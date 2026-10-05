@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BY JAEI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+:root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.app{max-width:620px;margin:auto;min-height:100vh;background:var(--bg)}
+header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px solid var(--line)}.head{height:64px;padding:0 18px;display:flex;align-items:center;justify-content:space-between}.logo{font-family:Georgia,serif;letter-spacing:3px;font-size:20px}.icon{border:0;background:none;font-size:21px;padding:7px;color:var(--ink);cursor:pointer}.loginLink{border:0;background:none;font-family:Georgia,serif;letter-spacing:1.5px;font-size:12px;padding:9px 8px;color:var(--ink);cursor:pointer}
+.notice{margin:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:18px}.notice b{font-family:Georgia,serif;letter-spacing:2px;font-size:13px}.notice p{font-size:13px;line-height:1.8;margin:10px 0;color:#756960}.notice strong{font-weight:700;color:var(--ink)}.cats{display:flex;gap:8px;overflow:auto;padding:0 18px 16px}.cats button{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:9px 14px;color:var(--muted);cursor:pointer}.cats button.active{background:var(--ink);color:white}.brandCats{display:flex;gap:7px;overflow:auto;padding:0 18px 16px}.brandCats button{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:8px 12px;color:var(--muted);cursor:pointer;font-size:12px}.brandCats button.active{background:#8a786b;color:#fff}.orderMini{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.orderMini img{width:54px;height:62px;border-radius:9px;object-fit:cover;background:#eee7df}.orderMiniText{flex:1;min-width:0}.orderMiniName{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniOption{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniPrice{font-size:12px;font-weight:600;white-space:nowrap}.search{margin:0 18px 18px;border-bottom:1px solid var(--line)}.search input{width:100%;padding:10px 4px;border:0;background:transparent;outline:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 14px 90px}.product{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line)}.photo{aspect-ratio:1/1.12;background:#eee7df;display:flex;align-items:center;justify-content:center;color:#aaa;overflow:hidden;cursor:pointer}.photo img{width:100%;height:100%;object-fit:cover}.info{padding:12px}.name{font-size:14px;margin-bottom:7px;cursor:pointer}.price{font-weight:600;font-size:14px}.member{font-size:12px;color:#9b6f55;margin-top:4px}.opts{display:grid;gap:7px;margin-top:10px}.opts select{width:100%;border:1px solid var(--line);background:white;border-radius:9px;padding:8px;color:var(--ink);font-size:12px}.add{width:100%;border:0;background:var(--ink);color:white;border-radius:10px;padding:10px;margin-top:8px;font-size:12px;cursor:pointer}.empty{text-align:center;padding:70px 20px;color:var(--muted);grid-column:1/-1}.status{text-align:center;color:var(--muted);padding:25px;font-size:13px}
+.detail,.cart,.login{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto}.inner{max-width:620px;margin:auto;min-height:100%;padding-bottom:90px}.topbar{height:62px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#f7f3edf5;z-index:2}.back{border:0;background:none;font-size:15px;color:var(--ink);cursor:pointer}.gallery{display:flex;flex-direction:column;gap:10px;padding:14px}.gallery img{width:100%;aspect-ratio:auto;max-height:none;object-fit:cover;border-radius:16px;display:block}.detailInfo{padding:10px 18px}.detailInfo h1{font-family:Georgia,serif;font-size:24px;font-weight:400}.detailInfo p{line-height:1.8;color:#766a61;font-size:14px}.choice{margin:18px 0}.choice label{display:block;font-size:12px;margin-bottom:7px;color:var(--muted)}.choice select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:620px;width:100%;padding:12px 14px;background:#f7f3edf5;border-top:1px solid var(--line);display:flex;gap:8px}.bottom button{flex:1;padding:13px;border-radius:11px;border:1px solid var(--line);background:white;color:var(--ink);cursor:pointer}.bottom .primary{background:var(--ink);color:white}.cartList{padding:18px}.cartItem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.thumb{width:80px;height:90px;border-radius:10px;background:#eee7df;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.cartText{flex:1}.qty{display:flex;align-items:center;gap:10px;margin-top:8px}.qty button{border:1px solid var(--line);background:white;border-radius:7px;width:26px;height:26px;cursor:pointer}.total{padding:18px;font-size:18px;border-top:1px solid var(--line)}.loginForm{padding:24px 18px;display:grid;gap:10px}.loginForm input{padding:12px;border:1px solid var(--line);border-radius:10px}.loginForm button{padding:12px;border:0;border-radius:10px;background:var(--ink);color:white;cursor:pointer}.loginForm .secondary{background:white;color:var(--ink);border:1px solid var(--line)}.small{font-size:12px;color:var(--muted);line-height:1.6}.memberBadge{font-size:11px;color:#9b6f55;margin-top:5px}
+.orderForm{padding:20px 18px;display:grid;gap:10px}.orderForm label{font-size:12px;color:var(--muted)}.orderForm input,.orderForm textarea{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}.orderForm textarea{min-height:90px;resize:vertical}.orderSummary{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13px;line-height:1.8}.orderDone{padding:30px 20px;text-align:center;line-height:1.9}.orderDone button{margin-top:16px;padding:12px 18px;border:0;border-radius:10px;background:var(--ink);color:#fff}
+</style></head>
+<body><div class="app"><header><div class="head"><div class="logo">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
+<section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후 주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를 제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처</strong>를 남겨주시면 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section>
+<nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><main id="grid" class="grid"></main></div>
+<div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
+<script>
+const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],category='ALL',brandFilter='ALL',user=null,approved=false,cart=[];
+const guestCartKey='byjaei_cart_guest';
+function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
+function loadCart(){
+  try{
+    const raw=localStorage.getItem(cartKey());
+    const parsed=raw?JSON.parse(raw):[];
+    cart=Array.isArray(parsed)?parsed:[];
+  }catch(e){console.warn('장바구니 데이터를 복구했어요.',e);cart=[];localStorage.removeItem(cartKey())}
+}
+function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
+const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
+function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
+async function load(){const {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false});if(error){console.error(error);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}products=data||[];render()}
+function setCategory(x){
+  category=x;
+  brandFilter='ALL';
+  render();
+}
+function setBrandFilter(x){
+  brandFilter=x;
+  render();
+}
+function cats(){
+  const main=['ALL','BEBE','CHILD','ETC','BRAND'];
+  const catEl=document.getElementById('cats');
+  catEl.innerHTML=main.map(x=>`<button type="button" class="${category===x?'active':''}" data-category="${x}">${x}</button>`).join('');
+  const brandEl=document.getElementById('brandCats');
+  if(category!=='BRAND'){
+    brandEl.hidden=true;
+    brandEl.innerHTML='';
+    return;
+  }
+  const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
+  const brands=[...new Set(products.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>collator.compare(a,b));
+  brandEl.hidden=false;
+  brandEl.innerHTML=['ALL',...brands].map(x=>`<button type="button" class="${brandFilter===x?'active':''}" data-brand="${x.replaceAll('\"','&quot;')}">${x}</button>`).join('');
+}
+
+document.getElementById('cats').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-category]');
+  if(!b) return;
+  setCategory(b.dataset.category);
+});
+document.getElementById('brandCats').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-brand]');
+  if(!b) return;
+  setBrandFilter(b.dataset.brand);
+});
+function render(){
+  cats();
+  let q=(document.getElementById('search').value||'').toLowerCase();
+  let a=products.filter(p=>{
+    const categoryOk=category==='ALL'||category==='BRAND'||String(p.category||'').trim().toUpperCase()===category;
+    const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
+    return categoryOk&&brandOk&&String(p.name).toLowerCase().includes(q);
+  });
+  document.getElementById('grid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">등록된 상품이 없어요 🤍</div>';
+}
+function img(p){return p.images&&p.images[0]?`<img src="${p.images[0]}" alt="${p.name}">`:'PRODUCT IMAGE'}
+function options(arr){return (arr||[]).map(v=>{let x=parseSize(v);return `<option value="${x.add}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
+function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}</div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
+function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id);addCart(p,c.value,s.options[s.selectedIndex].text,+s.value)}
+function addCart(p,color,size,add){if(!user){if(confirm('장바구니에 담으려면 로그인이 필요해요.\n\n로그인 화면으로 이동할까요?'))openLogin();return}let key=p.id+'-'+color+'-'+size;let x=cart.find(i=>i.key===key);x?x.qty++:cart.push({key,id:p.id,name:p.name,color,size,add,qty:1});save();alert('장바구니에 담았어요 🤍')}
+function detail(id){let p=products.find(x=>x.id===id);document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('detail')">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><h1>${p.name}</h1><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div></div><div class="bottom"><button onclick="closeLayer('detail')">뒤로</button><button class="primary" onclick="dadd(${p.id})">장바구니 담기</button></div></div>`}
+function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds');addCart(p,document.getElementById('dc').value,s.options[s.selectedIndex].text,+s.value)}
+function openCart(){
+  closeAll();
+  const el=document.getElementById('cart'); el.hidden=false;
+  loadCart();
+  const valid=cart.filter(x=>products.some(p=>p.id===x.id));
+  if(valid.length!==cart.length){cart=valid;save()}
+  const member=!!(approved&&user);
+  const selectedTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
+  const normalTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(Number(p.normal_price)+Number(x.add||0)):0)*x.qty},0);
+  const discount=Math.max(0,normalTotal-selectedTotal);
+  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">← 계속 쇼핑</button><b>장바구니</b><span></span></div><div class="cartList">
+  ${cart.length?`<div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 12px"><label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;cursor:pointer"><input id="cartAll" type="checkbox" onchange="toggleAllCart(this.checked)" style="width:auto"> 전체선택</label><button onclick="removeSelected()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer">선택삭제</button></div>`:''}
+  ${cart.length?cart.map((x,i)=>{let p=products.find(p=>p.id===x.id);return `<div class="cartItem"><div style="display:flex;align-items:center;gap:9px"><input class="cartCheck" type="checkbox" data-index="${i}" style="width:auto" onclick="event.stopPropagation()"><div class="thumb" onclick="detail(${p.id})">${img(p)}</div></div><div class="cartText" onclick="detail(${p.id})"><b>${x.name}</b><div>${x.color} / ${x.size}</div><div class="qty"><button onclick="event.stopPropagation();qty(${i},-1)">−</button>${x.qty}<button onclick="event.stopPropagation();qty(${i},1)">+</button></div></div><div style="text-align:right"><b>${won((getPrice(p)+Number(x.add||0))*x.qty)}</b>${member&&p.member_price!=null?`<div class="small">회원가</div>`:''}</div></div>`}).join(''):`<div class="empty">장바구니가 비어 있어요 🤍</div>`}
+  </div><div class="total" style="font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:17px"><span>총주문금액</span><b>${won(selectedTotal)}</b></div></div><div class="bottom"><button class="primary" onclick="openOrder()">주문서 작성하기</button></div></div>`;
+}
+function toggleAllCart(checked){document.querySelectorAll('.cartCheck').forEach(x=>x.checked=checked)}
+function removeSelected(){const checked=[...document.querySelectorAll('.cartCheck:checked')].map(x=>Number(x.dataset.index));if(!checked.length)return alert('삭제할 상품을 선택해주세요.');cart=cart.filter((_,i)=>!checked.includes(i));save();openCart()}
+function qty(i,n){loadCart();if(!cart[i])return;cart[i].qty+=n;if(cart[i].qty<1)cart.splice(i,1);save();openCart()}
+function openOrder(){
+  closeAll();const el=document.getElementById('cart');el.hidden=false;loadCart();
+  if(!cart.length){alert('장바구니가 비어 있어요 🤍');openCart();return;}
+  const member=!!(approved&&user);
+  const normalTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(Number(p.normal_price)+Number(x.add||0)):0)*x.qty},0);
+  const total=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
+  const discount=Math.max(0,normalTotal-total);
+  const rows=cart.map(x=>{const p=products.find(p=>p.id===x.id);const line=(getPrice(p)+Number(x.add||0))*x.qty;return `<div class="orderMini"><img src="${p.images?.[0]||''}" alt="${p.name}"><div class="orderMiniText"><div class="orderMiniName">${p.name}</div><div class="orderMiniOption">${x.color} / ${x.size} · ${x.qty}개</div></div><div class="orderMiniPrice">${won(line)}</div></div>`}).join('');
+  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openCart()">← 장바구니</button><b>주문서</b><span></span></div><div class="orderSummary">${rows}<div style="padding-top:12px;font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:16px"><span>총주문금액</span><b>${won(total)}</b></div></div></div><div class="orderForm"><label>성함</label><input id="orderName" placeholder="성함을 입력해주세요"><label>연락처</label><input id="orderPhone" placeholder="연락처를 입력해주세요"><label>배송지 <span style="font-size:11px;color:var(--muted);font-weight:400">(주소를 정확히 입력해주세요.)</span></label><input id="orderAddress" placeholder="배송지를 직접 입력해주세요"><label>요청사항</label><textarea id="orderMemo" placeholder="요청사항이 있다면 입력해주세요"></textarea><button class="primary" style="padding:13px;border:0;border-radius:11px;background:var(--ink);color:white;cursor:pointer" onclick="submitOrder()">주문서 제출하기</button></div></div>`;
+}
+async function submitOrder(){
+  const n=document.getElementById('orderName').value.trim(),ph=document.getElementById('orderPhone').value.trim(),ad=document.getElementById('orderAddress').value.trim(),memo=document.getElementById('orderMemo').value.trim();
+  if(!n||!ph||!ad)return alert('성함, 연락처, 배송지를 입력해주세요.');
+  loadCart();if(!cart.length)return alert('장바구니가 비어 있어요 🤍');
+  const items=cart.map(x=>{const p=products.find(p=>p.id===x.id);if(!p)return null;const unit=getPrice(p)+Number(x.add||0);return {id:p.id,name:p.name,brand:p.brand||'',color:x.color||'',size:x.size||'',qty:x.qty,unit_price:unit,line_total:unit*x.qty,image:p.images?.[0]||''}}).filter(Boolean);
+  if(!items.length)return alert('장바구니 상품을 다시 확인해주세요.');
+  const total=items.reduce((a,x)=>a+x.line_total,0);const {data:{user:u}}=await sb.auth.getUser();
+  const {error}=await sb.from('orders').insert({user_id:u?.id||null,customer_name:n,phone:ph,address:ad,memo,items,total_price:total,status:'주문접수'});
+  if(error){console.error(error);return alert('주문서 저장 중 문제가 생겼어요. '+error.message);}
+  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문서가 접수됐어요 🤍</strong><br><br>1:1 채팅으로 <strong>성함과 연락처</strong>를 남겨주시면 확인 후 입금 안내를 도와드릴게요.<br><button onclick="closeLayer('cart');cart=[];save()">확인</button></div></div>`;
+}
+async function openLogin(){closeAll();const el=document.getElementById('login');el.hidden=false;let {data:{session}}=await sb.auth.getSession();if(session){user=session.user;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><p>${user.email}님, 안녕하세요 🤍</p><p class="small">${approved?'회원 승인이 완료되어 회원가가 적용돼요.':'승인대기중이에요. 관리자 승인 후 이용 가능해요.'}</p><button onclick="logout()">로그아웃</button></div></div>`}else{const saved=localStorage.getItem('byjaei_saved_email')||'';el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><input id="email" placeholder="이메일" value="${saved.replace(/\"/g,'&quot;')}" onkeydown="if(event.key==='Enter')login()"><input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:2px 0 8px;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0" ${saved?'checked':''}> 이메일/아이디 저장</label><button onclick="login()">로그인</button><button class="secondary" onclick="signup()">회원가입</button></div></div>`}}
+async function login(){let e=document.getElementById('email').value.trim(),p=document.getElementById('pw').value;if(!e||!p)return alert('이메일과 비밀번호를 입력해주세요.');if(document.getElementById('saveEmail')?.checked)localStorage.setItem('byjaei_saved_email',e);else localStorage.removeItem('byjaei_saved_email');let {error}=await sb.auth.signInWithPassword({email:e,password:p});if(error){return alert(error.message||'로그인에 실패했어요.')}const {data:pr}=await sb.from('profiles').select('approved,withdrawn').eq('id',(await sb.auth.getUser()).data.user.id).maybeSingle();if(pr?.withdrawn){await sb.auth.signOut();user=null;approved=false;return alert('탈퇴 처리된 회원이에요.\n새로 가입해서 이용해주세요.')}if(!pr?.approved){await sb.auth.signOut();user=null;approved=false;return alert('승인대기중이에요.\n관리자 승인 후 이용 가능해요.')}await refreshUser();closeLayer('login');render()}
+async function signup(){closeAll();const el=document.getElementById('login');el.hidden=false;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openLogin()">← 돌아가기</button><b>회원가입</b><span></span></div><div class="loginForm"><input id="signupName" placeholder="이름"><input id="signupPhone" type="tel" placeholder="연락처"><input id="signupEmail" type="email" placeholder="이메일"><input id="signupPw" type="password" placeholder="비밀번호 (6자 이상)"><input id="signupPwConfirm" type="password" placeholder="비밀번호 확인 (다시 입력)"><input id="signupReferral" placeholder="가입경로 (선택)"><button onclick="submitSignup()">회원가입</button><div class="small">가입 후 관리자 승인 전까지는 회원가가 적용되지 않아요.</div></div></div>`}
+async function submitSignup(){const name=document.getElementById('signupName').value.trim(),phone=document.getElementById('signupPhone').value.trim(),e=document.getElementById('signupEmail').value.trim(),p=document.getElementById('signupPw').value,pc=document.getElementById('signupPwConfirm').value,ref=document.getElementById('signupReferral').value.trim();if(!name||!phone||!e||p.length<6)return alert('이름, 연락처, 이메일을 입력하고 비밀번호는 6자 이상으로 설정해주세요.');if(p!==pc)return alert('비밀번호와 비밀번호 확인이 일치하지 않아요.');const {data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{name,phone,referral_source:ref}}});if(error)return alert(error.message);if(data.user){const {error:pe}=await sb.from('profiles').upsert({id:data.user.id,name,email:e,phone,referral_source:ref,approved:false},{onConflict:'id'});if(pe)console.warn('프로필 저장은 트리거에서 처리됩니다.',pe)}alert('가입이 완료됐어요. 🤍\n\n승인대기중이에요.\n관리자 승인 후 이용 가능해요.');openLogin()}
+
+async function logout(){await sb.auth.signOut();user=null;closeLayer('login');render()}
+sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')showRecovery()})
+async function refreshUser(){
+  let {data:{user:u}}=await sb.auth.getUser();
+  user=u||null;
+  approved=false;
+  if(user){
+    const {data:p}=await sb.from('profiles').select('approved,is_admin,withdrawn').eq('id',user.id).maybeSingle();
+    if(p?.withdrawn){await sb.auth.signOut(); user=null; approved=false; return;} approved=!!p?.approved;
+  }
+}
+function closeLayer(id){document.getElementById(id).hidden=true}function closeAll(){['detail','cart','login'].forEach(x=>document.getElementById(x).hidden=true)}
+sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;loadCart();render()});refreshUser().then(()=>{loadCart();return load()});
+</script></body></html>
