@@ -28,7 +28,54 @@ function removeSelectedImage(i){const files=selectedFiles();files.splice(i,1);se
 $('images').addEventListener('change',renderSelectedImages);
 function resetForm(){editingId=null;editingImages=[];['name','normal','member','colors','sizes','description'].forEach(id=>$(id).value='');$('brand').value='';$('preview').innerHTML='';$('images').value='';$('saveBtn').disabled=false;$('saveBtn').textContent='상품 등록하기'}function msg(t){$('msg').textContent=t;$('msg').style.display='block';setTimeout(()=>$('msg').style.display='none',3500)}
 let adminCategoryFilter='ALL',adminBrandFilter='ALL';
-function renderAdminFilters(data){const cats=['ALL','BRAND','BEBE','CHILD','ETC'];$('adminCatBar').innerHTML=cats.map(c=>`<button class="${adminCategoryFilter===c?'active':''}" onclick="setAdminCategory('${c}')">${c}</button>`).join('');const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));const be=$('adminBrandBar');if(adminCategoryFilter==='BRAND'){be.hidden=false;be.innerHTML=`<button class="${adminBrandFilter==='ALL'?'active':''}" onclick="setAdminBrand('ALL')">ALL</button>`+brands.map(b=>`<button class="${adminBrandFilter===b?'active':''}" onclick="setAdminBrand(${JSON.stringify(b)})">${b}</button>`).join('')}else{be.hidden=true;be.innerHTML='';}}
+function renderAdminFilters(data){
+  const cats=['ALL','BRAND','BEBE','CHILD','ETC'];
+
+  $('adminCatBar').innerHTML=cats.map(c=>`
+    <button
+      class="${adminCategoryFilter===c?'active':''}"
+      onclick="setAdminCategory('${c}')"
+    >${c}</button>
+  `).join('');
+
+  const brands=[
+    ...new Set(
+      data
+        .map(p=>String(p.brand||'').trim())
+        .filter(Boolean)
+    )
+  ].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
+
+  const be=$('adminBrandBar');
+
+  if(adminCategoryFilter==='BRAND'){
+    be.hidden=false;
+
+    be.innerHTML=
+      `<button
+        class="${adminBrandFilter==='ALL'?'active':''}"
+        onclick="setAdminBrand('ALL')"
+      >ALL</button>`
+      +
+      brands.map((b,i)=>`
+        <button
+          class="${adminBrandFilter===b?'active':''}"
+          data-brand-index="${i}"
+        >${b}</button>
+      `).join('');
+
+    be.querySelectorAll('[data-brand-index]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const brand=brands[Number(btn.dataset.brandIndex)];
+        setAdminBrand(brand);
+      });
+    });
+
+  }else{
+    be.hidden=true;
+    be.innerHTML='';
+  }
+}
 function setAdminCategory(c){adminCategoryFilter=c;adminBrandFilter='ALL';loadProducts()}
 function setAdminBrand(b){adminBrandFilter=b;loadProducts()}
 function filteredAdminProducts(data){return data.filter(p=>{const cat=adminCategoryFilter==='ALL'||adminCategoryFilter==='BRAND'||String(p.category||'').toUpperCase()===adminCategoryFilter;const brand=adminCategoryFilter!=='BRAND'||adminBrandFilter==='ALL'||String(p.brand||'').trim()===adminBrandFilter;return cat&&brand})}
