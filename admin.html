@@ -30,13 +30,25 @@ function resetForm(){editingId=null;editingImages=[];['name','normal','member','
 let adminCategoryFilter='ALL',adminBrandFilter='ALL';
 function renderAdminFilters(data){
   const cats=['ALL','BRAND','BEBE','CHILD','ETC'];
+  const catBar=$('adminCatBar');
+  const brandBar=$('adminBrandBar');
 
-  $('adminCatBar').innerHTML=cats.map(c=>`
-    <button
-      class="${adminCategoryFilter===c?'active':''}"
-      onclick="setAdminCategory('${c}')"
-    >${c}</button>
-  `).join('');
+  catBar.innerHTML='';
+
+  cats.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.textContent=c;
+    btn.className=adminCategoryFilter===c?'active':'';
+
+    btn.addEventListener('click',()=>{
+      adminCategoryFilter=c;
+      adminBrandFilter='ALL';
+      loadProducts();
+    });
+
+    catBar.appendChild(btn);
+  });
 
   const brands=[
     ...new Set(
@@ -46,39 +58,61 @@ function renderAdminFilters(data){
     )
   ].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
 
-  const be=$('adminBrandBar');
+  if(adminCategoryFilter!=='BRAND'){
+    brandBar.hidden=true;
+    brandBar.innerHTML='';
+    return;
+  }
 
-  if(adminCategoryFilter==='BRAND'){
-    be.hidden=false;
+  brandBar.hidden=false;
+  brandBar.innerHTML='';
 
-    be.innerHTML=
-      `<button
-        class="${adminBrandFilter==='ALL'?'active':''}"
-        onclick="setAdminBrand('ALL')"
-      >ALL</button>`
-      +
-      brands.map((b,i)=>`
-        <button
-          class="${adminBrandFilter===b?'active':''}"
-          data-brand-index="${i}"
-        >${b}</button>
-      `).join('');
+  const allBtn=document.createElement('button');
+  allBtn.type='button';
+  allBtn.textContent='ALL';
+  allBtn.className=adminBrandFilter==='ALL'?'active':'';
 
-    be.querySelectorAll('[data-brand-index]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const brand=brands[Number(btn.dataset.brandIndex)];
-        setAdminBrand(brand);
-      });
+  allBtn.addEventListener('click',()=>{
+    adminBrandFilter='ALL';
+    loadProducts();
+  });
+
+  brandBar.appendChild(allBtn);
+
+  brands.forEach(brand=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.textContent=brand;
+    btn.className=adminBrandFilter===brand?'active':'';
+
+    btn.addEventListener('click',()=>{
+      adminBrandFilter=brand;
+      loadProducts();
     });
 
-  }else{
-    be.hidden=true;
-    be.innerHTML='';
-  }
+    brandBar.appendChild(btn);
+  });
+}
 }
 function setAdminCategory(c){adminCategoryFilter=c;adminBrandFilter='ALL';loadProducts()}
 function setAdminBrand(b){adminBrandFilter=b;loadProducts()}
-function filteredAdminProducts(data){return data.filter(p=>{const cat=adminCategoryFilter==='ALL'||adminCategoryFilter==='BRAND'||String(p.category||'').toUpperCase()===adminCategoryFilter;const brand=adminCategoryFilter!=='BRAND'||adminBrandFilter==='ALL'||String(p.brand||'').trim()===adminBrandFilter;return cat&&brand})}function filteredAdminProducts(data){
+  function filteredAdminProducts(data){
+  return data.filter(p=>{
+    if(adminCategoryFilter !== 'ALL' && adminCategoryFilter !== 'BRAND'){
+      if(String(p.category || '').toUpperCase() !== adminCategoryFilter){
+        return false;
+      }
+    }
+
+    if(adminCategoryFilter === 'BRAND' && adminBrandFilter !== 'ALL'){
+      if(String(p.brand || '').trim() !== String(adminBrandFilter || '').trim()){
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
   return data.filter(p=>{
     const categoryOk =
       adminCategoryFilter === 'ALL' ||
