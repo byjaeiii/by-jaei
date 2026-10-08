@@ -125,18 +125,13 @@ function toggleCategoryOpen(id){
 }
 function renderCategoryManager(){
   const list=$('categoryManagerList');if(!list)return;
-  const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const winterRoots=categories.filter(c=>clean(c.name).startsWith('26WINTER') && c.parent_id==null && clean(c.name)!=='26WINTER(전체보기)');
-  const winterIds=new Set(winterRoots.map(c=>String(c.id)));
-  const roots=categories.filter(c=>c.parent_id==null && !winterIds.has(String(c.id))).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
+  const roots=categories.filter(c=>c.parent_id==null && String(c.name).replace(/\s+/g,'').toUpperCase()!=='26WINTER(전체보기)').sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
   const row=(c,depth=0)=>{
     const children=categoryManagerChildren(c.id);
     const open=categoryOpenIds.has(String(c.id));
     return `<div class="categoryTreeNode"><div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="categoryToggle">${children.length?`<button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen(${c.id})">${open?'−':'+'}</button>`:'<span class="categoryExpandSpacer"></span>'}</div><div class="grow"><b>${c.name}</b>${children.length?`<div class="categoryDepth">하위 ${children.length}개</div>`:''}</div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>${open?`<div class="categoryTreeChildren">${children.map(ch=>row(ch,depth+1)).join('')}</div>`:''}</div>`;
   };
-  const winterOpen=categoryOpenIds.has('__26winter__');
-  const winterHtml=winterRoots.length?`<div class="categoryVirtualGroup"><div class="categoryManagerRow"><div class="categoryToggle"><button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen('__26winter__')">${winterOpen?'−':'+'}</button></div><div class="grow"><b>26WINTER</b><div class="categoryDepth">그룹 ${winterRoots.length}개</div></div></div>${winterOpen?`<div class="categoryTreeChildren">${winterRoots.map(c=>row(c,1)).join('')}</div>`:''}</div>`:'';
-  list.innerHTML=(winterHtml+roots.map(c=>row(c,0)).join('')) || '<p class="note">등록된 카테고리가 없어요.</p>';
+  list.innerHTML=roots.map(c=>row(c,0)).join('') || '<p class="note">등록된 카테고리가 없어요.</p>';
 }
 function categoryDescendantIds(id,out=new Set()){
   categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
@@ -206,24 +201,16 @@ function renderAdminFilters(data){
   const escape=v=>String(v).replaceAll('"','&quot;');
   const childrenOf=c=>categories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const winterTop=categories.filter(c=>clean(c.name).startsWith('26WINTER') && c.parent_id==null && clean(c.name)!=='26WINTER(전체보기)' && clean(c.name)!=='26WINTER')
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const winterIds=new Set(winterTop.map(c=>String(c.id)));
-  const roots=categories.filter(c=>c.parent_id==null && !winterIds.has(String(c.id)) && clean(c.name)!=='26WINTER(전체보기)')
+  const roots=categories.filter(c=>c.parent_id==null && clean(c.name)!=='26WINTER(전체보기)')
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
   const button=(name,label=name,extra='')=>`<button type="button" class="${adminCategoryFilter===name?'active':''} ${extra}" data-admin-category="${escape(name)}">${label}</button>`;
-  const selectedCategory=adminCategoryFilter==='26 WINTER'
-    ? null
-    : categories.find(c=>String(c.name)===String(adminCategoryFilter));
-  const selectedChildren=adminCategoryFilter==='26 WINTER'
-    ? winterTop
-    : adminCategoryFilter==='ALL' || adminCategoryFilter==='BRAND' || !selectedCategory
-      ? []
-      : childrenOf(selectedCategory);
-  const title=adminCategoryFilter==='26 WINTER'?'26WINTER':adminCategoryFilter==='ALL'?'':adminCategoryFilter==='BRAND'?'BRAND':String(adminCategoryFilter);
-  const winterHtml=winterTop.length?`<button type="button" class="${adminCategoryFilter==='26 WINTER'?'active':''}" data-admin-category="26 WINTER">26WINTER</button>`:'';
+  const selectedCategory=categories.find(c=>String(c.name)===String(adminCategoryFilter));
+  const selectedChildren=adminCategoryFilter==='ALL' || adminCategoryFilter==='BRAND' || !selectedCategory
+    ? []
+    : childrenOf(selectedCategory);
+  const title=adminCategoryFilter==='ALL'?'':adminCategoryFilter==='BRAND'?'BRAND':String(adminCategoryFilter);
   const normalHtml=roots.map(c=>button(c.name,c.name,c.parent_id==null?'parentCat':'')).join('');
-  catBar.innerHTML=`<div class="adminCatTopRow">${button('ALL')}${winterHtml}${normalHtml}${button('BRAND')}</div>${title?`<div class="adminCatTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="adminCatSubRow">${selectedChildren.map(c=>button(c.name,c.name,childrenOf(c).length?'parentCat':'childCat')).join('')}</div>`:''}`;
+  catBar.innerHTML=`<div class="adminCatTopRow">${button('ALL')}${normalHtml}${button('BRAND')}</div>${title?`<div class="adminCatTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="adminCatSubRow">${selectedChildren.map(c=>button(c.name,c.name,childrenOf(c).length?'parentCat':'childCat')).join('')}</div>`:''}`;
   catBar.querySelectorAll('button[data-admin-category]').forEach(btn=>btn.addEventListener('click',()=>{adminCategoryFilter=btn.dataset.adminCategory;adminBrandFilter='ALL';loadProducts()}));
 
   const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
