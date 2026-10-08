@@ -61,20 +61,6 @@ function categoryTreeRows(parentId=null,depth=0,rows=[]){
 }
 function categoryDescendantNames(name){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  if(clean(name)==='26WINTER'){
-    const roots=siteCategories.filter(c=>{
-      const n=clean(c.name);
-      return n.startsWith('26WINTER') && n!=='26WINTER(전체보기)' && n!=='26WINTER';
-    });
-    const out=[];
-    const walk=id=>{
-      const c=siteCategories.find(x=>String(x.id)===String(id));
-      if(c&&clean(c.name)!=='26WINTER(전체보기)')out.push(String(c.name));
-      siteCategories.filter(x=>String(x.parent_id??'')===String(id??'')).forEach(x=>walk(x.id));
-    };
-    roots.filter(c=>!siteCategories.some(x=>String(x.parent_id??'')===String(c.id))).forEach(c=>walk(c.id));
-    return [...new Set(out)];
-  }
   const root=siteCategories.find(c=>String(c.name)===String(name));
   if(!root)return [String(name)];
   const out=[];
@@ -89,25 +75,16 @@ function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
   const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)');
   const catEl=document.getElementById('cats');
-  const roots=rows.filter(({c})=>c.parent_id==null);
-  const winterTop=siteCategories.filter(c=>{
-    const n=clean(c.name);
-    return n.startsWith('26WINTER') && n!=='26WINTER(전체보기)' && n!=='26WINTER' && c.parent_id==null;
-  }).sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const winterIds=new Set(winterTop.map(c=>String(c.id)));
-  const normalRoots=roots.filter(({c})=>!winterIds.has(String(c.id))).map(({c})=>c);
+  const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
   const escape=v=>String(v).replaceAll('"','&quot;');
   const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const selectedChildren=category==='26 WINTER'
-    ? winterTop
-    : category==='ALL' || category==='BRAND'
-      ? []
-      : (()=>{ const c=siteCategories.find(x=>String(x.name)===String(category)); return c?childrenOf(c):[]; })();
-  const title=category==='26 WINTER'?'26WINTER':category==='ALL'?'':category==='BRAND'?'BRAND':String(category);
-  const winterHtml=`<button type="button" class="${category==='26 WINTER'?'active':''}" data-category="26 WINTER">26WINTER</button>`;
-  const normalHtml=normalRoots.map(c=>`<button type="button" class="${category===c.name?'active':''}" data-category="${escape(c.name)}">${c.name}</button>`).join('');
-  catEl.innerHTML=`<div class="catTopRow"><button type="button" class="${category==='ALL'?'active':''}" data-category="ALL">ALL</button>${winterHtml}${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${category===c.name?'active':''}" data-category="${escape(c.name)}">${c.name}</button>`).join('')}</div>`:''}`;
+  const selectedChildren=category==='ALL' || category==='BRAND'
+    ? []
+    : (()=>{ const c=siteCategories.find(x=>String(x.name)===String(category)); return c?childrenOf(c):[]; })();
+  const title=category==='ALL'?'':category==='BRAND'?'BRAND':String(category);
+  const normalHtml=roots.map(c=>`<button type="button" class="${category===c.name?'active':''}" data-category="${escape(c.name)}">${c.name}</button>`).join('');
+  catEl.innerHTML=`<div class="catTopRow"><button type="button" class="${category==='ALL'?'active':''}" data-category="ALL">ALL</button>${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${category===c.name?'active':''}" data-category="${escape(c.name)}">${c.name}</button>`).join('')}</div>`:''}`;
   const brandEl=document.getElementById('brandCats');
   if(category!=='BRAND'){
     brandEl.hidden=true; brandEl.innerHTML=''; return;
