@@ -99,7 +99,7 @@ function normalizeBrand(v){
   return String(v||'').trim().toLocaleLowerCase('ko-KR');
 }
 function categoryTreeRows(parentId=null,depth=0,rows=[]){
-  categories.filter(c=>(c.parent_id??null)===(parentId??null)).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
+  categories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
   return rows;
 }
 function categoryDescendantNames(name){
@@ -121,7 +121,7 @@ function renderCategoryManager(){
   list.innerHTML=rows.length?rows.map(({c,depth})=>`<div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="grow"><b>${depth?'↳ ':''}${c.name}</b>${c.parent_id?`<div class="categoryDepth">하위 카테고리</div>`:''}</div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>`).join(''):'<p class="note">등록된 카테고리가 없어요.</p>';
 }
 function categoryDescendantIds(id,out=new Set()){
-  categories.filter(c=>String(c.parent_id||'')===String(id)).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
+  categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
 }
 function renderCategoryParentOptions(selected=''){
   const el=$('categoryParentInput');if(!el)return;const blocked=editingCategoryId?new Set([Number(editingCategoryId),...categoryDescendantIds(editingCategoryId)]):new Set();el.innerHTML='<option value="">상위 카테고리 없음</option>'+categoryTreeRows().filter(({c})=>!blocked.has(Number(c.id))).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');if(selected)el.value=String(selected);
@@ -157,7 +157,7 @@ async function saveCategory(){
 async function moveCategory(id,direction){
   const current=categories.find(c=>String(c.id)===String(id));
   if(!current)return;
-  const siblings=categories.filter(c=>(c.parent_id??null)===(current.parent_id??null))
+  const siblings=categories.filter(c=>String(c.parent_id??'')===String(current.parent_id??''))
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
   const idx=siblings.findIndex(c=>String(c.id)===String(id)),ni=idx+direction;
   if(idx<0||ni<0||ni>=siblings.length)return;
