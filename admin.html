@@ -19,7 +19,7 @@
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
 <div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2><button class="secondary" onclick="logout()">로그아웃</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
-사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><div class="row"><div><label>브랜드</label><input id="brand"></div><div><label>카테고리</label><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div></div><div class="row"><div><label>정상가</label><input id="normal" type="number"></div><div><label>회원가</label><input id="member" type="number"></div></div><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"><label>상품 설명</label><textarea id="description"></textarea><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
+사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div class="row"><div><label>브랜드</label><input id="brand"></div><div><label>카테고리</label><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div></div><div id="sizeChartOptionFields"><div class="row"><div><label>정상가</label><input id="normal" type="number"></div><div><label>회원가</label><input id="member" type="number"></div></div><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"></div><label>상품 설명</label><textarea id="description"></textarea><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
 <script>
 const CFG={supabaseUrl:'https://wquupamwhjwqyhtxctdl.supabase.co',supabaseKey:'sb_publishable_1MJJqt80Nqj4agK3g2YGPA_8CEZRpOh'};
 let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage.getItem('byjaei_admin_user')||'';let editingId=null,editingImages=[],photoItems=[],draggedPhotoId='';const $=id=>document.getElementById(id);
@@ -37,20 +37,29 @@ function setSelectedCategories(categories){
   const set=new Set(categories||[]);
   document.querySelectorAll('input[name="category"]').forEach(x=>x.checked=set.has(x.value));
 }
+function toggleSizeChartFields(){
+  const checked=$('isSizeChart').checked;
+  const box=$('sizeChartOptionFields');
+  if(box)box.style.display=checked?'none':'';
+  ['normal','member','colors','sizes'].forEach(id=>{const el=$(id);if(el)el.disabled=checked;});
+}
 async function saveProduct(){
+  const isSizeChart=$('isSizeChart').checked;
   const name=$('name').value.trim(),normal=Number($('normal').value),member=$('member').value?Number($('member').value):null;
   const categories=getSelectedCategories();
-  if(!name||!normal)return alert('상품명과 정상가를 입력해주세요.');
+  if(!name)return alert('상품명을 입력해주세요.');
+  if(!isSizeChart&&!normal)return alert('상품명과 정상가를 입력해주세요.');
   if(!categories.length)return alert('카테고리를 하나 이상 선택해주세요.');
   try{
     const urls=await uploadFiles();
     const basePayload={
       name,
       brand:$('brand').value.trim(),
-      normal_price:normal,
-      member_price:member,
-      colors:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),
-      sizes:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),
+      normal_price:isSizeChart?0:normal,
+      member_price:isSizeChart?null:member,
+      colors:isSizeChart?[]:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),
+      sizes:isSizeChart?[]:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),
+      is_size_chart:isSizeChart,
       description:$('description').value,
       images:urls
     };
@@ -84,6 +93,7 @@ function renderSelectedImages(){const box=$('preview');if(!box)return;box.innerH
 function removePhotoItem(id){photoItems=photoItems.filter(x=>x.id!==id);editingImages=photoItems.filter(x=>x.type==='existing').map(x=>x.url);syncSelectedFiles();renderSelectedImages()}
 function handleImageChange(){const chosen=[...($('images').files||[])];const existingKeys=new Set(photoItems.filter(x=>x.type==='new').map(x=>fileKey(x.file)));chosen.forEach(f=>{const k=fileKey(f);if(!existingKeys.has(k)){photoItems.push({id:'photo-'+crypto.randomUUID(),type:'new',file:f});existingKeys.add(k)}});syncSelectedFiles();renderSelectedImages()}
 $('images').addEventListener('change',handleImageChange);
+toggleSizeChartFields();
 $('preview').addEventListener('dragstart',e=>{const item=e.target.closest('.previewItem');if(!item)return;draggedPhotoId=item.dataset.photoId;item.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',draggedPhotoId)});
 $('preview').addEventListener('dragover',e=>{const item=e.target.closest('.previewItem');if(!item)return;e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('#preview .previewItem.dragOver').forEach(x=>x.classList.remove('dragOver'));if(item.dataset.photoId!==draggedPhotoId)item.classList.add('dragOver')});
 $('preview').addEventListener('drop',e=>{const target=e.target.closest('.previewItem');if(!target)return;e.preventDefault();const targetId=target.dataset.photoId;if(!draggedPhotoId||draggedPhotoId===targetId)return;const from=photoItems.findIndex(x=>x.id===draggedPhotoId),to=photoItems.findIndex(x=>x.id===targetId);if(from<0||to<0)return;const [moved]=photoItems.splice(from,1);photoItems.splice(to,0,moved);syncSelectedFiles();renderSelectedImages()});
@@ -92,6 +102,8 @@ function resetForm(){
   editingId=null;editingImages=[];photoItems=[];draggedPhotoId='';
   ['name','normal','member','colors','sizes','description'].forEach(id=>$(id).value='');
   $('brand').value='';
+  $('isSizeChart').checked=false;
+  toggleSizeChartFields();
   setSelectedCategories([]);
   $('preview').innerHTML='';
   $('images').value='';
@@ -348,7 +360,7 @@ async function moveProduct(id,direction){
 }
 
 async function getProduct(id){const d=await api('/rest/v1/products?select=*&id=eq.'+id);return d[0]}
-async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([p.category||'CHILD']);$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
+async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([p.category||'CHILD']);$('isSizeChart').checked=!!p.is_size_chart;$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';toggleSizeChartFields();$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
 function categoryPathText(name){
   const target=String(name||'').trim();
   if(!target)return '-';
