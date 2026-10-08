@@ -126,19 +126,18 @@ function render(){
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
     return categoryOk&&brandOk&&String(p.name).toLowerCase().includes(q);
   });
-  if(category==='ALL'){
+  if(category==='ALL'||(category==='BRAND'&&brandFilter==='ALL')){
     const seen=new Set();
-    const normText=v=>String(v??'').trim().replace(/\s+/g,' ').toLowerCase();
-    const normArray=v=>Array.isArray(v)?v.map(x=>normText(x)).sort((x,y)=>x.localeCompare(y,'ko-KR',{numeric:true})).join('\u001f'):'';
     a=a.filter(p=>{
+      const normalize=v=>String(v??'').trim().toLowerCase();
       const key=[
-        normText(p.name),
-        normText(p.brand),
-        String(p.normal_price??''),
-        String(p.member_price??''),
-        normArray(p.colors),
-        normArray(p.sizes),
-        normText(p.description)
+        normalize(p.name),
+        normalize(p.brand),
+        normalize(p.normal_price),
+        normalize(p.member_price),
+        JSON.stringify((p.colors||[]).map(normalize)),
+        JSON.stringify((p.sizes||[]).map(normalize)),
+        normalize(p.description)
       ].join('\u0001');
       if(seen.has(key)) return false;
       seen.add(key);
