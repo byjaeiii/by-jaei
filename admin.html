@@ -107,7 +107,7 @@ function renderBulkCategoryOptions(){
 function renderCategoryManager(){
   const list=$('categoryManagerList');if(!list)return;
   const rows=categoryTreeRows();
-  list.innerHTML=rows.length?rows.map(({c,depth})=>`<div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="grow"><b>${depth?'↳ ':''}${c.name}</b>${c.parent_id?`<div class="categoryDepth">하위 카테고리</div>`:''}</div><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>`).join(''):'<p class="note">등록된 카테고리가 없어요.</p>';
+  list.innerHTML=rows.length?rows.map(({c,depth})=>`<div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="grow"><b>${depth?'↳ ':''}${c.name}</b>${c.parent_id?`<div class="categoryDepth">하위 카테고리</div>`:''}</div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>`).join(''):'<p class="note">등록된 카테고리가 없어요.</p>';
 }
 function categoryDescendantIds(id,out=new Set()){
   categories.filter(c=>String(c.parent_id||'')===String(id)).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
@@ -130,8 +130,11 @@ async function saveCategory(){
   try{
     if(editingCategoryId){
       const old=categories.find(c=>String(c.id)===String(editingCategoryId));
-      await api('/rest/v1/categories?id=eq.'+encodeURIComponent(editingCategoryId),{method:'PATCH',body:JSON.stringify({name,parent_id:parentId}),headers:{'Prefer':'return=minimal'}});
-      if(old&&old.name!==name){await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});}
+      const updatedCategory=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(editingCategoryId),{method:'PATCH',body:JSON.stringify({name,parent_id:parentId}),headers:{'Prefer':'return=representation'}});
+      if(!Array.isArray(updatedCategory)||updatedCategory.length===0)throw new Error('카테고리 수정 권한이 없거나 해당 카테고리를 찾지 못했어요.');
+      if(old&&old.name!==name){
+        await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});
+      }
       alert('카테고리를 수정했어요.');
     }else{
       const max=categories.reduce((m,c)=>Math.max(m,Number(c.sort_order)||0),0);
@@ -141,6 +144,23 @@ async function saveCategory(){
     resetCategoryForm();await loadCategories();await loadProducts();
   }catch(e){alert('카테고리 저장에 실패했어요.\n\n'+e.message)}
 }
+async function moveCategory(id,direction){
+  const current=categories.find(c=>String(c.id)===String(id));
+  if(!current)return;
+  const siblings=categories.filter(c=>(c.parent_id??null)===(current.parent_id??null))
+    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
+  const idx=siblings.findIndex(c=>String(c.id)===String(id)),ni=idx+direction;
+  if(idx<0||ni<0||ni>=siblings.length)return;
+  const other=siblings[ni],aOrder=Number(current.sort_order)||0,bOrder=Number(other.sort_order)||0;
+  try{
+    const a=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(current.id),{method:'PATCH',body:JSON.stringify({sort_order:bOrder}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(a)||a.length===0)throw new Error('카테고리 순서를 변경할 권한이 없어요.');
+    const b=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(other.id),{method:'PATCH',body:JSON.stringify({sort_order:aOrder}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(b)||b.length===0)throw new Error('카테고리 순서를 변경하지 못했어요.');
+    await loadCategories();await loadProducts();
+  }catch(e){alert('카테고리 순서 변경에 실패했어요.\n\n'+e.message);await loadCategories();}
+}
+
 async function deleteCategory(id){
   const c=categories.find(x=>String(x.id)===String(id));if(!c)return;
   const child=categories.some(x=>String(x.parent_id||'')===String(id));
