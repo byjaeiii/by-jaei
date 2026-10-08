@@ -128,13 +128,17 @@ function render(){
   });
   if(category==='ALL'){
     const seen=new Set();
+    const normText=v=>String(v??'').trim().replace(/\s+/g,' ').toLowerCase();
+    const normArray=v=>Array.isArray(v)?v.map(x=>normText(x)).sort((x,y)=>x.localeCompare(y,'ko-KR',{numeric:true})).join('\u001f'):'';
     a=a.filter(p=>{
       const key=[
-        String(p.name||'').trim().toLowerCase(),
-        String(p.brand||'').trim().toLowerCase(),
-        String(p.images?.[0]||'').trim(),
+        normText(p.name),
+        normText(p.brand),
         String(p.normal_price??''),
-        String(p.member_price??'')
+        String(p.member_price??''),
+        normArray(p.colors),
+        normArray(p.sizes),
+        normText(p.description)
       ].join('\u0001');
       if(seen.has(key)) return false;
       seen.add(key);
