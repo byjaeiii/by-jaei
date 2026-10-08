@@ -1,363 +1,178 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BY JAEI ADMIN v13</title><style>
-:root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:760px;margin:auto;padding:20px}.logo{font:24px Georgia,serif;letter-spacing:3px;margin:10px 0 25px}.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}h2{font:20px Georgia,serif;font-weight:400;margin:0 0 18px}label{display:block;font-size:12px;color:var(--muted);margin:14px 0 7px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);outline:0}textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}button{border:0;border-radius:11px;padding:13px 16px;background:var(--ink);color:#fff;cursor:pointer}.secondary{background:white;color:var(--ink);border:1px solid var(--line)}.actions{display:flex;gap:8px;margin-top:18px}.preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.previewItem{position:relative;width:100px;height:100px}.previewItem img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}.previewItem button{position:absolute;right:4px;top:4px;width:24px;height:24px;padding:0;border-radius:50%;background:rgba(81,70,61,.88);font-size:15px;line-height:24px}.uploadHint{font-size:11px;color:var(--muted);margin-top:7px}.note{font-size:12px;color:var(--muted);line-height:1.7}.msg{padding:12px;border-radius:10px;background:#eee8df;margin-top:12px;line-height:1.6}.item{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;cursor:pointer}.item img{width:64px;height:64px;object-fit:cover;border-radius:9px}.productAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.productCard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}.productCardImg{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.productCardBody{padding:11px}.productCardName{font-size:13px;font-weight:700;margin-bottom:5px}.productCardMeta{font-size:11px;color:var(--muted);line-height:1.55}.productCardActions{display:flex;gap:5px;margin-top:9px}.productCardActions button{flex:1;padding:8px 5px;font-size:10px}.adminCatBar{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;margin-bottom:10px}.adminCatBar button{white-space:nowrap;background:white;color:var(--ink);border:1px solid var(--line);padding:8px 10px;font-size:11px}.adminCatBar button.active{background:var(--ink);color:white}.adminBrandBar{display:flex;gap:5px;flex-wrap:wrap;margin:-2px 0 10px}.adminBrandBar button{background:#f3eee8;color:var(--ink);border:0;padding:6px 9px;font-size:10px;border-radius:999px}.adminBrandBar button.active{background:var(--ink);color:#fff}@media(max-width:560px){.productAdminGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.productCardBody{padding:9px}.productCardActions{gap:4px}.productCardActions button{font-size:9px;padding:7px 3px}}.item .grow{flex:1}.danger{background:#9b5d50}.previewLayer{position:fixed;inset:0;background:rgba(40,30,25,.38);z-index:20;display:flex;align-items:flex-end;justify-content:center}.previewBox{background:var(--card);width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px}.previewGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.previewGrid img{width:100%;height:180px;object-fit:cover;border-radius:12px}.memberRow,.orderRow{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between}.statusBadge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-top:5px}.status-received{background:#eee8df;color:#6d625a}.status-paid{background:#e5efe5;color:#557055}.status-prep{background:#e7edf5;color:#536b86}.status-done{background:#e8e1f0;color:#705b80}.status-cancel{background:#f4e3e0;color:#9a5a50}.filterBar{display:grid;grid-template-columns:1.3fr 1.1fr 1fr 1fr auto;gap:7px;margin:0 0 14px}.orderFilterBar{margin-top:10px}.orderFilterBar{margin-top:10px}.filterBar input{padding:10px}.filterBar button{padding:10px 12px;font-size:12px}.filterCount{font-size:11px;color:var(--muted);margin:-7px 0 10px}@media(max-width:560px){.filterBar{grid-template-columns:1fr 1fr}.filterBar input:first-child{grid-column:1/-1}.filterBar button{grid-column:1/-1}.filterBar input{font-size:12px;padding:9px}.filterBar button{font-size:11px;padding:9px 8px}}.smallText,.orderItems{font-size:12px;color:var(--muted);line-height:1.6}.descriptionText{white-space:pre-line;line-height:1.7}.bulkBar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 10px;margin:0 0 10px;background:#f7f3ed;border:1px solid var(--line);border-radius:10px}.bulkBar select{width:auto;min-width:170px;padding:8px}.bulkBar button{padding:8px 10px;font-size:11px}.bulkCount{font-size:11px;color:var(--muted);margin-right:auto}.categoryManagerRow{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}.categoryManagerRow .grow{flex:1}.categoryManagerRow .categoryDepth{color:var(--muted);font-size:11px}.categoryManagerRow button{padding:7px 9px;font-size:10px}.categoryManagerChild{padding-left:18px}.productSelectWrap{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);margin-bottom:6px}.productSelectWrap input{width:auto;margin:0}.memberActions,.orderActions{display:flex;gap:6px;flex-wrap:wrap}.memberActions button,.orderActions button{padding:8px 10px;font-size:11px}@media(max-width:560px){.row{grid-template-columns:1fr}.memberRow,.orderRow{align-items:flex-start}.memberActions,.orderActions{justify-content:flex-end}}
-</style>
+<!doctype html>
+<!-- BY JAEI latest version -->
+<html lang="ko">
+<head>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#f7f3ed">
+<link rel="apple-touch-icon" href="/icon-512.png">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BY JAEI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <style>
-.adminSectionNav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px;padding:4px}
-.adminSectionNav button{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:10px;padding:10px 13px;font-size:12px;cursor:pointer}
-.adminSectionNav button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.adminSection{display:none}
-.adminSection.active{display:block}
-.adminSectionTitle{margin:0 0 14px;font-size:16px}
-</style>
-</head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
-<div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
-<div id="app" hidden>
-
-<div class="adminSectionNav">
-  <button type="button" class="active" data-admin-section="products">상품관리</button>
-  <button type="button" data-admin-section="orders">주문관리</button>
-  <button type="button" data-admin-section="members">회원관리</button>
-</div>
-<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2><button class="secondary" onclick="logout()">로그아웃</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
-사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><div class="row"><div><label>브랜드</label><input id="brand"></div><div><label>카테고리</label><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div></div><div class="row"><div><label>정상가</label><input id="normal" type="number"></div><div><label>회원가</label><input id="member" type="number"></div></div><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"><label>상품 설명</label><textarea id="description"></textarea><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
+:root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.app{max-width:620px;margin:auto;min-height:100vh;background:var(--bg)}
+header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px solid var(--line)}.head{height:64px;padding:0 18px;display:flex;align-items:center;justify-content:space-between}.logo{font-family:Georgia,serif;letter-spacing:3px;font-size:20px;cursor:pointer}.icon{border:0;background:none;font-size:21px;padding:7px;color:var(--ink);cursor:pointer}.loginLink{border:0;background:none;font-family:Georgia,serif;letter-spacing:1.5px;font-size:12px;padding:9px 8px;color:var(--ink);cursor:pointer}
+.notice{margin:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:18px}.notice b{font-family:Georgia,serif;letter-spacing:2px;font-size:13px}.notice p{font-size:13px;line-height:1.8;margin:10px 0;color:#756960}.notice strong{font-weight:700;color:var(--ink)}.cats{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 16px}.cats button{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:8px 9px;color:var(--muted);cursor:pointer;font-size:12px}.cats button.parentCat{font-weight:700}.cats button.childCat{font-size:11px;margin-left:10px;padding-left:12px}.cats button.active{background:var(--ink);color:white}.cats .catChildMark{margin-right:3px;color:#9b8f84}.cats .catGroup{width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.cats .catChildren{width:100%;display:flex;flex-wrap:wrap;gap:6px;padding-left:12px;margin:0 0 2px 4px}.cats .catChildren button{margin-left:0}.brandCats{display:flex;gap:7px;overflow:auto;padding:0 18px 16px}.brandCats button{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:8px 12px;color:var(--muted);cursor:pointer;font-size:12px}.brandCats button.active{background:#8a786b;color:#fff}.orderMini{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.orderMini img{width:54px;height:62px;border-radius:9px;object-fit:cover;background:#eee7df}.orderMiniText{flex:1;min-width:0}.orderMiniName{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniOption{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniPrice{font-size:12px;font-weight:600;white-space:nowrap}.search{margin:0 18px 18px;border-bottom:1px solid var(--line)}.search input{width:100%;padding:10px 4px;border:0;background:transparent;outline:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 14px 90px}.product{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line)}.photo{aspect-ratio:1/1.12;background:#eee7df;display:flex;align-items:center;justify-content:center;color:#aaa;overflow:hidden;cursor:pointer}.photo img{width:100%;height:100%;object-fit:cover}.info{padding:12px}.name{font-size:14px;margin-bottom:7px;cursor:pointer}.price{font-weight:600;font-size:14px}.member{font-size:12px;color:#9b6f55;margin-top:4px}.opts{display:grid;gap:7px;margin-top:10px}.opts select{width:100%;border:1px solid var(--line);background:white;border-radius:9px;padding:8px;color:var(--ink);font-size:12px}.add{width:100%;border:0;background:var(--ink);color:white;border-radius:10px;padding:10px;margin-top:8px;font-size:12px;cursor:pointer}.empty{text-align:center;padding:70px 20px;color:var(--muted);grid-column:1/-1}.status{text-align:center;color:var(--muted);padding:25px;font-size:13px}
+.detail,.cart,.login{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto}.inner{max-width:620px;margin:auto;min-height:100%;padding-bottom:90px}.topbar{height:62px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#f7f3edf5;z-index:2}.back{border:0;background:none;font-size:15px;color:var(--ink);cursor:pointer}.gallery{display:flex;flex-direction:column;gap:10px;padding:14px}.gallery img{width:100%;aspect-ratio:auto;max-height:none;object-fit:cover;border-radius:16px;display:block}.detailInfo{padding:10px 18px}.detailInfo h1{font-family:Georgia,serif;font-size:24px;font-weight:400}.detailInfo p{line-height:1.8;color:#766a61;font-size:14px;white-space:pre-line}.detailPriceBox{margin-top:22px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fffdf9}.detailPriceRow{display:flex;justify-content:space-between;align-items:center;font-size:14px;line-height:1.8}.detailPriceRow.special{margin-top:5px;color:#9b6f55;font-size:15px}.detailPriceRow b{font-weight:600}.choice{margin:18px 0}.choice label{display:block;font-size:12px;margin-bottom:7px;color:var(--muted)}.choice select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:620px;width:100%;padding:12px 14px;background:#f7f3edf5;border-top:1px solid var(--line);display:flex;gap:8px}.bottom button{flex:1;padding:13px;border-radius:11px;border:1px solid var(--line);background:white;color:var(--ink);cursor:pointer}.bottom .primary{background:var(--ink);color:white}.cartList{padding:18px}.cartItem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.thumb{width:80px;height:90px;border-radius:10px;background:#eee7df;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.cartText{flex:1}.qty{display:flex;align-items:center;gap:10px;margin-top:8px}.qty button{border:1px solid var(--line);background:white;border-radius:7px;width:26px;height:26px;cursor:pointer}.total{padding:18px;font-size:18px;border-top:1px solid var(--line)}.loginForm{padding:24px 18px;display:grid;gap:10px}.loginForm input{padding:12px;border:1px solid var(--line);border-radius:10px}.loginForm button{padding:12px;border:0;border-radius:10px;background:var(--ink);color:white;cursor:pointer}.loginForm .secondary{background:white;color:var(--ink);border:1px solid var(--line)}.small{font-size:12px;color:var(--muted);line-height:1.6}.memberBadge{font-size:11px;color:#9b6f55;margin-top:5px}
+.orderForm{padding:20px 18px;display:grid;gap:10px}.orderForm label{font-size:12px;color:var(--muted)}.orderForm input,.orderForm textarea{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}.orderForm textarea{min-height:90px;resize:vertical}.orderSummary{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13px;line-height:1.8}.orderDone{padding:30px 20px;text-align:center;line-height:1.9}.orderDone button{margin-top:16px;padding:12px 18px;border:0;border-radius:10px;background:var(--ink);color:#fff}
+</style></head>
+<body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
+<section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><main id="grid" class="grid"></main></div>
+<div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
-const CFG={supabaseUrl:'https://wquupamwhjwqyhtxctdl.supabase.co',supabaseKey:'sb_publishable_1MJJqt80Nqj4agK3g2YGPA_8CEZRpOh'};
-let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage.getItem('byjaei_admin_user')||'';let editingId=null,editingImages=[];const $=id=>document.getElementById(id);
-const savedAdminEmail=localStorage.getItem('byjaei_admin_saved_email')||'';$('email').value=savedAdminEmail;$('saveEmail').checked=!!savedAdminEmail;
-function status(t){$('loginStatus').textContent=t}
-function headers(json=true){const h={'apikey':CFG.supabaseKey,'Authorization':'Bearer '+token};if(json)h['Content-Type']='application/json';return h}
-async function api(path,opt={}){const r=await fetch(CFG.supabaseUrl+path,{...opt,headers:{...headers(opt.body!==undefined),...(opt.headers||{})}});let data=null;try{data=await r.json()}catch{}if(!r.ok)throw new Error((data&&(data.message||data.error_description||data.error))||('HTTP '+r.status));return data}
-async function login(){const email=$('email').value.trim(),password=$('pw').value;if($('saveEmail').checked)localStorage.setItem('byjaei_admin_saved_email',email);else localStorage.removeItem('byjaei_admin_saved_email');if(!email||!password){alert('이메일과 비밀번호를 입력해주세요.');return}const b=$('loginBtn');b.disabled=true;b.textContent='로그인 확인 중...';status('1단계 · Supabase 인증 서버에 연결 중...');try{const r=await fetch(CFG.supabaseUrl+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:CFG.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify({email,password})});let d={};try{d=await r.json()}catch{}if(!r.ok){const raw=d.error_description||d.msg||d.message||('HTTP '+r.status);let msg=raw;if(raw.toLowerCase().includes('invalid login credentials')){msg='관리자 이메일 또는 비밀번호가 맞지 않아요.\n\nSupabase에서 관리자 계정이 존재하는지, 이메일이 정확한지 확인해주세요.'}else if(raw.toLowerCase().includes('email not confirmed')){msg='관리자 이메일 인증이 완료되지 않았어요.\n\nSupabase Authentication에서 관리자 계정의 이메일 인증 상태를 확인해주세요.'}status('로그인 실패 · '+msg.split('\n')[0]);alert('로그인 실패\n\n'+msg);return}if(!d.access_token||!d.user?.id){status('로그인 응답은 받았지만 세션 정보가 없어요.');alert('세션 정보가 없습니다.');return}token=d.access_token;userId=d.user.id;localStorage.setItem('byjaei_admin_token',token);localStorage.setItem('byjaei_admin_user',userId);status('2단계 · 관리자 권한 확인 중...');const rows=await api('/rest/v1/profiles?select=id,name,is_admin& id=eq.'+encodeURIComponent(userId)).catch(async()=>api('/rest/v1/profiles?select=id,name,is_admin&id=eq.'+encodeURIComponent(userId)));const p=rows?.[0];if(!p){throw new Error('profiles에 이 관리자 계정의 프로필이 없습니다.')}if(p.is_admin!==true){throw new Error('이 계정의 is_admin 값이 true가 아닙니다.')}status('관리자 로그인 성공 🤍');$('authBox').hidden=true;$('app').hidden=false;await loadCategories();await Promise.all([loadProducts(),loadMembers(),loadOrders()])}catch(e){status('확인 실패 · '+e.message);alert('관리자 확인 실패\n\n'+e.message);token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user')}finally{b.disabled=false;b.textContent='로그인'}}
-$('loginBtn').addEventListener('click',login);$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-async function logout(){token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user');$('authBox').hidden=false;$('app').hidden=true;status('로그아웃됐어요.')}
-function getSelectedCategories(){
-  return [...document.querySelectorAll('input[name="category"]:checked')].map(x=>x.value);
-}
-function setSelectedCategories(categories){
-  const set=new Set(categories||[]);
-  document.querySelectorAll('input[name="category"]').forEach(x=>x.checked=set.has(x.value));
-}
-async function saveProduct(){
-  const name=$('name').value.trim(),normal=Number($('normal').value),member=$('member').value?Number($('member').value):null;
-  const categories=getSelectedCategories();
-  if(!name||!normal)return alert('상품명과 정상가를 입력해주세요.');
-  if(!categories.length)return alert('카테고리를 하나 이상 선택해주세요.');
+const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',brandFilter='ALL',user=null,approved=false,cart=[];
+const guestCartKey='byjaei_cart_guest';
+function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
+function loadCart(){
   try{
-    const urls=await uploadFiles();
-    const basePayload={
-      name,
-      brand:$('brand').value.trim(),
-      normal_price:normal,
-      member_price:member,
-      colors:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),
-      sizes:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),
-      description:$('description').value,
-      images:urls
-    };
-
-    if(editingId){
-      const payload={...basePayload,category:categories[0]};
-      await api('/rest/v1/products?id=eq.'+editingId,{method:'PATCH',body:JSON.stringify(payload),headers:{'Prefer':'return=minimal'}});
-      for(const category of categories.slice(1)){
-        const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
-        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category,sort_order:(Number(current?.[0]?.sort_order)||0)+1}),headers:{'Prefer':'return=representation'}});
-      }
-      msg('상품이 수정됐어요 🤍');
-    }else{
-      const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
-      let nextOrder=(Number(current?.[0]?.sort_order)||0)+1;
-      for(const category of categories){
-        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category,sort_order:nextOrder++}),headers:{'Prefer':'return=representation'}});
-      }
-      msg('상품이 등록됐어요 🤍');
-    }
-    resetForm();
-    loadProducts();
-  }catch(e){alert(e.message)}
+    const raw=localStorage.getItem(cartKey());
+    const parsed=raw?JSON.parse(raw):[];
+    cart=Array.isArray(parsed)?parsed:[];
+  }catch(e){console.warn('장바구니 데이터를 복구했어요.',e);cart=[];localStorage.removeItem(cartKey())}
 }
-function selectedFiles(){return [...($('images').files||[])]}
-function setSelectedFiles(files){const dt=new DataTransfer();files.forEach(f=>dt.items.add(f));$('images').files=dt.files}
-async function uploadFiles(){const urls=[...editingImages];for(const f of selectedFiles()){const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=Date.now()+'-'+crypto.randomUUID()+'-'+safe;const r=await fetch(CFG.supabaseUrl+'/storage/v1/object/products/'+encodeURIComponent(path),{method:'POST',headers:{apikey:CFG.supabaseKey,Authorization:'Bearer '+token,'x-upsert':'false','Content-Type':f.type||'application/octet-stream'},body:f});if(!r.ok){let d={};try{d=await r.json()}catch{}throw new Error('사진 업로드 실패: '+(d.message||d.error||r.status))}urls.push(CFG.supabaseUrl+'/storage/v1/object/public/products/'+path)}return urls}
-function renderSelectedImages(){const box=$('preview');const existing=(editingImages||[]).map((x,i)=>`<div class="previewItem"><img src="${x}" alt="기존 상품사진"><button type="button" title="사진 삭제" onclick="removeExistingImage(${i})">×</button></div>`).join('');const selected=selectedFiles().map((f,i)=>{const u=URL.createObjectURL(f);return `<div class="previewItem"><img src="${u}" alt="선택한 상품사진"><button type="button" title="사진 삭제" onclick="removeSelectedImage(${i})">×</button></div>`}).join('');box.innerHTML=existing+selected}
-function removeExistingImage(i){editingImages.splice(i,1);renderSelectedImages()}
-function removeSelectedImage(i){const files=selectedFiles();files.splice(i,1);setSelectedFiles(files);renderSelectedImages()}
-$('images').addEventListener('change',renderSelectedImages);
-function resetForm(){
-  editingId=null;editingImages=[];
-  ['name','normal','member','colors','sizes','description'].forEach(id=>$(id).value='');
-  $('brand').value='';
-  setSelectedCategories([]);
-  $('preview').innerHTML='';
-  $('images').value='';
-  $('saveBtn').disabled=false;
-  $('saveBtn').textContent='상품 등록하기';
+function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
+const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
+function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
+async function load(){
+  const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
+    sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+    sb.from('categories').select('id,name,parent_id,sort_order,created_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+  ]);
+  if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
+  products=productData||[];
+  siteCategories=categoryError?[]:(categoryData||[]);
+  if(categoryError)console.error(categoryError);
+  render();
 }
-function msg(t){$('msg').textContent=t;$('msg').style.display='block';setTimeout(()=>$('msg').style.display='none',3500)}
-let adminCategoryFilter='ALL',adminBrandFilter='ALL',selectedProductIds=new Set(),categories=[],editingCategoryId=null;
-
-function normalizeBrand(v){
-  return String(v||'').trim().toLocaleLowerCase('ko-KR');
+function goHome(){category='ALL';brandFilter='ALL';window.scrollTo({top:0,behavior:'smooth'});render()}
+function setCategory(x){
+  category=x;
+  brandFilter='ALL';
+  render();
+}
+function setBrandFilter(x){
+  brandFilter=x;
+  render();
 }
 function categoryTreeRows(parentId=null,depth=0,rows=[]){
-  categories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
+  siteCategories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
   return rows;
 }
 function categoryDescendantNames(name){
-  const root=categories.find(c=>String(c.name)===String(name));
-  if(!root)return [String(name)];
-  const out=[];
-  const walk=id=>{const c=categories.find(x=>String(x.id)===String(id));if(c)out.push(String(c.name));categories.filter(x=>String(x.parent_id||'')===String(id)).forEach(x=>walk(x.id))};
-  walk(root.id);return out;
+  if(name==='26 WINTER'){
+    return siteCategories.filter(c=>String(c.name||'').replace(/\s+/g,'').toUpperCase().startsWith('26WINTER')).map(c=>String(c.name));
+  }
+  const root=siteCategories.find(c=>String(c.name)===String(name));if(!root)return [String(name)];const out=[];
+  const walk=id=>{const c=siteCategories.find(x=>String(x.id)===String(id));if(c)out.push(String(c.name));siteCategories.filter(x=>String(x.parent_id||'')===String(id)).forEach(x=>walk(x.id))};walk(root.id);return out;
 }
-function renderCategoryOptions(selected=[]){
-  const box=$('categoryOptions');if(!box)return;const set=new Set(selected||[]);box.innerHTML=categoryTreeRows().map(({c,depth})=>`<label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${depth*14}px"><input type="checkbox" name="category" value="${String(c.name).replaceAll('"','&quot;')}" style="width:auto" ${set.has(c.name)?'checked':''}> ${depth?'↳ ':''}${c.name}</label>`).join('');
-}
-function renderBulkCategoryOptions(){
-  const el=$('bulkCategory');if(!el)return;const current=el.value;el.innerHTML='<option value="">이동할 카테고리 선택</option>'+categoryTreeRows().map(({c,depth})=>`<option value="${String(c.name).replaceAll('"','&quot;')}">${depth?'↳ ':''}${c.name}</option>`).join('');if(categories.some(c=>c.name===current))el.value=current;
-}
-function renderCategoryManager(){
-  const list=$('categoryManagerList');if(!list)return;
+function cats(){
   const rows=categoryTreeRows();
-  list.innerHTML=rows.length?rows.map(({c,depth})=>`<div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="grow"><b>${depth?'↳ ':''}${c.name}</b>${c.parent_id?`<div class="categoryDepth">하위 카테고리</div>`:''}</div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>`).join(''):'<p class="note">등록된 카테고리가 없어요.</p>';
-}
-function categoryDescendantIds(id,out=new Set()){
-  categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
-}
-function renderCategoryParentOptions(selected=''){
-  const el=$('categoryParentInput');if(!el)return;const blocked=editingCategoryId?new Set([Number(editingCategoryId),...categoryDescendantIds(editingCategoryId)]):new Set();el.innerHTML='<option value="">상위 카테고리 없음</option>'+categoryTreeRows().filter(({c})=>!blocked.has(Number(c.id))).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');if(selected)el.value=String(selected);
-}
-async function loadCategories(){
-  const data=await api('/rest/v1/categories?select=id,name,parent_id,sort_order,created_at&order=sort_order.asc,created_at.asc');
-  categories=Array.isArray(data)?data:[];
-  renderCategoryOptions();renderBulkCategoryOptions();renderCategoryParentOptions();renderCategoryManager();
-}
-function resetCategoryForm(){editingCategoryId=null;$('categoryNameInput').value='';renderCategoryParentOptions();$('categoryParentInput').value='';$('categorySaveBtn').textContent='카테고리 추가';$('categoryCancelBtn').hidden=true;}
-function editCategory(id){const c=categories.find(x=>String(x.id)===String(id));if(!c)return;editingCategoryId=c.id;$('categoryNameInput').value=c.name||'';renderCategoryParentOptions(c.parent_id);$('categorySaveBtn').textContent='카테고리 수정';$('categoryCancelBtn').hidden=false;scrollTo({top:document.getElementById('categoryNameInput').getBoundingClientRect().top+scrollY-80,behavior:'smooth'});}
-async function saveCategory(){
-  const name=$('categoryNameInput').value.trim(),parentId=$('categoryParentInput').value||null;
-  if(!name)return alert('카테고리 이름을 입력해주세요.');
-  if(editingCategoryId&&(String(parentId)===String(editingCategoryId)||categoryDescendantIds(editingCategoryId).has(Number(parentId))))return alert('현재 카테고리의 하위 카테고리를 상위 카테고리로 지정할 수 없어요.');
-  try{
-    if(editingCategoryId){
-      const old=categories.find(c=>String(c.id)===String(editingCategoryId));
-      const updatedCategory=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(editingCategoryId),{method:'PATCH',body:JSON.stringify({name,parent_id:parentId}),headers:{'Prefer':'return=representation'}});
-      if(!Array.isArray(updatedCategory)||updatedCategory.length===0)throw new Error('카테고리 수정 권한이 없거나 해당 카테고리를 찾지 못했어요.');
-      if(old&&old.name!==name){
-        await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});
-      }
-      alert('카테고리를 수정했어요.');
-    }else{
-      const max=categories.reduce((m,c)=>Math.max(m,Number(c.sort_order)||0),0);
-      await api('/rest/v1/categories',{method:'POST',body:JSON.stringify({name,parent_id:parentId,sort_order:max+1}),headers:{'Prefer':'return=representation'}});
-      alert('카테고리를 추가했어요.');
-    }
-    resetCategoryForm();await loadCategories();await loadProducts();
-  }catch(e){alert('카테고리 저장에 실패했어요.\n\n'+e.message)}
-}
-async function moveCategory(id,direction){
-  const current=categories.find(c=>String(c.id)===String(id));
-  if(!current)return;
-  const siblings=categories.filter(c=>String(c.parent_id??'')===String(current.parent_id??''))
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const idx=siblings.findIndex(c=>String(c.id)===String(id)),ni=idx+direction;
-  if(idx<0||ni<0||ni>=siblings.length)return;
-  const other=siblings[ni],aOrder=Number(current.sort_order)||0,bOrder=Number(other.sort_order)||0;
-  try{
-    const a=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(current.id),{method:'PATCH',body:JSON.stringify({sort_order:bOrder}),headers:{'Prefer':'return=representation'}});
-    if(!Array.isArray(a)||a.length===0)throw new Error('카테고리 순서를 변경할 권한이 없어요.');
-    const b=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(other.id),{method:'PATCH',body:JSON.stringify({sort_order:aOrder}),headers:{'Prefer':'return=representation'}});
-    if(!Array.isArray(b)||b.length===0)throw new Error('카테고리 순서를 변경하지 못했어요.');
-    await loadCategories();await loadProducts();
-  }catch(e){alert('카테고리 순서 변경에 실패했어요.\n\n'+e.message);await loadCategories();}
-}
-
-async function deleteCategory(id){
-  const c=categories.find(x=>String(x.id)===String(id));if(!c)return;
-  const child=categories.some(x=>String(x.parent_id||'')===String(id));
-  if(child)return alert('하위 카테고리가 있어요. 하위 카테고리를 먼저 삭제하거나 이동해주세요.');
-  const used=window.__allAdminProducts?.filter(p=>String(p.category||'')===String(c.name)).length||0;
-  if(used)return alert(`이 카테고리에 상품 ${used}개가 있어요. 상품을 다른 카테고리로 먼저 이동해주세요.`);
-  if(!confirm(`'${c.name}' 카테고리를 삭제할까요?`))return;
-  try{await api('/rest/v1/categories?id=eq.'+encodeURIComponent(id),{method:'DELETE'});if(String(editingCategoryId)===String(id))resetCategoryForm();await loadCategories();await loadProducts();}catch(e){alert('카테고리 삭제에 실패했어요.\n\n'+e.message)}
-}
-
-function renderAdminFilters(data){
-  const cats=['ALL',...categoryTreeRows().map(({c})=>c.name),'BRAND'];
-  const catBar=$('adminCatBar');
-  const brandBar=$('adminBrandBar');
-
-  catBar.innerHTML='';
-  cats.forEach(c=>{
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.textContent=c;
-    btn.className=adminCategoryFilter===c?'active':'';
-    btn.addEventListener('click',()=>{
-      adminCategoryFilter=c;
-      adminBrandFilter='ALL';
-      loadProducts();
-    });
-    catBar.appendChild(btn);
-  });
-
-  const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))]
-    .sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
-
-  if(adminCategoryFilter!=='BRAND'){
-    brandBar.hidden=true;
-    brandBar.innerHTML='';
+  const winterChildren=rows.filter(({c})=>String(c.name||'').replace(/\s+/g,'').toUpperCase().startsWith('26WINTER') && String(c.name||'').replace(/\s+/g,'').toUpperCase()!=='26WINTER(전체보기)');
+  const normalRows=rows.filter(({c})=>!winterChildren.some(w=>String(w.c.id)===String(c.id)));
+  const catEl=document.getElementById('cats');
+  const winterOpen=category==='26 WINTER'||winterChildren.some(({c})=>String(c.name)===String(category));
+  const winterHtml=`<div class="catGroup"><button type="button" class="${category==='26 WINTER'?'active':''} parentCat" data-category="26 WINTER">26 WINTER</button>${winterOpen?`<div class="catChildren">${winterChildren.map(({c})=>`<button type="button" class="${category===c.name?'active':''} childCat" data-category="${String(c.name).replaceAll('"','&quot;')}">${c.name}</button>`).join('')}</div>`:''}</div>`;
+  const topButtons=[
+    `<button type="button" class="${category==='ALL'?'active':''}" data-category="ALL">ALL</button>`,
+    winterHtml,
+    ...normalRows.map(({c,depth})=>`<button type="button" class="${category===c.name?'active':''} ${depth?'childCat':'parentCat'}" data-category="${String(c.name).replaceAll('"','&quot;')}">${depth?'':''}${c.name}</button>`),
+    `<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button>`
+  ];
+  catEl.innerHTML=topButtons.join('');
+  const brandEl=document.getElementById('brandCats');
+  if(category!=='BRAND'){
+    brandEl.hidden=true;
+    brandEl.innerHTML='';
     return;
   }
-
-  brandBar.hidden=false;
-  brandBar.innerHTML='';
-
-  const allBtn=document.createElement('button');
-  allBtn.type='button';
-  allBtn.textContent='ALL';
-  allBtn.className=adminBrandFilter==='ALL'?'active':'';
-  allBtn.addEventListener('click',()=>{
-    adminBrandFilter='ALL';
-    loadProducts();
-  });
-  brandBar.appendChild(allBtn);
-
-  brands.forEach(brand=>{
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.textContent=brand;
-    btn.className=normalizeBrand(adminBrandFilter)===normalizeBrand(brand)?'active':'';
-    btn.addEventListener('click',()=>{
-      adminBrandFilter=brand;
-      loadProducts();
-    });
-    brandBar.appendChild(btn);
-  });
+  const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
+  const brands=[...new Set(products.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>collator.compare(a,b));
+  brandEl.hidden=false;
+  brandEl.innerHTML=['ALL',...brands].map(x=>`<button type="button" class="${brandFilter===x?'active':''}" data-brand="${x.replaceAll('"','&quot;')}">${x}</button>`).join('');
 }
-
-function updateBulkUI(visibleData=[]){
-  const bar=$('bulkBar'),count=$('bulkCount'),all=$('selectAllProducts');
-  if(!bar||!count||!all)return;
-  const visibleIds=visibleData.map(p=>String(p.id));
-  const selectedVisible=visibleIds.filter(id=>selectedProductIds.has(id)).length;
-  bar.hidden=visibleData.length===0 && selectedProductIds.size===0;
-  count.textContent=`선택 ${selectedProductIds.size}개`;
-  all.checked=visibleIds.length>0 && selectedVisible===visibleIds.length;
-  all.indeterminate=selectedVisible>0 && selectedVisible<visibleIds.length;
-}
-function toggleAllVisibleProducts(checked,visibleData=[]){
-  visibleData.forEach(p=>{const id=String(p.id);if(checked)selectedProductIds.add(id);else selectedProductIds.delete(id)});
-  loadProducts();
-}
-function toggleProductSelection(id,checked){
-  const key=String(id);if(checked)selectedProductIds.add(key);else selectedProductIds.delete(key);
-  updateBulkUI(window.__adminVisibleProducts||[]);
-}
-async function moveSelectedProducts(){
-  const ids=[...selectedProductIds],target=$('bulkCategory')?.value||'';
-  if(!ids.length)return alert('이동할 상품을 선택해주세요.');
-  if(!target)return alert('이동할 카테고리를 선택해주세요.');
-  if(!confirm(`선택한 ${ids.length}개 상품을 '${target}' 카테고리로 이동할까요?`))return;
-  try{
-    for(const id of ids){
-      await api('/rest/v1/products?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({category:target}),headers:{'Prefer':'return=minimal'}});
-    }
-    selectedProductIds.clear();
-    if($('bulkCategory'))$('bulkCategory').value='';
-    alert('선택한 상품을 이동했어요.');
-    await loadProducts();
-  }catch(e){alert('상품 카테고리 이동에 실패했어요.\n\n'+e.message)}
-}
-function filteredAdminProducts(data){
-  return data.filter(p=>{
-    const category=String(p.category||'').trim();
-    if(adminCategoryFilter!=='ALL' && adminCategoryFilter!=='BRAND' && !categoryDescendantNames(adminCategoryFilter).some(x=>x===category))return false;
-    if(adminCategoryFilter==='BRAND' && adminBrandFilter!=='ALL')return normalizeBrand(p.brand)===normalizeBrand(adminBrandFilter);
-    return true;
-  });
-}
-
-async function pinProduct(id){
-  try{
-    const data=await api('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc');
-    const target=data.find(x=>String(x.id)===String(id));
-    if(!target)return;
-
-    const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);
-    const minOrder=Math.min(...numericOrders,0);
-    const isPinned=Number(target.sort_order)===minOrder-1;
-
-    if(isPinned){
-      const maxOrder=Math.max(...numericOrders,0);
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
-    }else{
-      // 선택한 상품을 맨 앞으로 보내고, 기존 상품의 상대적인 순서는 유지합니다.
-      for(const item of data){
-        if(String(item.id)===String(id))continue;
-        await api('/rest/v1/products?id=eq.'+item.id,{method:'PATCH',body:JSON.stringify({sort_order:(Number(item.sort_order)||0)+1}),headers:{'Prefer':'return=minimal'}});
-      }
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:0}),headers:{'Prefer':'return=minimal'}});
-    }
-    await loadProducts();
-  }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
-}
-
-document.addEventListener('change',e=>{
-  if(e.target?.id==='selectAllProducts')toggleAllVisibleProducts(e.target.checked,window.__adminVisibleProducts||[]);
-  if(e.target?.classList?.contains('productSelect'))toggleProductSelection(e.target.dataset.id,e.target.checked);
+document.getElementById('cats').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-category]');
+  if(!b) return;
+  setCategory(b.dataset.category);
 });
-async function loadProducts(){
-  try{
-    const data=await api('/rest/v1/products?select=*&order=sort_order.asc,created_at.asc');
-    renderAdminFilters(data);
-    window.__allAdminProducts=data;
-    const filtered=filteredAdminProducts(data);
-    window.__adminVisibleProducts=filtered;
-    updateBulkUI(filtered);
-    const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);
-    const minOrder=Math.min(...numericOrders,0);
-    $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
-      const pinned=Number(p.sort_order)===minOrder-1;
-      return `<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''} · ${p.category}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${pinned?'고정 해제':'상품고정'}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`;
-    }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
-  }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
-}
-
-async function moveProduct(id,direction){
-  try{
-    const data=await api('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc');
-    const idx=data.findIndex(x=>String(x.id)===String(id)),ni=idx+direction;
-    if(idx<0||ni<0||ni>=data.length)return;
-    const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);const minOrder=Math.min(...numericOrders,0);const a=data[idx],b=data[ni],av=Number(a.sort_order)||0,bv=Number(b.sort_order)||0;if(av===minOrder-1||bv===minOrder-1)return;
-    await api('/rest/v1/products?id=eq.'+a.id,{method:'PATCH',body:JSON.stringify({sort_order:bv}),headers:{'Prefer':'return=minimal'}});
-    await api('/rest/v1/products?id=eq.'+b.id,{method:'PATCH',body:JSON.stringify({sort_order:av}),headers:{'Prefer':'return=minimal'}});
-    await loadProducts()
-  }catch(e){alert('상품 순서 변경에 실패했어요.\n\n'+e.message)}
-}
-
-async function getProduct(id){const d=await api('/rest/v1/products?select=*&id=eq.'+id);return d[0]}
-async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([p.category||'CHILD']);$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';scrollTo({top:0,behavior:'smooth'})}
-function previewProduct(id){getProduct(id).then(p=>{if(!p)return;const l=document.createElement('div');l.className='previewLayer';l.id='pv';l.onclick=e=>{if(e.target===l)l.remove()};l.innerHTML=`<div class="previewBox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">상품 미리보기</h2><button class="secondary" onclick="$('pv').remove()">닫기</button></div><div class="previewGrid">${(p.images||[]).map(x=>`<img src="${x}">`).join('')}</div><h2>${p.name}</h2><div class="note">${p.brand||''} · ${p.category}</div><p><b>${Number(p.normal_price).toLocaleString()}원</b>${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}</p><p>COLOR · ${(p.colors||[]).join(', ')||'-'}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</p><p class="descriptionText">${p.description||''}</p><button onclick="$('pv').remove();editProduct(${p.id})">수정하기</button></div>`;document.body.appendChild(l)})}
-async function removeProduct(id){if(!confirm('이 상품을 삭제할까요?'))return;try{await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});loadProducts()}catch(e){alert(e.message)}}
-function dateKST(v){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date(v))}
-function matchesDate(v,from,to){const d=dateKST(v);return (!from||d>=from)&&(!to||d<=to)}
-function filterValue(id){return ($(id)?.value||'').trim()}
-async function loadMembers(){const el=$('members');try{const data=await api('/rest/v1/profiles?select=id,name,email,phone,referral_source,approved,withdrawn,is_admin,created_at&order=created_at.desc');const q=filterValue('memberNameSearch').toLowerCase(),phoneQ=filterValue('memberPhoneSearch').toLowerCase(),from=filterValue('memberFrom'),to=filterValue('memberTo');const filtered=(data||[]).filter(m=>(!q||String(m.name||'').toLowerCase().includes(q))&&(!phoneQ||String(m.phone||'').toLowerCase().includes(phoneQ))&&matchesDate(m.created_at,from,to));$('memberFilterCount').textContent=(q||phoneQ||from||to)?`검색 결과 ${filtered.length}명 / 전체 ${data?.length||0}명`:'';if(!filtered.length){el.innerHTML='<p class="note">검색 결과가 없어요.</p>';return}el.innerHTML=filtered.map(m=>`<div class="memberRow"><div><b>${m.name||'이름 없음'}</b><div class="smallText">${m.email||''}${m.phone?'<br>연락처 · '+m.phone:''}${m.referral_source?'<br>가입경로 · '+m.referral_source:''}<br>${m.is_admin?'관리자':(m.withdrawn?'탈퇴처리':(m.approved?'승인완료':'승인대기'))}</div></div><div class="memberActions">${m.is_admin?'<span class="smallText">관리자</span>':m.withdrawn?'<span class="smallText">탈퇴처리</span>':`${m.approved?`<button class="secondary" onclick="setApproval('${m.id}',false)">승인취소</button>`:`<button onclick="setApproval('${m.id}',true)">승인</button>`}<button class="secondary" onclick="withdrawMember('${m.id}')">탈퇴처리</button>`}</div></div>`).join('')}catch(e){el.innerHTML='<p class="note">'+e.message+'</p>'}}
-async function setApproval(id,value){try{await api('/rest/v1/profiles?id=eq.'+id,{method:'PATCH',body:JSON.stringify({approved:value}),headers:{'Prefer':'return=minimal'}});loadMembers()}catch(e){alert(e.message)}}
-async function loadOrders(){const el=$('orders');try{const data=await api('/rest/v1/orders?select=*&order=created_at.desc');const q=filterValue('orderNameSearch').toLowerCase(),phoneQ=filterValue('orderPhoneSearch').toLowerCase(),from=filterValue('orderFrom'),to=filterValue('orderTo');const filtered=(data||[]).filter(o=>(!q||String(o.customer_name||'').toLowerCase().includes(q))&&(!phoneQ||String(o.phone||'').toLowerCase().includes(phoneQ))&&matchesDate(o.created_at,from,to));$('orderFilterCount').textContent=(q||phoneQ||from||to)?`검색 결과 ${filtered.length}건 / 전체 ${data?.length||0}건`:'';if(!filtered.length){el.innerHTML='<p class="note">검색 결과가 없어요.</p>';return}el.innerHTML=filtered.map(o=>{const items=Array.isArray(o.items)?o.items:[];const txt=items.map(i=>`${i.name} · ${i.color||''}${i.color&&i.size?' / ':''}${i.size||''} · ${i.qty}개`).join('<br>');const cls={'주문접수':'status-received','입금확인':'status-paid','배송준비':'status-prep','배송완료':'status-done','취소':'status-cancel'}[o.status]||'status-received';const memo=o.memo||'';return `<div class="orderRow"><div style="flex:1"><b>${o.customer_name}</b><div class="smallText">${o.phone}<br>${o.address}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${o.status||'주문접수'}</span><div class="orderItems" style="margin-top:8px">${txt}</div>${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>기타 메모</b><br>${memo}</div>`:''}<div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${String(o.admin_memo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${o.id})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${o.id})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select onchange="updateOrderStatus(${o.id},this.value)"><option ${o.status==='주문접수'?'selected':''}>주문접수</option><option ${o.status==='입금확인'?'selected':''}>입금확인</option><option ${o.status==='배송준비'?'selected':''}>배송준비</option><option ${o.status==='배송완료'?'selected':''}>배송완료</option><option ${o.status==='취소'?'selected':''}>취소</option></select><button class="danger" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${o.id})">주문삭제</button></div></div>`}).join('')}catch(e){el.innerHTML='<p class="note">'+e.message+'</p>'}}
-async function saveOrderMemo(id){const value=$('memo_'+id)?.value.trim()||'';try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:value}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 저장됐어요.')}catch(e){alert('메모 저장 실패\n\n'+e.message)}}
-async function deleteOrderMemo(id){if(!confirm('이 주문의 관리자 메모를 삭제할까요?'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:null}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 삭제됐어요.');loadOrders()}catch(e){alert('메모 삭제 실패\n\n'+e.message)}}
-async function updateOrderStatus(id,statusValue){try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:statusValue}),headers:{'Prefer':'return=minimal'}});loadOrders()}catch(e){alert(e.message)}}
-async function deleteOrder(id){if(!confirm('이 주문을 삭제할까요?\n\n삭제하면 주문관리에서 다시 복구할 수 없어요.'))return;try{const deleted=await api('/rest/v1/orders?id=eq.'+id,{method:'DELETE',headers:{'Prefer':'return=representation'}});if(!Array.isArray(deleted)||deleted.length===0){throw new Error('주문이 삭제되지 않았어요. Supabase의 orders 삭제 권한(RLS) 또는 연결된 데이터 설정을 확인해주세요.')}alert('주문을 삭제했어요.');loadOrders()}catch(e){alert('주문 삭제 실패\n\n'+e.message)}}
-async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까요?\n\n탈퇴 처리하면 해당 계정이 완전히 삭제되어 같은 이메일로 다시 가입할 수 있어요.'))return;try{await api('/rest/v1/rpc/admin_delete_user',{method:'POST',body:JSON.stringify({target_user_id:id}),headers:{'Prefer':'return=minimal'}});alert('탈퇴 처리했어요.\n\n이제 같은 이메일로 다시 가입할 수 있어요.');loadMembers()}catch(e){alert('탈퇴 처리 실패\n\n'+e.message)}}
-</script>
-<script>
-document.querySelectorAll('[data-admin-section]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const key=btn.dataset.adminSection;
-    document.querySelectorAll('[data-admin-section]').forEach(x=>x.classList.toggle('active',x===btn));
-    document.querySelectorAll('.adminSection').forEach(x=>x.classList.toggle('active',x.id==='adminSection-'+key));
-  });
+document.getElementById('brandCats').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-brand]');
+  if(!b) return;
+  setBrandFilter(b.dataset.brand);
 });
-</script>
-</body></html>
+function render(){
+  cats();
+  let q=(document.getElementById('search').value||'').toLowerCase();
+  let a=products.filter(p=>{
+    const productCategory=String(p.category||'').trim();
+    const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category).includes(productCategory);
+    const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
+    return categoryOk&&brandOk&&String(p.name).toLowerCase().includes(q);
+  });
+  document.getElementById('grid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">등록된 상품이 없어요 🤍</div>';
+}
+function img(p){return p.images&&p.images[0]?`<img src="${p.images[0]}" alt="${p.name}">`:'PRODUCT IMAGE'}
+function options(arr){return (arr||[]).map(v=>{let x=parseSize(v);return `<option value="${x.add}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
+function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}</div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
+function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id);addCart(p,c.value,s.options[s.selectedIndex].text,+s.value)}
+function addCart(p,color,size,add){if(!user){if(confirm('장바구니에 담으려면 로그인이 필요해요.\n\n로그인 화면으로 이동할까요?'))openLogin();return}let key=p.id+'-'+color+'-'+size;let x=cart.find(i=>i.key===key);x?x.qty++:cart.push({key,id:p.id,name:p.name,color,size,add,qty:1});save();alert('장바구니에 담았어요 🤍')}
+function detail(id){let p=products.find(x=>x.id===id);document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('detail')">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><h1>${p.name}</h1><p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div><div class="detailPriceBox"><div class="detailPriceRow"><span>정상가</span><b>${won(p.normal_price)}</b></div>${approved&&user&&p.member_price!=null?`<div class="detailPriceRow special"><span>특별회원가</span><b>${won(p.member_price)}</b></div>`:''}</div></div><div class="bottom"><button onclick="closeLayer('detail')">뒤로</button><button class="primary" onclick="dadd(${p.id})">장바구니 담기</button></div></div>`}
+function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds');addCart(p,document.getElementById('dc').value,s.options[s.selectedIndex].text,+s.value)}
+function openCart(){
+  closeAll();
+  const el=document.getElementById('cart'); el.hidden=false;
+  loadCart();
+  const valid=cart.filter(x=>products.some(p=>p.id===x.id));
+  if(valid.length!==cart.length){cart=valid;save()}
+  const member=!!(approved&&user);
+  const selectedTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
+  const normalTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(Number(p.normal_price)+Number(x.add||0)):0)*x.qty},0);
+  const discount=Math.max(0,normalTotal-selectedTotal);
+  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">← 계속 쇼핑</button><b>장바구니</b><span></span></div><div class="cartList">
+  ${cart.length?`<div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 12px"><label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;cursor:pointer"><input id="cartAll" type="checkbox" onchange="toggleAllCart(this.checked)" style="width:auto"> 전체선택</label><button onclick="removeSelected()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer">선택삭제</button></div>`:''}
+  ${cart.length?cart.map((x,i)=>{let p=products.find(p=>p.id===x.id);return `<div class="cartItem"><div style="display:flex;align-items:center;gap:9px"><input class="cartCheck" type="checkbox" data-index="${i}" style="width:auto" onclick="event.stopPropagation()"><div class="thumb" onclick="detail(${p.id})">${img(p)}</div></div><div class="cartText" onclick="detail(${p.id})"><b>${x.name}</b><div>${x.color} / ${x.size}</div><div class="qty"><button onclick="event.stopPropagation();qty(${i},-1)">−</button>${x.qty}<button onclick="event.stopPropagation();qty(${i},1)">+</button></div></div><div style="text-align:right"><b>${won((getPrice(p)+Number(x.add||0))*x.qty)}</b>${member&&p.member_price!=null?`<div class="small">회원가</div>`:''}</div></div>`}).join(''):`<div class="empty">장바구니가 비어 있어요 🤍</div>`}
+  </div><div class="total" style="font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:17px"><span>총주문금액</span><b>${won(selectedTotal)}</b></div></div><div class="bottom"><button class="primary" onclick="openOrder()">주문서 작성하기</button></div></div>`;
+}
+function toggleAllCart(checked){document.querySelectorAll('.cartCheck').forEach(x=>x.checked=checked)}
+function removeSelected(){const checked=[...document.querySelectorAll('.cartCheck:checked')].map(x=>Number(x.dataset.index));if(!checked.length)return alert('삭제할 상품을 선택해주세요.');cart=cart.filter((_,i)=>!checked.includes(i));save();openCart()}
+function qty(i,n){loadCart();if(!cart[i])return;cart[i].qty+=n;if(cart[i].qty<1)cart.splice(i,1);save();openCart()}
+function openOrder(){
+  closeAll();const el=document.getElementById('cart');el.hidden=false;loadCart();
+  if(!cart.length){alert('장바구니가 비어 있어요 🤍');openCart();return;}
+  const member=!!(approved&&user);
+  const normalTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(Number(p.normal_price)+Number(x.add||0)):0)*x.qty},0);
+  const total=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
+  const discount=Math.max(0,normalTotal-total);
+  const rows=cart.map(x=>{const p=products.find(p=>p.id===x.id);const line=(getPrice(p)+Number(x.add||0))*x.qty;return `<div class="orderMini"><img src="${p.images?.[0]||''}" alt="${p.name}"><div class="orderMiniText"><div class="orderMiniName">${p.name}</div><div class="orderMiniOption">${x.color} / ${x.size} · ${x.qty}개</div></div><div class="orderMiniPrice">${won(line)}</div></div>`}).join('');
+  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openCart()">← 장바구니</button><b>주문서</b><span></span></div><div class="orderSummary">${rows}<div style="padding-top:12px;font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:16px"><span>총주문금액</span><b>${won(total)}</b></div></div></div><div class="orderForm"><label>성함</label><input id="orderName" placeholder="성함을 입력해주세요"><label>연락처</label><input id="orderPhone" placeholder="연락처를 입력해주세요"><label>배송지 <span style="font-size:11px;color:var(--muted);font-weight:400">(주소를 정확히 입력해주세요.)</span></label><input id="orderAddress" placeholder="배송지를 직접 입력해주세요"><label>요청사항</label><textarea id="orderMemo" placeholder="요청사항이 있다면 입력해주세요"></textarea><button class="primary" style="padding:13px;border:0;border-radius:11px;background:var(--ink);color:white;cursor:pointer" onclick="submitOrder()">주문서 제출하기</button></div></div>`;
+}
+async function submitOrder(){
+  const n=document.getElementById('orderName').value.trim(),ph=document.getElementById('orderPhone').value.trim(),ad=document.getElementById('orderAddress').value.trim(),memo=document.getElementById('orderMemo').value.trim();
+  if(!n||!ph||!ad)return alert('성함, 연락처, 배송지를 입력해주세요.');
+  loadCart();if(!cart.length)return alert('장바구니가 비어 있어요 🤍');
+  const items=cart.map(x=>{const p=products.find(p=>p.id===x.id);if(!p)return null;const unit=getPrice(p)+Number(x.add||0);return {id:p.id,name:p.name,brand:p.brand||'',color:x.color||'',size:x.size||'',qty:x.qty,unit_price:unit,line_total:unit*x.qty,image:p.images?.[0]||''}}).filter(Boolean);
+  if(!items.length)return alert('장바구니 상품을 다시 확인해주세요.');
+  const total=items.reduce((a,x)=>a+x.line_total,0);const {data:{user:u}}=await sb.auth.getUser();
+  const {error}=await sb.from('orders').insert({user_id:u?.id||null,customer_name:n,phone:ph,address:ad,memo,items,total_price:total,status:'주문접수'});
+  if(error){console.error(error);return alert('주문서 저장 중 문제가 생겼어요. '+error.message);}
+  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문서가 접수됐어요 🤍</strong><br><br>1:1 채팅으로 <strong>성함과 연락처</strong>를 남겨주시면 확인 후 입금 안내를 도와드릴게요.<br><button onclick="closeLayer('cart');cart=[];save()">확인</button></div></div>`;
+}
+async function openLogin(){closeAll();const el=document.getElementById('login');el.hidden=false;let {data:{session}}=await sb.auth.getSession();if(session){user=session.user;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><p>${user.email}님, 안녕하세요 🤍</p><p class="small">${approved?'회원 승인이 완료되어 회원가가 적용돼요.':'승인대기중이에요.\n관리자 승인 후 이용 가능해요.'}</p><button onclick="logout()">로그아웃</button></div></div>`}else{const saved=localStorage.getItem('byjaei_saved_email')||'';el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><input id="email" placeholder="이메일" value="${saved.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')login()"><input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:2px 0 8px;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0" ${saved?'checked':''}> 이메일/아이디 저장</label><button onclick="login()">로그인</button><button class="secondary" onclick="signup()">회원가입</button></div></div>`}}
+async function login(){let e=document.getElementById('email').value.trim(),p=document.getElementById('pw').value;if(!e||!p)return alert('이메일과 비밀번호를 입력해주세요.');if(document.getElementById('saveEmail')?.checked)localStorage.setItem('byjaei_saved_email',e);else localStorage.removeItem('byjaei_saved_email');let {error}=await sb.auth.signInWithPassword({email:e,password:p});if(error){return alert(error.message||'로그인에 실패했어요.')}const {data:pr}=await sb.from('profiles').select('approved,withdrawn').eq('id',(await sb.auth.getUser()).data.user.id).maybeSingle();if(pr?.withdrawn){await sb.auth.signOut();user=null;approved=false;return alert('탈퇴 처리된 회원이에요.\n새로 가입해서 이용해주세요.')}if(!pr?.approved){await sb.auth.signOut();user=null;approved=false;return alert('승인대기중이에요.\n관리자 승인 후 이용 가능해요.')}await refreshUser();closeLayer('login');render()}
+async function signup(){closeAll();const el=document.getElementById('login');el.hidden=false;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openLogin()">← 돌아가기</button><b>회원가입</b><span></span></div><div class="loginForm"><input id="signupName" placeholder="이름"><input id="signupPhone" type="tel" placeholder="연락처"><input id="signupEmail" type="email" placeholder="이메일"><input id="signupPw" type="password" placeholder="비밀번호 (6자 이상)"><input id="signupPwConfirm" type="password" placeholder="비밀번호 확인 (다시 입력)"><input id="signupReferral" placeholder="가입경로 (선택)"><button onclick="submitSignup()">회원가입</button><div class="small">가입 후 관리자 승인 전까지는 회원가가 적용되지 않아요.</div></div></div>`}
+async function submitSignup(){const name=document.getElementById('signupName').value.trim(),phone=document.getElementById('signupPhone').value.trim(),e=document.getElementById('signupEmail').value.trim(),p=document.getElementById('signupPw').value,pc=document.getElementById('signupPwConfirm').value,ref=document.getElementById('signupReferral').value.trim();if(!name||!phone||!e||p.length<6)return alert('이름, 연락처, 이메일을 입력하고 비밀번호는 6자 이상으로 설정해주세요.');if(p!==pc)return alert('비밀번호와 비밀번호 확인이 일치하지 않아요.');const {data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{name,phone,referral_source:ref}}});if(error)return alert(error.message);if(data.user){const {error:pe}=await sb.from('profiles').upsert({id:data.user.id,name,email:e,phone,referral_source:ref,approved:false},{onConflict:'id'});if(pe)console.warn('프로필 저장은 트리거에서 처리됩니다.',pe)}alert('가입이 완료됐어요.\n🤍\n\n승인대기중이에요.\n관리자 승인 후 이용 가능해요.');openLogin()}
+async function logout(){await sb.auth.signOut();user=null;closeLayer('login');render()}
+sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')showRecovery()})
+async function refreshUser(){
+  let {data:{user:u}}=await sb.auth.getUser();
+  user=u||null;
+  approved=false;
+  if(user){
+    const {data:p}=await sb.from('profiles').select('approved,is_admin,withdrawn').eq('id',user.id).maybeSingle();
+    if(p?.withdrawn){await sb.auth.signOut(); user=null; approved=false; return;} approved=!!p?.approved;
+  }
+}
+function closeLayer(id){document.getElementById(id).hidden=true}function closeAll(){['detail','cart','login'].forEach(x=>document.getElementById(x).hidden=true)}
+sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;loadCart();render()});refreshUser().then(()=>{loadCart();return load()});
+</script></body></html>
