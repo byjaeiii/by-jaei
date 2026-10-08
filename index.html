@@ -71,11 +71,11 @@ function cats(){
   const normalRows=rows.filter(({c})=>!winterChildren.some(w=>String(w.c.id)===String(c.id)));
   const catEl=document.getElementById('cats');
   const winterOpen=category==='26 WINTER'||winterChildren.some(({c})=>String(c.name)===String(category));
-  const winterHtml=`<div class="catGroup"><button type="button" class="${category==='26 WINTER'?'active':''} parentCat" data-category="26 WINTER">26 WINTER</button>${winterOpen?`<div class="catChildren">${winterChildren.map(({c})=>`<button type="button" class="${category===c.name?'active':''} childCat" data-category="${String(c.name).replaceAll('"','&quot;')}"><span class="catChildMark">↳</span>${c.name}</button>`).join('')}</div>`:''}</div>`;
+  const winterHtml=`<div class="catGroup"><button type="button" class="${category==='26 WINTER'?'active':''} parentCat" data-category="26 WINTER">26 WINTER</button>${winterOpen?`<div class="catChildren">${winterChildren.map(({c})=>`<button type="button" class="${category===c.name?'active':''} childCat" data-category="${String(c.name).replaceAll('"','&quot;')}">${c.name}</button>`).join('')}</div>`:''}</div>`;
   const topButtons=[
     `<button type="button" class="${category==='ALL'?'active':''}" data-category="ALL">ALL</button>`,
     winterHtml,
-    ...normalRows.map(({c,depth})=>`<button type="button" class="${category===c.name?'active':''} ${depth?'childCat':'parentCat'}" data-category="${String(c.name).replaceAll('"','&quot;')}">${depth?'<span class="catChildMark">↳</span>':''}${c.name}</button>`),
+    ...normalRows.map(({c,depth})=>`<button type="button" class="${category===c.name?'active':''} ${depth?'childCat':'parentCat'}" data-category="${String(c.name).replaceAll('"','&quot;')}">${depth?'':''}${c.name}</button>`),
     `<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button>`
   ];
   catEl.innerHTML=topButtons.join('');
