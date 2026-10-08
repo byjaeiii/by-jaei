@@ -56,7 +56,7 @@ function setBrandFilter(x){
   render();
 }
 function categoryTreeRows(parentId=null,depth=0,rows=[]){
-  siteCategories.filter(c=>(c.parent_id??null)===(parentId??null)).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
+  siteCategories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
   return rows;
 }
 function categoryDescendantNames(name){
@@ -68,7 +68,7 @@ function categoryDescendantNames(name){
 }
 function cats(){
   const rows=categoryTreeRows();
-  const winterChildren=rows.filter(({c})=>String(c.name||'').replace(/\s+/g,'').toUpperCase().startsWith('26WINTER'));
+  const winterChildren=rows.filter(({c})=>String(c.name||'').replace(/\s+/g,'').toUpperCase().startsWith('26WINTER') && String(c.name||'').replace(/\s+/g,'').toUpperCase()!=='26WINTER(전체보기)');
   const normalRows=rows.filter(({c})=>!winterChildren.some(w=>String(w.c.id)===String(c.id)));
   const catEl=document.getElementById('cats');
   const winterOpen=category==='26 WINTER'||winterChildren.some(({c})=>String(c.name)===String(category));
