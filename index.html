@@ -21,7 +21,7 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 <section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><main id="grid" class="grid"></main></div>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
-const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],category='ALL',brandFilter='ALL',user=null,approved=false,cart=[];
+const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',brandFilter='ALL',user=null,approved=false,cart=[];
 const guestCartKey='byjaei_cart_guest';
 function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
 function loadCart(){
@@ -34,7 +34,17 @@ function loadCart(){
 function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
 const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
 function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
-async function load(){const {data,error}=await sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});if(error){console.error(error);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}products=data||[];render()}
+async function load(){
+  const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
+    sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+    sb.from('categories').select('id,name,parent_id,sort_order,created_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+  ]);
+  if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
+  products=productData||[];
+  siteCategories=categoryError?[]:(categoryData||[]);
+  if(categoryError)console.error(categoryError);
+  render();
+}
 function setCategory(x){
   category=x;
   brandFilter='ALL';
@@ -44,8 +54,16 @@ function setBrandFilter(x){
   brandFilter=x;
   render();
 }
+function categoryTreeRows(parentId=null,depth=0,rows=[]){
+  siteCategories.filter(c=>(c.parent_id??null)===(parentId??null)).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
+  return rows;
+}
+function categoryDescendantNames(name){
+  const root=siteCategories.find(c=>String(c.name)===String(name));if(!root)return [String(name)];const out=[];
+  const walk=id=>{const c=siteCategories.find(x=>String(x.id)===String(id));if(c)out.push(String(c.name));siteCategories.filter(x=>String(x.parent_id||'')===String(id)).forEach(x=>walk(x.id))};walk(root.id);return out;
+}
 function cats(){
-  const main=['ALL','BRAND','BEBE','CHILD','ETC','26WINTER BEBE','26WINTER BEBE CHILD'];
+  const main=['ALL',...categoryTreeRows().map(({c})=>c.name),'BRAND'];
   const catEl=document.getElementById('cats');
   catEl.innerHTML=main.map(x=>`<button type="button" class="${category===x?'active':''}" data-category="${x}">${x}</button>`).join('');
   const brandEl=document.getElementById('brandCats');
@@ -73,7 +91,8 @@ function render(){
   cats();
   let q=(document.getElementById('search').value||'').toLowerCase();
   let a=products.filter(p=>{
-    const categoryOk=category==='ALL'||category==='BRAND'||String(p.category||'').trim().toUpperCase()===category;
+    const productCategory=String(p.category||'').trim();
+    const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category).includes(productCategory);
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
     return categoryOk&&brandOk&&String(p.name).toLowerCase().includes(q);
   });
