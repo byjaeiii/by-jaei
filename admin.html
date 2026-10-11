@@ -45,6 +45,20 @@ function toggleSizeChartFields(){
   if(box)box.style.display=checked?'none':'';
   ['normal','member','colors','sizes'].forEach(id=>{const el=$(id);if(el)el.disabled=checked;});
 }
+function parseOptionList(value){
+  const out=[];
+  let current='',depth=0;
+  for(const ch of String(value||'')){
+    if(ch==='(')depth++;
+    if(ch===')'&&depth>0)depth--;
+    if(ch===','&&depth===0){
+      if(current.trim())out.push(current.trim());
+      current='';
+    }else current+=ch;
+  }
+  if(current.trim())out.push(current.trim());
+  return out;
+}
 async function saveProduct(){
   const isSizeChart=$('isSizeChart').checked;
   const name=$('name').value.trim(),normal=Number($('normal').value),member=$('member').value?Number($('member').value):null;
@@ -59,8 +73,8 @@ async function saveProduct(){
       brand:$('brand').value.trim(),
       normal_price:isSizeChart?0:normal,
       member_price:isSizeChart?null:member,
-      colors:isSizeChart?[]:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),
-      sizes:isSizeChart?[]:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),
+      colors:isSizeChart?[]:parseOptionList($('colors').value),
+      sizes:isSizeChart?[]:parseOptionList($('sizes').value),
       is_size_chart:isSizeChart,
       description:$('description').value,
       images:urls
