@@ -127,9 +127,40 @@ function render(){
     return categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
   });
 
-  // 같은 상품을 여러 카테고리에 등록해 DB에 행이 여러 개 생긴 경우,
-  // 현재 화면에 표시할 목록(a)에서 상품명 기준으로 하나만 남깁니다.
-  // 전체보기뿐 아니라 상위 카테고리에서 하위 카테고리 상품을 함께 볼 때도 중복되지 않습니다.
+  const stamp=v=>{
+    const n=Date.parse(v||'');
+    return Number.isFinite(n)?n:0;
+  };
+  const updateStamp=p=>stamp(p.updated_at)||stamp(p.created_at);
+  const isSizeChartProduct=p=>p?.is_size_chart===true||/사이즈\s*표|size\s*guide/i.test(String(p?.name||''));
+  const overallView=category==='ALL'||(category==='BRAND'&&brandFilter==='ALL');
+
+  if(overallView){
+    // 전체보기는 상품 내용이 최근 수정된 순으로 표시합니다.
+    // sort_order의 음수 고정값은 여기서 사용하지 않으므로 사이즈표가 전체 맨 앞으로 고정되지 않습니다.
+    a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
+  }else if(category!=='BRAND'){
+    // 카테고리 화면에서는 해당 카테고리에 직접 속한 고정 상품만 맨 앞으로 둡니다.
+    // 다른 하위 카테고리에 고정된 사이즈표는 상위/다른 카테고리 화면에서 고정 효과를 내지 않습니다.
+    const selectedRow=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
+    const exactCategoryName=String(selectedRow?.name||category).trim();
+    const isPinnedHere=p=>String(p.category||'').trim()===exactCategoryName&&Number(p.sort_order)<0;
+    const scopedOrder=p=>{
+      if(isSizeChartProduct(p)&&Number(p.sort_order)<0&&String(p.category||'').trim()!==exactCategoryName) return Number.MAX_SAFE_INTEGER;
+      return Number(p.sort_order)||0;
+    };
+    a.sort((x,y)=>{
+      const xp=isPinnedHere(x),yp=isPinnedHere(y);
+      if(xp!==yp)return xp?-1:1;
+      return scopedOrder(x)-scopedOrder(y)||updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at);
+    });
+  }else{
+    // 특정 브랜드만 고른 경우에도 최근 수정된 상품이 먼저 오도록 합니다.
+    a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
+  }
+
+  // 여러 카테고리에 별도 행으로 저장된 동일 상품은 정렬 후 첫 번째 것만 남깁니다.
+  // 전체보기에서는 가장 최근 수정된 복제 행이 대표로 남습니다.
   const normalizeProductName=v=>String(v??'')
     .normalize('NFKC')
     .replace(/[\s\u00a0]+/g,'')
