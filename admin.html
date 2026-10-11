@@ -1,401 +1,42 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BY JAEI ADMIN v13</title><style>
-:root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:760px;margin:auto;padding:20px}.logo{font:24px Georgia,serif;letter-spacing:3px;margin:10px 0 25px}.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}h2{font:20px Georgia,serif;font-weight:400;margin:0 0 18px}label{display:block;font-size:12px;color:var(--muted);margin:14px 0 7px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);outline:0}textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}button{border:0;border-radius:11px;padding:13px 16px;background:var(--ink);color:#fff;cursor:pointer}.secondary{background:white;color:var(--ink);border:1px solid var(--line)}.actions{display:flex;gap:8px;margin-top:18px}.preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.previewItem{position:relative;width:100px;height:100px;cursor:grab;user-select:none}.previewItem:active{cursor:grabbing}.previewItem img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block;pointer-events:none}.previewItem.dragging{opacity:.45}.previewItem.dragOver{outline:2px dashed var(--line);outline-offset:3px}.photoDragHint{position:absolute;left:5px;top:5px;z-index:2;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.9);font-size:10px;line-height:16px;color:var(--muted);pointer-events:none}.previewItem button{position:absolute;right:4px;top:4px;width:24px;height:24px;padding:0;border-radius:50%;background:rgba(81,70,61,.88);font-size:15px;line-height:24px;z-index:3}.uploadHint{font-size:11px;color:var(--muted);margin-top:7px}.note{font-size:12px;color:var(--muted);line-height:1.7}.msg{padding:12px;border-radius:10px;background:#eee8df;margin-top:12px;line-height:1.6}.item{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;cursor:pointer}.item img{width:64px;height:64px;object-fit:cover;border-radius:9px}.productAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.productCard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}.productCardImg{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.productCardBody{padding:11px}.productCardName{font-size:13px;font-weight:700;margin-bottom:5px}.productCardMeta{font-size:11px;color:var(--muted);line-height:1.55}.productCardCategory{display:inline-flex;align-items:flex-start;max-width:100%;margin-top:4px;padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:#f7f3ed;color:var(--ink);font-size:10px;font-weight:700;line-height:1.45;white-space:normal;overflow:visible}.productCardCategoryLabel{font-size:9px;color:var(--muted);font-weight:500;margin-right:4px;flex:0 0 auto}.productCardCategoryValue{min-width:0;white-space:normal;overflow-wrap:anywhere}.productCardCategoryValue .current{font-weight:700}.productCardActions{display:flex;gap:5px;margin-top:9px}.productCardActions button{flex:1;padding:8px 5px;font-size:10px}.adminCatBar{padding:0 0 20px;margin-bottom:0}.adminCatTopRow{display:flex;align-items:center;justify-content:safe center;gap:38px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:thin;scrollbar-color:#cfc7bd transparent;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;padding:0 12px 8px;scroll-padding-inline:12px}.adminCatTopRow::-webkit-scrollbar{height:5px}.adminCatTopRow::-webkit-scrollbar-track{background:transparent}.adminCatTopRow::-webkit-scrollbar-thumb{background:#cfc7bd;border-radius:999px}.adminCatTopRow::-webkit-scrollbar-thumb:hover{background:#aaa198}.adminCatTopRow>button,.adminCatTopRow>.adminCatItem{flex:0 0 auto}.adminCatTitle{text-align:center;font-size:17px;font-weight:700;color:var(--ink);margin:28px 0 22px;line-height:1.2}.adminCatSubRow{display:flex;align-items:center;justify-content:safe center;gap:30px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:thin;scrollbar-color:#cfc7bd transparent;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;padding:0 12px 8px;scroll-padding-inline:12px}.adminCatSubRow::-webkit-scrollbar{height:5px}.adminCatSubRow::-webkit-scrollbar-track{background:transparent}.adminCatSubRow::-webkit-scrollbar-thumb{background:#cfc7bd;border-radius:999px}.adminCatSubRow::-webkit-scrollbar-thumb:hover{background:#aaa198}.adminCatItem{flex:0 0 auto}.adminCatBar button{flex:0 0 auto;white-space:nowrap;border:0;background:transparent;border-radius:0;padding:6px 0;color:var(--muted);cursor:pointer;font-size:12px;line-height:1.3;transition:.15s}.adminCatBar button.parentCat{font-weight:500;color:var(--muted)}.adminCatBar button.childCat{font-size:12px}.adminCatBar button.active{color:var(--ink);font-weight:700}.adminCatBar button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:8px}.adminBrandBar{display:flex;justify-content:center;gap:28px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;padding:0 16px 18px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.adminBrandBar::-webkit-scrollbar{display:none}.adminBrandBar button{white-space:nowrap;border:0;background:transparent;border-radius:0;padding:5px 0;color:var(--muted);cursor:pointer;font-size:12px}.adminBrandBar button.active{color:var(--ink);font-weight:700}.adminBrandBar button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:7px}.adminBrandBar button.active{background:var(--ink);color:#fff}@media(max-width:560px){.productAdminGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.productCardBody{padding:9px}.productCardActions{gap:4px}.productCardActions button{font-size:9px;padding:7px 3px}}.item .grow{flex:1}.danger{background:#9b5d50}.previewLayer{position:fixed;inset:0;background:rgba(40,30,25,.38);z-index:20;display:flex;align-items:flex-end;justify-content:center}.previewBox{background:var(--card);width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px}.previewGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.previewGrid img{width:100%;height:180px;object-fit:cover;border-radius:12px}.memberRow,.orderRow{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between}.statusBadge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-top:5px}.status-received{background:#eee8df;color:#6d625a}.status-paid{background:#e5efe5;color:#557055}.status-prep{background:#e7edf5;color:#536b86}.status-done{background:#e8e1f0;color:#705b80}.status-cancel{background:#f4e3e0;color:#9a5a50}.filterBar{display:grid;grid-template-columns:1.3fr 1.1fr 1fr 1fr auto;gap:7px;margin:0 0 14px}.orderFilterBar{margin-top:10px}.orderFilterBar{margin-top:10px}.filterBar input{padding:10px}.filterBar button{padding:10px 12px;font-size:12px}.filterCount{font-size:11px;color:var(--muted);margin:-7px 0 10px}@media(max-width:560px){.filterBar{grid-template-columns:1fr 1fr}.filterBar input:first-child{grid-column:1/-1}.filterBar button{grid-column:1/-1}.filterBar input{font-size:12px;padding:9px}.filterBar button{font-size:11px;padding:9px 8px}}.smallText,.orderItems{font-size:12px;color:var(--muted);line-height:1.6}.descriptionText{white-space:pre-line;line-height:1.7}.previewCategoryPath{font-size:11px;color:var(--muted);line-height:1.6;margin-top:-8px;margin-bottom:4px}.previewCategoryPath .current{color:var(--ink);font-weight:700}.bulkBar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 10px;margin:0 0 10px;background:#f7f3ed;border:1px solid var(--line);border-radius:10px}.bulkBar select{width:auto;min-width:170px;padding:8px}.bulkBar button{padding:8px 10px;font-size:11px}.bulkCount{font-size:11px;color:var(--muted);margin-right:auto}.categoryManagerRow{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}.categoryManagerRow .grow{flex:1}.categoryManagerRow .categoryDepth{color:var(--muted);font-size:11px}.categoryManagerRow button{padding:7px 9px;font-size:10px}.categoryManagerChild{padding-left:4px}.categoryToggle{width:28px;display:flex;justify-content:center;flex:0 0 28px}.categoryExpandBtn{width:24px;height:24px;padding:0!important;border-radius:7px;font-size:13px;line-height:22px}.categoryExpandSpacer{display:block;width:24px;height:24px}.categoryTreeChildren{margin-left:20px;border-left:1px solid var(--line);padding-left:8px}.categoryVirtualGroup{margin-bottom:6px;padding-bottom:2px}.categoryManagerRow{gap:6px}.categoryManagerRow .grow{min-width:0}.productSelectWrap{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);margin-bottom:6px}.productSelectWrap input{width:auto;margin:0}.memberActions,.orderActions{display:flex;gap:6px;flex-wrap:wrap}.memberActions button,.orderActions button{padding:8px 10px;font-size:11px}@media(max-width:560px){.row{grid-template-columns:1fr}.memberRow,.orderRow{align-items:flex-start}.memberActions,.orderActions{justify-content:flex-end}}
-</style>
-<style>
-.adminSectionNav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px;padding:4px}
-.adminSectionNav button{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:10px;padding:10px 13px;font-size:12px;cursor:pointer}
-.adminSectionNav button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.adminSection{display:none}
-.adminSection.active{display:block}
-.adminSectionTitle{margin:0 0 14px;font-size:16px}
-</style>
-
-<style>.photoFileName{width:100%;max-width:140px;margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;user-select:text}.previewItem{display:flex;flex-direction:column;align-items:center}</style>
-</head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
+:root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:760px;margin:auto;padding:20px}.logo{font:24px Georgia,serif;letter-spacing:3px;margin:10px 0 25px}.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}h2{font:20px Georgia,serif;font-weight:400;margin:0 0 18px}label{display:block;font-size:12px;color:var(--muted);margin:14px 0 7px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);outline:0}textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}button{border:0;border-radius:11px;padding:13px 16px;background:var(--ink);color:#fff;cursor:pointer}.secondary{background:white;color:var(--ink);border:1px solid var(--line)}.actions{display:flex;gap:8px;margin-top:18px}.preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.previewItem{position:relative;width:100px;height:100px}.previewItem img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}.previewItem button{position:absolute;right:4px;top:4px;width:24px;height:24px;padding:0;border-radius:50%;background:rgba(81,70,61,.88);font-size:15px;line-height:24px}.uploadHint{font-size:11px;color:var(--muted);margin-top:7px}.note{font-size:12px;color:var(--muted);line-height:1.7}.msg{padding:12px;border-radius:10px;background:#eee8df;margin-top:12px;line-height:1.6}.item{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;cursor:pointer}.item img{width:64px;height:64px;object-fit:cover;border-radius:9px}.productAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.productCard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}.productCardImg{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.productCardBody{padding:11px}.productCardName{font-size:13px;font-weight:700;margin-bottom:5px}.productCardMeta{font-size:11px;color:var(--muted);line-height:1.55}.productCardActions{display:flex;gap:5px;margin-top:9px}.productCardActions button{flex:1;padding:8px 5px;font-size:10px}.adminCatBar{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;margin-bottom:10px}.adminCatBar button{white-space:nowrap;background:white;color:var(--ink);border:1px solid var(--line);padding:8px 10px;font-size:11px}.adminCatBar button.active{background:var(--ink);color:white}.adminBrandBar{display:flex;gap:5px;flex-wrap:wrap;margin:-2px 0 10px}.adminBrandBar button{background:#f3eee8;color:var(--ink);border:0;padding:6px 9px;font-size:10px;border-radius:999px}.adminBrandBar button.active{background:var(--ink);color:#fff}@media(max-width:560px){.productAdminGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.productCardBody{padding:9px}.productCardActions{gap:4px}.productCardActions button{font-size:9px;padding:7px 3px}}.item .grow{flex:1}.danger{background:#9b5d50}.previewLayer{position:fixed;inset:0;background:rgba(40,30,25,.38);z-index:20;display:flex;align-items:flex-end;justify-content:center}.previewBox{background:var(--card);width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px}.previewGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.previewGrid img{width:100%;height:180px;object-fit:cover;border-radius:12px}.memberRow,.orderRow{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between}.statusBadge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-top:5px}.status-received{background:#eee8df;color:#6d625a}.status-paid{background:#e5efe5;color:#557055}.status-prep{background:#e7edf5;color:#536b86}.status-done{background:#e8e1f0;color:#705b80}.status-cancel{background:#f4e3e0;color:#9a5a50}.filterBar{display:grid;grid-template-columns:1.3fr 1.1fr 1fr 1fr auto;gap:7px;margin:0 0 14px}.orderFilterBar{margin-top:10px}.orderFilterBar{margin-top:10px}.filterBar input{padding:10px}.filterBar button{padding:10px 12px;font-size:12px}.filterCount{font-size:11px;color:var(--muted);margin:-7px 0 10px}@media(max-width:560px){.filterBar{grid-template-columns:1fr 1fr}.filterBar input:first-child{grid-column:1/-1}.filterBar button{grid-column:1/-1}.filterBar input{font-size:12px;padding:9px}.filterBar button{font-size:11px;padding:9px 8px}}.smallText,.orderItems{font-size:12px;color:var(--muted);line-height:1.6}.memberActions,.orderActions{display:flex;gap:6px;flex-wrap:wrap}.memberActions button,.orderActions button{padding:8px 10px;font-size:11px}@media(max-width:560px){.row{grid-template-columns:1fr}.memberRow,.orderRow{align-items:flex-start}.memberActions,.orderActions{justify-content:flex-end}}
+</style></head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
-
-<div class="adminSectionNav">
-  <button type="button" class="active" data-admin-section="products">상품관리</button>
-  <button type="button" data-admin-section="orders">주문관리</button>
-  <button type="button" data-admin-section="members">회원관리</button>
-</div>
-<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2><button class="secondary" onclick="logout()">로그아웃</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
-사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>브랜드</label><input id="brand" placeholder="브랜드명을 입력해주세요."><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div style="margin-top:12px"><label>카테고리</label><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div id="sizeChartOptionFields"><div class="row"><div><label>정상가</label><input id="normal" type="number" min="0" step="1"></div><div><label>회원가 (정상가에서 25% 할인)</label><input id="member" type="number" min="0" step="1"></div></div><div class="uploadHint">정상가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요.</div><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"></div><label>상품 설명</label><textarea id="description"></textarea><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
+<div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2><button class="secondary" onclick="logout()">로그아웃</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
+사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><div class="row"><div><label>브랜드</label><input id="brand"></div><div><label>카테고리</label><select id="category"><option>BEBE</option><option>CHILD</option><option>ETC</option></select></div></div><div class="row"><div><label>정상가</label><input id="normal" type="number"></div><div><label>회원가</label><input id="member" type="number"></div></div><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"><label>상품 설명</label><textarea id="description"></textarea><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div>
+<div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="list"><p class="note">불러오는 중...</p></div></div>
+<div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div>
+<div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div></div>
 <script>
 const CFG={supabaseUrl:'https://wquupamwhjwqyhtxctdl.supabase.co',supabaseKey:'sb_publishable_1MJJqt80Nqj4agK3g2YGPA_8CEZRpOh'};
-let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage.getItem('byjaei_admin_user')||'';let editingId=null,editingImages=[],photoItems=[],draggedPhotoId='';const $=id=>document.getElementById(id);
+let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage.getItem('byjaei_admin_user')||'';let editingId=null,editingImages=[];const $=id=>document.getElementById(id);
 const savedAdminEmail=localStorage.getItem('byjaei_admin_saved_email')||'';$('email').value=savedAdminEmail;$('saveEmail').checked=!!savedAdminEmail;
 function status(t){$('loginStatus').textContent=t}
 function headers(json=true){const h={'apikey':CFG.supabaseKey,'Authorization':'Bearer '+token};if(json)h['Content-Type']='application/json';return h}
 async function api(path,opt={}){const r=await fetch(CFG.supabaseUrl+path,{...opt,headers:{...headers(opt.body!==undefined),...(opt.headers||{})}});let data=null;try{data=await r.json()}catch{}if(!r.ok)throw new Error((data&&(data.message||data.error_description||data.error))||('HTTP '+r.status));return data}
-async function login(){const email=$('email').value.trim(),password=$('pw').value;if($('saveEmail').checked)localStorage.setItem('byjaei_admin_saved_email',email);else localStorage.removeItem('byjaei_admin_saved_email');if(!email||!password){alert('이메일과 비밀번호를 입력해주세요.');return}const b=$('loginBtn');b.disabled=true;b.textContent='로그인 확인 중...';status('1단계 · Supabase 인증 서버에 연결 중...');try{const r=await fetch(CFG.supabaseUrl+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:CFG.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify({email,password})});let d={};try{d=await r.json()}catch{}if(!r.ok){const raw=d.error_description||d.msg||d.message||('HTTP '+r.status);let msg=raw;if(raw.toLowerCase().includes('invalid login credentials')){msg='관리자 이메일 또는 비밀번호가 맞지 않아요.\n\nSupabase에서 관리자 계정이 존재하는지, 이메일이 정확한지 확인해주세요.'}else if(raw.toLowerCase().includes('email not confirmed')){msg='관리자 이메일 인증이 완료되지 않았어요.\n\nSupabase Authentication에서 관리자 계정의 이메일 인증 상태를 확인해주세요.'}status('로그인 실패 · '+msg.split('\n')[0]);alert('로그인 실패\n\n'+msg);return}if(!d.access_token||!d.user?.id){status('로그인 응답은 받았지만 세션 정보가 없어요.');alert('세션 정보가 없습니다.');return}token=d.access_token;userId=d.user.id;localStorage.setItem('byjaei_admin_token',token);localStorage.setItem('byjaei_admin_user',userId);status('2단계 · 관리자 권한 확인 중...');const rows=await api('/rest/v1/profiles?select=id,name,is_admin& id=eq.'+encodeURIComponent(userId)).catch(async()=>api('/rest/v1/profiles?select=id,name,is_admin&id=eq.'+encodeURIComponent(userId)));const p=rows?.[0];if(!p){throw new Error('profiles에 이 관리자 계정의 프로필이 없습니다.')}if(p.is_admin!==true){throw new Error('이 계정의 is_admin 값이 true가 아닙니다.')}status('관리자 로그인 성공 🤍');$('authBox').hidden=true;$('app').hidden=false;await loadCategories();await Promise.all([loadProducts(),loadMembers(),loadOrders()])}catch(e){status('확인 실패 · '+e.message);alert('관리자 확인 실패\n\n'+e.message);token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user')}finally{b.disabled=false;b.textContent='로그인'}}
+async function login(){const email=$('email').value.trim(),password=$('pw').value;if($('saveEmail').checked)localStorage.setItem('byjaei_admin_saved_email',email);else localStorage.removeItem('byjaei_admin_saved_email');if(!email||!password){alert('이메일과 비밀번호를 입력해주세요.');return}const b=$('loginBtn');b.disabled=true;b.textContent='로그인 확인 중...';status('1단계 · Supabase 인증 서버에 연결 중...');try{const r=await fetch(CFG.supabaseUrl+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:CFG.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify({email,password})});let d={};try{d=await r.json()}catch{}if(!r.ok){const raw=d.error_description||d.msg||d.message||('HTTP '+r.status);let msg=raw;if(raw.toLowerCase().includes('invalid login credentials')){msg='관리자 이메일 또는 비밀번호가 맞지 않아요.\n\nSupabase에서 관리자 계정이 존재하는지, 이메일이 정확한지 확인해주세요.'}else if(raw.toLowerCase().includes('email not confirmed')){msg='관리자 이메일 인증이 완료되지 않았어요.\n\nSupabase Authentication에서 관리자 계정의 이메일 인증 상태를 확인해주세요.'}status('로그인 실패 · '+msg.split('\n')[0]);alert('로그인 실패\n\n'+msg);return}if(!d.access_token||!d.user?.id){status('로그인 응답은 받았지만 세션 정보가 없어요.');alert('세션 정보가 없습니다.');return}token=d.access_token;userId=d.user.id;localStorage.setItem('byjaei_admin_token',token);localStorage.setItem('byjaei_admin_user',userId);status('2단계 · 관리자 권한 확인 중...');const rows=await api('/rest/v1/profiles?select=id,name,is_admin& id=eq.'+encodeURIComponent(userId)).catch(async()=>api('/rest/v1/profiles?select=id,name,is_admin&id=eq.'+encodeURIComponent(userId)));const p=rows?.[0];if(!p){throw new Error('profiles에 이 관리자 계정의 프로필이 없습니다.')}if(p.is_admin!==true){throw new Error('이 계정의 is_admin 값이 true가 아닙니다.')}status('관리자 로그인 성공 🤍');$('authBox').hidden=true;$('app').hidden=false;await Promise.all([loadProducts(),loadMembers(),loadOrders()])}catch(e){status('확인 실패 · '+e.message);alert('관리자 확인 실패\n\n'+e.message);token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user')}finally{b.disabled=false;b.textContent='로그인'}}
 $('loginBtn').addEventListener('click',login);$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 async function logout(){token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user');$('authBox').hidden=false;$('app').hidden=true;status('로그아웃됐어요.')}
-function getSelectedCategories(){
-  return [...document.querySelectorAll('input[name="category"]:checked')].map(x=>x.value);
-}
-function setSelectedCategories(categories){
-  const set=new Set(categories||[]);
-  document.querySelectorAll('input[name="category"]').forEach(x=>x.checked=set.has(x.value));
-}
-function toggleSizeChartFields(){
-  const checked=$('isSizeChart').checked;
-  const box=$('sizeChartOptionFields');
-  if(box)box.style.display=checked?'none':'';
-  ['normal','member','colors','sizes'].forEach(id=>{const el=$(id);if(el)el.disabled=checked;});
-}
-async function saveProduct(){
-  const isSizeChart=$('isSizeChart').checked;
-  const name=$('name').value.trim(),normal=Number($('normal').value),member=$('member').value?Number($('member').value):null;
-  const categories=getSelectedCategories();
-  if(!name)return alert('상품명을 입력해주세요.');
-  if(!isSizeChart&&!normal)return alert('상품명과 정상가를 입력해주세요.');
-  if(!categories.length)return alert('카테고리를 하나 이상 선택해주세요.');
-  try{
-    const urls=await uploadFiles();
-    const basePayload={
-      name,
-      brand:$('brand').value.trim(),
-      normal_price:isSizeChart?0:normal,
-      member_price:isSizeChart?null:member,
-      colors:isSizeChart?[]:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),
-      sizes:isSizeChart?[]:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),
-      is_size_chart:isSizeChart,
-      description:$('description').value,
-      images:urls
-    };
-
-    if(editingId){
-      const payload={...basePayload,category:categories[0]};
-      await api('/rest/v1/products?id=eq.'+editingId,{method:'PATCH',body:JSON.stringify(payload),headers:{'Prefer':'return=minimal'}});
-      for(const category of categories.slice(1)){
-        const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
-        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category,sort_order:(Number(current?.[0]?.sort_order)||0)+1}),headers:{'Prefer':'return=representation'}});
-      }
-      msg('상품이 수정됐어요 🤍');
-    }else{
-      const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
-      let nextOrder=(Number(current?.[0]?.sort_order)||0)+1;
-      for(const category of categories){
-        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category,sort_order:nextOrder++}),headers:{'Prefer':'return=representation'}});
-      }
-      msg('상품이 등록됐어요 🤍');
-    }
-    resetForm();
-    loadProducts();
-  }catch(e){alert(e.message)}
-}
-function fileKey(f){return [f?.name||'',f?.size||0,f?.lastModified||0].join('::')}
-function selectedFiles(){return photoItems.filter(x=>x.type==='new').map(x=>x.file)}
-function setSelectedFiles(files){const dt=new DataTransfer();(files||[]).forEach(f=>dt.items.add(f));$('images').files=dt.files}
-function syncSelectedFiles(){setSelectedFiles(selectedFiles())}
-async function uploadFiles(){const urls=[];for(const item of photoItems){if(item.type==='existing'){urls.push(item.url);continue}const f=item.file;const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=Date.now()+'-'+crypto.randomUUID()+'-'+safe;const r=await fetch(CFG.supabaseUrl+'/storage/v1/object/products/'+encodeURIComponent(path),{method:'POST',headers:{apikey:CFG.supabaseKey,Authorization:'Bearer '+token,'x-upsert':'false','Content-Type':f.type||'application/octet-stream'},body:f});if(!r.ok){let d={};try{d=await r.json()}catch{}throw new Error('사진 업로드 실패: '+(d.message||d.error||r.status))}urls.push(CFG.supabaseUrl+'/storage/v1/object/public/products/'+path)}return urls}
-function photoDisplayName(item){
-  if(item.type==='new')return item.file.name;
-  try{
-    const raw=decodeURIComponent(String(item.url||'').split('/').pop().split('?')[0]);
-    return raw.replace(/^\d+-[0-9a-f-]{20,}-/i,'')||'기존 상품사진';
-  }catch(e){return '기존 상품사진'}
-}
-function renderSelectedImages(){const box=$('preview');if(!box)return;box.innerHTML=photoItems.map(item=>{const src=item.type==='existing'?item.url:URL.createObjectURL(item.file);const alt=item.type==='existing'?'기존 상품사진':'선택한 상품사진';const filename=photoDisplayName(item);return `<div class="previewItem" draggable="true" data-photo-id="${item.id}"><span class="photoDragHint">↕ 이동</span><img src="${src}" alt="${alt}"><div class="photoFileName" title="${filename}">${filename}</div><button type="button" title="사진 삭제" onclick="event.stopPropagation();removePhotoItem('${item.id}')">×</button></div>`}).join('');}
-function removePhotoItem(id){photoItems=photoItems.filter(x=>x.id!==id);editingImages=photoItems.filter(x=>x.type==='existing').map(x=>x.url);syncSelectedFiles();renderSelectedImages()}
-function handleImageChange(){const chosen=[...($('images').files||[])].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));const existingKeys=new Set(photoItems.filter(x=>x.type==='new').map(x=>fileKey(x.file)));chosen.forEach(f=>{const k=fileKey(f);if(!existingKeys.has(k)){photoItems.push({id:'photo-'+crypto.randomUUID(),type:'new',file:f});existingKeys.add(k)}});syncSelectedFiles();renderSelectedImages()}
-$('images').addEventListener('change',handleImageChange);
-toggleSizeChartFields();
-$('normal').addEventListener('input',()=>{
-  if($('isSizeChart').checked)return;
-  const raw=$('normal').value.trim();
-  if(raw===''){$('member').value='';return;}
-  const normal=Number(raw);
-  if(Number.isFinite(normal)&&normal>=0){$('member').value=String(Math.round(normal*0.75));}
-});
-$('preview').addEventListener('dragstart',e=>{const item=e.target.closest('.previewItem');if(!item)return;draggedPhotoId=item.dataset.photoId;item.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',draggedPhotoId)});
-$('preview').addEventListener('dragover',e=>{const item=e.target.closest('.previewItem');if(!item)return;e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('#preview .previewItem.dragOver').forEach(x=>x.classList.remove('dragOver'));if(item.dataset.photoId!==draggedPhotoId)item.classList.add('dragOver')});
-$('preview').addEventListener('drop',e=>{const target=e.target.closest('.previewItem');if(!target)return;e.preventDefault();const targetId=target.dataset.photoId;if(!draggedPhotoId||draggedPhotoId===targetId)return;const from=photoItems.findIndex(x=>x.id===draggedPhotoId),to=photoItems.findIndex(x=>x.id===targetId);if(from<0||to<0)return;const [moved]=photoItems.splice(from,1);photoItems.splice(to,0,moved);syncSelectedFiles();renderSelectedImages()});
-$('preview').addEventListener('dragend',()=>{draggedPhotoId='';document.querySelectorAll('#preview .previewItem.dragging,#preview .previewItem.dragOver').forEach(x=>x.classList.remove('dragging','dragOver'))});
-function resetForm(){
-  editingId=null;editingImages=[];photoItems=[];draggedPhotoId='';
-  ['name','normal','member','colors','sizes','description'].forEach(id=>$(id).value='');
-  $('brand').value='';
-  $('isSizeChart').checked=false;
-  toggleSizeChartFields();
-  setSelectedCategories([]);
-  $('preview').innerHTML='';
-  $('images').value='';
-  $('saveBtn').disabled=false;
-  $('saveBtn').textContent='상품 등록하기';
-}
-function msg(t){$('msg').textContent=t;$('msg').style.display='block';setTimeout(()=>$('msg').style.display='none',3500)}
-let adminCategoryFilter='ALL',adminBrandFilter='ALL',selectedProductIds=new Set(),categories=[],editingCategoryId=null,categoryOpenIds=new Set();
-
-function normalizeBrand(v){
-  return String(v||'').trim().toLocaleLowerCase('ko-KR');
-}
-function categoryTreeRows(parentId=null,depth=0,rows=[]){
-  categories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
-  return rows;
-}
-function categoryDescendantNames(name){
-  const root=categories.find(c=>String(c.name)===String(name));
-  if(!root)return [String(name)];
-  const out=[];
-  const walk=id=>{const c=categories.find(x=>String(x.id)===String(id));if(c)out.push(String(c.name));categories.filter(x=>String(x.parent_id||'')===String(id)).forEach(x=>walk(x.id))};
-  walk(root.id);return out;
-}
-function renderCategoryOptions(selected=[]){
-  const box=$('categoryOptions');if(!box)return;const set=new Set(selected||[]);box.innerHTML=categoryTreeRows().map(({c,depth})=>`<label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${depth*14}px"><input type="checkbox" name="category" value="${String(c.name).replaceAll('"','&quot;')}" style="width:auto" ${set.has(c.name)?'checked':''}> ${depth?'↳ ':''}${c.name}</label>`).join('');
-}
-function renderBulkCategoryOptions(){
-  const el=$('bulkCategory');if(!el)return;const current=el.value;el.innerHTML='<option value="">이동할 카테고리 선택</option>'+categoryTreeRows().map(({c,depth})=>`<option value="${String(c.name).replaceAll('"','&quot;')}">${depth?'↳ ':''}${c.name}</option>`).join('');if(categories.some(c=>c.name===current))el.value=current;
-}
-function categoryManagerChildren(id){
-  return categories.filter(c=>String(c.parent_id??'')===String(id??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
-}
-function toggleCategoryOpen(id){
-  const key=String(id);
-  categoryOpenIds.has(key)?categoryOpenIds.delete(key):categoryOpenIds.add(key);
-  renderCategoryManager();
-}
-function renderCategoryManager(){
-  const list=$('categoryManagerList');if(!list)return;
-  const roots=categories.filter(c=>c.parent_id==null && String(c.name).replace(/\s+/g,'').toUpperCase()!=='26WINTER(전체보기)').sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
-  const row=(c,depth=0)=>{
-    const children=categoryManagerChildren(c.id);
-    const open=categoryOpenIds.has(String(c.id));
-    return `<div class="categoryTreeNode"><div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="categoryToggle">${children.length?`<button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen(${c.id})">${open?'−':'+'}</button>`:'<span class="categoryExpandSpacer"></span>'}</div><div class="grow"><b>${c.name}</b>${children.length?`<div class="categoryDepth">하위 ${children.length}개</div>`:''}</div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>${open?`<div class="categoryTreeChildren">${children.map(ch=>row(ch,depth+1)).join('')}</div>`:''}</div>`;
-  };
-  list.innerHTML=roots.map(c=>row(c,0)).join('') || '<p class="note">등록된 카테고리가 없어요.</p>';
-}
-function categoryDescendantIds(id,out=new Set()){
-  categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
-}
-function renderCategoryParentOptions(selected=''){
-  const el=$('categoryParentInput');if(!el)return;const blocked=editingCategoryId?new Set([Number(editingCategoryId),...categoryDescendantIds(editingCategoryId)]):new Set();el.innerHTML='<option value="">상위 카테고리 없음</option>'+categoryTreeRows().filter(({c})=>!blocked.has(Number(c.id))).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');if(selected)el.value=String(selected);
-}
-async function loadCategories(){
-  const data=await api('/rest/v1/categories?select=id,name,parent_id,sort_order,created_at&order=sort_order.asc,created_at.asc');
-  categories=Array.isArray(data)?data:[];
-  renderCategoryOptions();renderBulkCategoryOptions();renderCategoryParentOptions();renderCategoryManager();
-}
-function resetCategoryForm(){editingCategoryId=null;$('categoryNameInput').value='';renderCategoryParentOptions();$('categoryParentInput').value='';$('categorySaveBtn').textContent='카테고리 추가';$('categoryCancelBtn').hidden=true;}
-function editCategory(id){const c=categories.find(x=>String(x.id)===String(id));if(!c)return;editingCategoryId=c.id;$('categoryNameInput').value=c.name||'';renderCategoryParentOptions(c.parent_id);$('categorySaveBtn').textContent='카테고리 수정';$('categoryCancelBtn').hidden=false;scrollTo({top:document.getElementById('categoryNameInput').getBoundingClientRect().top+scrollY-80,behavior:'smooth'});}
-async function saveCategory(){
-  const name=$('categoryNameInput').value.trim(),parentId=$('categoryParentInput').value||null;
-  if(!name)return alert('카테고리 이름을 입력해주세요.');
-  if(editingCategoryId&&(String(parentId)===String(editingCategoryId)||categoryDescendantIds(editingCategoryId).has(Number(parentId))))return alert('현재 카테고리의 하위 카테고리를 상위 카테고리로 지정할 수 없어요.');
-  try{
-    if(editingCategoryId){
-      const old=categories.find(c=>String(c.id)===String(editingCategoryId));
-      const updatedCategory=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(editingCategoryId),{method:'PATCH',body:JSON.stringify({name,parent_id:parentId}),headers:{'Prefer':'return=representation'}});
-      if(!Array.isArray(updatedCategory)||updatedCategory.length===0)throw new Error('카테고리 수정 권한이 없거나 해당 카테고리를 찾지 못했어요.');
-      if(old&&old.name!==name){
-        await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});
-      }
-      alert('카테고리를 수정했어요.');
-    }else{
-      const max=categories.reduce((m,c)=>Math.max(m,Number(c.sort_order)||0),0);
-      await api('/rest/v1/categories',{method:'POST',body:JSON.stringify({name,parent_id:parentId,sort_order:max+1}),headers:{'Prefer':'return=representation'}});
-      alert('카테고리를 추가했어요.');
-    }
-    resetCategoryForm();await loadCategories();await loadProducts();
-  }catch(e){alert('카테고리 저장에 실패했어요.\n\n'+e.message)}
-}
-async function moveCategory(id,direction){
-  const current=categories.find(c=>String(c.id)===String(id));
-  if(!current)return;
-  const siblings=categories.filter(c=>String(c.parent_id??'')===String(current.parent_id??''))
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const idx=siblings.findIndex(c=>String(c.id)===String(id)),ni=idx+direction;
-  if(idx<0||ni<0||ni>=siblings.length)return;
-  const other=siblings[ni],aOrder=Number(current.sort_order)||0,bOrder=Number(other.sort_order)||0;
-  try{
-    const a=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(current.id),{method:'PATCH',body:JSON.stringify({sort_order:bOrder}),headers:{'Prefer':'return=representation'}});
-    if(!Array.isArray(a)||a.length===0)throw new Error('카테고리 순서를 변경할 권한이 없어요.');
-    const b=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(other.id),{method:'PATCH',body:JSON.stringify({sort_order:aOrder}),headers:{'Prefer':'return=representation'}});
-    if(!Array.isArray(b)||b.length===0)throw new Error('카테고리 순서를 변경하지 못했어요.');
-    await loadCategories();await loadProducts();
-  }catch(e){alert('카테고리 순서 변경에 실패했어요.\n\n'+e.message);await loadCategories();}
-}
-
-async function deleteCategory(id){
-  const c=categories.find(x=>String(x.id)===String(id));if(!c)return;
-  const child=categories.some(x=>String(x.parent_id||'')===String(id));
-  if(child)return alert('하위 카테고리가 있어요. 하위 카테고리를 먼저 삭제하거나 이동해주세요.');
-  const used=window.__allAdminProducts?.filter(p=>String(p.category||'')===String(c.name)).length||0;
-  if(used)return alert(`이 카테고리에 상품 ${used}개가 있어요. 상품을 다른 카테고리로 먼저 이동해주세요.`);
-  if(!confirm(`'${c.name}' 카테고리를 삭제할까요?`))return;
-  try{await api('/rest/v1/categories?id=eq.'+encodeURIComponent(id),{method:'DELETE'});if(String(editingCategoryId)===String(id))resetCategoryForm();await loadCategories();await loadProducts();}catch(e){alert('카테고리 삭제에 실패했어요.\n\n'+e.message)}
-}
-
-function renderAdminFilters(data){
-  const catBar=$('adminCatBar');
-  const brandBar=$('adminBrandBar');
-  const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const escape=v=>String(v).replaceAll('"','&quot;');
-  const childrenOf=c=>categories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const roots=categories.filter(c=>c.parent_id==null && clean(c.name)!=='26WINTER(전체보기)')
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const button=(name,label=name,extra='')=>`<button type="button" class="${adminCategoryFilter===name?'active':''} ${extra}" data-admin-category="${escape(name)}">${label}</button>`;
-  const selectedCategory=categories.find(c=>String(c.name)===String(adminCategoryFilter));
-  const selectedChildren=adminCategoryFilter==='ALL' || adminCategoryFilter==='BRAND' || !selectedCategory
-    ? []
-    : childrenOf(selectedCategory);
-  const title=adminCategoryFilter==='ALL'?'':adminCategoryFilter==='BRAND'?'BRAND':String(adminCategoryFilter);
-  const normalHtml=roots.map(c=>button(c.name,c.name,c.parent_id==null?'parentCat':'')).join('');
-  catBar.innerHTML=`<div class="adminCatTopRow">${button('ALL')}${normalHtml}${button('BRAND')}</div>${title?`<div class="adminCatTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="adminCatSubRow">${selectedChildren.map(c=>button(c.name,c.name,childrenOf(c).length?'parentCat':'childCat')).join('')}</div>`:''}`;
-  catBar.querySelectorAll('button[data-admin-category]').forEach(btn=>btn.addEventListener('click',()=>{adminCategoryFilter=btn.dataset.adminCategory;adminBrandFilter='ALL';loadProducts()}));
-
-  const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
-  if(adminCategoryFilter!=='BRAND'){
-    brandBar.hidden=true; brandBar.innerHTML=''; return;
-  }
-  brandBar.hidden=false;
-  brandBar.innerHTML='';
-  const allBtn=document.createElement('button');allBtn.type='button';allBtn.textContent='ALL';allBtn.className=adminBrandFilter==='ALL'?'active':'';allBtn.addEventListener('click',()=>{adminBrandFilter='ALL';loadProducts()});brandBar.appendChild(allBtn);
-  brands.forEach(brand=>{const btn=document.createElement('button');btn.type='button';btn.textContent=brand;btn.className=normalizeBrand(adminBrandFilter)===normalizeBrand(brand)?'active':'';btn.addEventListener('click',()=>{adminBrandFilter=brand;loadProducts()});brandBar.appendChild(btn)});
-}
-function updateBulkUI(visibleData=[]){
-  const bar=$('bulkBar'),count=$('bulkCount'),all=$('selectAllProducts');
-  if(!bar||!count||!all)return;
-  const visibleIds=visibleData.map(p=>String(p.id));
-  const selectedVisible=visibleIds.filter(id=>selectedProductIds.has(id)).length;
-  bar.hidden=visibleData.length===0 && selectedProductIds.size===0;
-  count.textContent=`선택 ${selectedProductIds.size}개`;
-  all.checked=visibleIds.length>0 && selectedVisible===visibleIds.length;
-  all.indeterminate=selectedVisible>0 && selectedVisible<visibleIds.length;
-}
-function toggleAllVisibleProducts(checked,visibleData=[]){
-  visibleData.forEach(p=>{const id=String(p.id);if(checked)selectedProductIds.add(id);else selectedProductIds.delete(id)});
-  loadProducts();
-}
-function toggleProductSelection(id,checked){
-  const key=String(id);if(checked)selectedProductIds.add(key);else selectedProductIds.delete(key);
-  updateBulkUI(window.__adminVisibleProducts||[]);
-}
-async function moveSelectedProducts(){
-  const ids=[...selectedProductIds],target=$('bulkCategory')?.value||'';
-  if(!ids.length)return alert('이동할 상품을 선택해주세요.');
-  if(!target)return alert('이동할 카테고리를 선택해주세요.');
-  if(!confirm(`선택한 ${ids.length}개 상품을 '${target}' 카테고리로 이동할까요?`))return;
-  try{
-    for(const id of ids){
-      await api('/rest/v1/products?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({category:target}),headers:{'Prefer':'return=minimal'}});
-    }
-    selectedProductIds.clear();
-    if($('bulkCategory'))$('bulkCategory').value='';
-    alert('선택한 상품을 이동했어요.');
-    await loadProducts();
-  }catch(e){alert('상품 카테고리 이동에 실패했어요.\n\n'+e.message)}
-}
-function dedupeAdminAllProducts(data){
-  const seen=new Set();
-  return data.filter(p=>{
-    const key=JSON.stringify([
-      String(p.name||'').trim(),
-      String(p.brand||'').trim(),
-      p.normal_price??null,
-      p.member_price??null,
-      p.colors||[],
-      p.sizes||[],
-      p.description||'',
-      p.images||[]
-    ]);
-    if(seen.has(key))return false;
-    seen.add(key);
-    return true;
-  });
-}
-function filteredAdminProducts(data){
-  const filtered=data.filter(p=>{
-    const category=String(p.category||'').trim();
-    if(adminCategoryFilter!=='ALL' && adminCategoryFilter!=='BRAND' && !categoryDescendantNames(adminCategoryFilter).some(x=>x===category))return false;
-    if(adminCategoryFilter==='BRAND' && adminBrandFilter!=='ALL')return normalizeBrand(p.brand)===normalizeBrand(adminBrandFilter);
-    return true;
-  });
-  return adminCategoryFilter==='ALL'?dedupeAdminAllProducts(filtered):filtered;
-}
-
-function isSizeChartProduct(p){return p?.is_size_chart===true||/사이즈\s*표|size\s*guide/i.test(String(p?.name||''))}
-
-async function pinProduct(id){
-  try{
-    const data=await api('/rest/v1/products?select=id,name,category,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
-    const target=data.find(x=>String(x.id)===String(id));
-    if(!target)return;
-
-    // 사이즈표 상품은 같은 카테고리의 상품 순서에만 영향을 줍니다.
-    // 일반 상품의 기존 고정 기능은 전체 상품 범위를 유지합니다.
-    const scope=isSizeChartProduct(target)
-      ? data.filter(x=>String(x.category||'')===String(target.category||''))
-      : data;
-    const numericOrders=scope.map(x=>Number(x.sort_order)).filter(Number.isFinite);
-    const isPinned=Number(target.sort_order)<0;
-
-    if(isPinned){
-      const normalOrders=numericOrders.filter(n=>n>=0);
-      const maxOrder=Math.max(...normalOrders,0);
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
-    }else{
-      // 음수 sort_order만 고정 상태로 사용합니다. 여러 카테고리의 순서는 건드리지 않습니다.
-      const normalOrders=numericOrders.filter(n=>n>=0);
-      const minOrder=Math.min(...normalOrders,0);
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=minimal'}});
-    }
-    await loadProducts();
-  }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
-}
-
-document.addEventListener('change',e=>{
-  if(e.target?.id==='selectAllProducts')toggleAllVisibleProducts(e.target.checked,window.__adminVisibleProducts||[]);
-  if(e.target?.classList?.contains('productSelect'))toggleProductSelection(e.target.dataset.id,e.target.checked);
-});
-async function loadProducts(){
-  try{
-    const data=await api('/rest/v1/products?select=*&order=sort_order.asc,created_at.asc');
-    renderAdminFilters(data);
-    window.__allAdminProducts=data;
-    const filtered=filteredAdminProducts(data);
-    window.__adminVisibleProducts=filtered;
-    updateBulkUI(filtered);
-    $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
-      // 음수 sort_order는 고정 상태. 사이즈표 상품은 해당 카테고리 안에서만 고정됩니다.
-      const pinned=Number(p.sort_order)<0;
-      return `<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`;
-    }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
-  }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
-}
-
-async function moveProduct(id,direction){
-  try{
-    const data=await api('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc');
-    const idx=data.findIndex(x=>String(x.id)===String(id)),ni=idx+direction;
-    if(idx<0||ni<0||ni>=data.length)return;
-    const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);const minOrder=Math.min(...numericOrders,0);const a=data[idx],b=data[ni],av=Number(a.sort_order)||0,bv=Number(b.sort_order)||0;if(av===minOrder-1||bv===minOrder-1)return;
-    await api('/rest/v1/products?id=eq.'+a.id,{method:'PATCH',body:JSON.stringify({sort_order:bv}),headers:{'Prefer':'return=minimal'}});
-    await api('/rest/v1/products?id=eq.'+b.id,{method:'PATCH',body:JSON.stringify({sort_order:av}),headers:{'Prefer':'return=minimal'}});
-    await loadProducts()
-  }catch(e){alert('상품 순서 변경에 실패했어요.\n\n'+e.message)}
-}
-
+async function saveProduct(){const name=$('name').value.trim(),normal=Number($('normal').value),member=$('member').value?Number($('member').value):null;if(!name||!normal)return alert('상품명과 정상가를 입력해주세요.');try{const urls=await uploadFiles();const payload={name,brand:$('brand').value.trim(),category:$('category').value,normal_price:normal,member_price:member,colors:$('colors').value.split(',').map(x=>x.trim()).filter(Boolean),sizes:$('sizes').value.split(',').map(x=>x.trim()).filter(Boolean),description:$('description').value.trim(),images:urls};{const current=await api('/rest/v1/products?select=sort_order&order=sort_order.asc&limit=1');payload.sort_order=(Number(current?.[0]?.sort_order)||0)-1}await api('/rest/v1/products'+(editingId?'?id=eq.'+editingId:''),{method:editingId?'PATCH':'POST',body:JSON.stringify(payload),headers:editingId?{'Prefer':'return=minimal'}:{'Prefer':'return=representation'}});msg(editingId?'상품이 수정됐어요 🤍':'상품이 등록됐어요 🤍');resetForm();loadProducts()}catch(e){alert(e.message)}}
+function selectedFiles(){return [...($('images').files||[])]}
+function setSelectedFiles(files){const dt=new DataTransfer();files.forEach(f=>dt.items.add(f));$('images').files=dt.files}
+async function uploadFiles(){const urls=[...editingImages];for(const f of selectedFiles()){const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=Date.now()+'-'+crypto.randomUUID()+'-'+safe;const r=await fetch(CFG.supabaseUrl+'/storage/v1/object/products/'+encodeURIComponent(path),{method:'POST',headers:{apikey:CFG.supabaseKey,Authorization:'Bearer '+token,'x-upsert':'false','Content-Type':f.type||'application/octet-stream'},body:f});if(!r.ok){let d={};try{d=await r.json()}catch{}throw new Error('사진 업로드 실패: '+(d.message||d.error||r.status))}urls.push(CFG.supabaseUrl+'/storage/v1/object/public/products/'+path)}return urls}
+function renderSelectedImages(){const box=$('preview');const existing=(editingImages||[]).map((x,i)=>`<div class="previewItem"><img src="${x}" alt="기존 상품사진"><button type="button" title="사진 삭제" onclick="removeExistingImage(${i})">×</button></div>`).join('');const selected=selectedFiles().map((f,i)=>{const u=URL.createObjectURL(f);return `<div class="previewItem"><img src="${u}" alt="선택한 상품사진"><button type="button" title="사진 삭제" onclick="removeSelectedImage(${i})">×</button></div>`}).join('');box.innerHTML=existing+selected}
+function removeExistingImage(i){editingImages.splice(i,1);renderSelectedImages()}
+function removeSelectedImage(i){const files=selectedFiles();files.splice(i,1);setSelectedFiles(files);renderSelectedImages()}
+$('images').addEventListener('change',renderSelectedImages);
+function resetForm(){editingId=null;editingImages=[];['name','normal','member','colors','sizes','description'].forEach(id=>$(id).value='');$('brand').value='';$('preview').innerHTML='';$('images').value='';$('saveBtn').disabled=false;$('saveBtn').textContent='상품 등록하기'}function msg(t){$('msg').textContent=t;$('msg').style.display='block';setTimeout(()=>$('msg').style.display='none',3500)}
+let adminCategoryFilter='ALL',adminBrandFilter='ALL';
+function renderAdminFilters(data){const cats=['ALL','BRAND','BEBE','CHILD','ETC'];$('adminCatBar').innerHTML=cats.map(c=>`<button class="${adminCategoryFilter===c?'active':''}" onclick="setAdminCategory('${c}')">${c}</button>`).join('');const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));const be=$('adminBrandBar');if(adminCategoryFilter==='BRAND'){be.hidden=false;be.innerHTML=`<button class="${adminBrandFilter==='ALL'?'active':''}" onclick="setAdminBrand('ALL')">ALL</button>`+brands.map(b=>`<button class="${adminBrandFilter===b?'active':''}" onclick="setAdminBrand(${JSON.stringify(b)})">${b}</button>`).join('')}else{be.hidden=true;be.innerHTML='';}}
+function setAdminCategory(c){adminCategoryFilter=c;adminBrandFilter='ALL';loadProducts()}
+function setAdminBrand(b){adminBrandFilter=b;loadProducts()}
+function filteredAdminProducts(data){return data.filter(p=>{const cat=adminCategoryFilter==='ALL'||adminCategoryFilter==='BRAND'||String(p.category||'').toUpperCase()===adminCategoryFilter;const brand=adminCategoryFilter!=='BRAND'||adminBrandFilter==='ALL'||String(p.brand||'').trim()===adminBrandFilter;return cat&&brand})}
+async function loadProducts(){try{const data=await api('/rest/v1/products?select=*&order=sort_order.asc,created_at.asc');renderAdminFilters(data);const filtered=filteredAdminProducts(data);$('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>`<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><div class="productCardName">${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''} · ${p.category}</div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'}catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}}
+async function moveProduct(id,direction){try{const data=await api('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc');const idx=data.findIndex(x=>String(x.id)===String(id)),ni=idx+direction;if(idx<0||ni<0||ni>=data.length)return;const a=data[idx],b=data[ni],av=Number(a.sort_order)||0,bv=Number(b.sort_order)||0;await api('/rest/v1/products?id=eq.'+a.id,{method:'PATCH',body:JSON.stringify({sort_order:bv})});await api('/rest/v1/products?id=eq.'+b.id,{method:'PATCH',body:JSON.stringify({sort_order:av})});await loadProducts()}catch(e){alert('상품 순서 변경에 실패했어요.\n\n'+e.message)}}
 async function getProduct(id){const d=await api('/rest/v1/products?select=*&id=eq.'+id);return d[0]}
-async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([p.category||'CHILD']);$('isSizeChart').checked=!!p.is_size_chart;$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';toggleSizeChartFields();$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
-function categoryPathText(name){
-  const target=String(name||'').trim();
-  if(!target)return '-';
-  const start=categories.find(c=>String(c.name)===target);
-  if(!start)return target;
-  const chain=[];const seen=new Set();let cur=start;
-  while(cur&& !seen.has(String(cur.id))){
-    seen.add(String(cur.id));
-    chain.unshift(String(cur.name));
-    cur=categories.find(c=>String(c.id)===String(cur.parent_id??''));
-  }
-  if(chain.length<=1)return chain[0]||target;
-  return chain.map((x,i)=>i===chain.length-1?`<span class="current">${x}</span>`:x).join(' &nbsp;›&nbsp; ');
-}
-function previewProduct(id){getProduct(id).then(p=>{if(!p)return;const l=document.createElement('div');l.className='previewLayer';l.id='pv';l.onclick=e=>{if(e.target===l)l.remove()};l.innerHTML=`<div class="previewBox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">상품 미리보기</h2><button class="secondary" onclick="$('pv').remove()">닫기</button></div><div class="previewGrid">${(p.images||[]).map(x=>`<img src="${x}">`).join('')}</div><h2>${p.name}</h2><div class="note">${p.brand||''}</div><div class="previewCategoryPath">${categoryPathText(p.category)}</div><p><b>${Number(p.normal_price).toLocaleString()}원</b>${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}</p><p>COLOR · ${(p.colors||[]).join(', ')||'-'}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</p><p class="descriptionText">${p.description||''}</p><button onclick="$('pv').remove();editProduct(${p.id})">수정하기</button></div>`;document.body.appendChild(l)})}
+async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];$('name').value=p.name||'';$('brand').value=p.brand||'';$('category').value=p.category||'CHILD';$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';scrollTo({top:0,behavior:'smooth'})}
+function previewProduct(id){getProduct(id).then(p=>{if(!p)return;const l=document.createElement('div');l.className='previewLayer';l.id='pv';l.onclick=e=>{if(e.target===l)l.remove()};l.innerHTML=`<div class="previewBox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">상품 미리보기</h2><button class="secondary" onclick="$('pv').remove()">닫기</button></div><div class="previewGrid">${(p.images||[]).map(x=>`<img src="${x}">`).join('')}</div><h2>${p.name}</h2><div class="note">${p.brand||''} · ${p.category}</div><p><b>${Number(p.normal_price).toLocaleString()}원</b>${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}</p><p>COLOR · ${(p.colors||[]).join(', ')||'-'}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</p><p>${p.description||''}</p><button onclick="$('pv').remove();editProduct(${p.id})">수정하기</button></div>`;document.body.appendChild(l)})}
 async function removeProduct(id){if(!confirm('이 상품을 삭제할까요?'))return;try{await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});loadProducts()}catch(e){alert(e.message)}}
 function dateKST(v){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date(v))}
 function matchesDate(v,from,to){const d=dateKST(v);return (!from||d>=from)&&(!to||d<=to)}
@@ -406,16 +47,6 @@ async function loadOrders(){const el=$('orders');try{const data=await api('/rest
 async function saveOrderMemo(id){const value=$('memo_'+id)?.value.trim()||'';try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:value}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 저장됐어요.')}catch(e){alert('메모 저장 실패\n\n'+e.message)}}
 async function deleteOrderMemo(id){if(!confirm('이 주문의 관리자 메모를 삭제할까요?'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:null}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 삭제됐어요.');loadOrders()}catch(e){alert('메모 삭제 실패\n\n'+e.message)}}
 async function updateOrderStatus(id,statusValue){try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:statusValue}),headers:{'Prefer':'return=minimal'}});loadOrders()}catch(e){alert(e.message)}}
-async function deleteOrder(id){if(!confirm('이 주문을 삭제할까요?\n\n삭제하면 주문관리에서 다시 복구할 수 없어요.'))return;try{const deleted=await api('/rest/v1/orders?id=eq.'+id,{method:'DELETE',headers:{'Prefer':'return=representation'}});if(!Array.isArray(deleted)||deleted.length===0){throw new Error('주문이 삭제되지 않았어요. Supabase의 orders 삭제 권한(RLS) 또는 연결된 데이터 설정을 확인해주세요.')}alert('주문을 삭제했어요.');loadOrders()}catch(e){alert('주문 삭제 실패\n\n'+e.message)}}
+async function deleteOrder(id){if(!confirm('이 주문을 삭제할까요?\n\n삭제하면 주문관리에서 다시 복구할 수 없어요.'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'DELETE'});alert('주문을 삭제했어요.');loadOrders()}catch(e){alert('주문 삭제 실패\n\n'+e.message)}}
 async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까요?\n\n탈퇴 처리하면 해당 계정이 완전히 삭제되어 같은 이메일로 다시 가입할 수 있어요.'))return;try{await api('/rest/v1/rpc/admin_delete_user',{method:'POST',body:JSON.stringify({target_user_id:id}),headers:{'Prefer':'return=minimal'}});alert('탈퇴 처리했어요.\n\n이제 같은 이메일로 다시 가입할 수 있어요.');loadMembers()}catch(e){alert('탈퇴 처리 실패\n\n'+e.message)}}
-</script>
-<script>
-document.querySelectorAll('[data-admin-section]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const key=btn.dataset.adminSection;
-    document.querySelectorAll('[data-admin-section]').forEach(x=>x.classList.toggle('active',x===btn));
-    document.querySelectorAll('.adminSection').forEach(x=>x.classList.toggle('active',x.id==='adminSection-'+key));
-  });
-});
-</script>
-</body></html>
+</script></body></html>
