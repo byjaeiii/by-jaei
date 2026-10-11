@@ -119,30 +119,31 @@ document.getElementById('brandCats').addEventListener('click',e=>{
 });
 function render(){
   cats();
-  let q=(document.getElementById('search').value||'').toLowerCase();
+  const q=(document.getElementById('search').value||'').toLowerCase();
   let a=products.filter(p=>{
     const productCategory=String(p.category||'').trim();
     const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category).includes(productCategory);
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
-    return categoryOk&&brandOk&&String(p.name).toLowerCase().includes(q);
+    return categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
   });
-  if(category==='ALL'||(category==='BRAND'&&brandFilter==='ALL')){
-    const seen=new Set();
-    a=a.filter(p=>{
-      // 복수 카테고리 등록은 DB에 별도 행으로 저장되므로,
-      // 전체보기에서는 고객에게 보이는 상품명/가격을 기준으로 한 장만 표시합니다.
-      // 사이즈표는 브랜드/가격 값이 달라도 이름이 같으면 한 장만 남깁니다.
-      const normalize=v=>String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,' ').trim().toLowerCase();
-      const name=normalize(p.name);
-      const isSizeChart=p.is_size_chart===true || /사이즈\s*표|size\s*guide/i.test(String(p.name||''));
-      const key=isSizeChart
-        ? 'size-chart\u0001'+name
-        : [name, normalize(p.normal_price), normalize(p.member_price)].join('\u0001');
-      if(seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }
+
+  // 같은 상품을 여러 카테고리에 등록해 DB에 행이 여러 개 생긴 경우,
+  // 현재 화면에 표시할 목록(a)에서 상품명 기준으로 하나만 남깁니다.
+  // 전체보기뿐 아니라 상위 카테고리에서 하위 카테고리 상품을 함께 볼 때도 중복되지 않습니다.
+  const normalizeProductName=v=>String(v??'')
+    .normalize('NFKC')
+    .replace(/[\s\u00a0]+/g,'')
+    .trim()
+    .toLocaleLowerCase('ko-KR');
+  const seenProducts=new Set();
+  a=a.filter(p=>{
+    const key=normalizeProductName(p.name);
+    if(!key) return true;
+    if(seenProducts.has(key)) return false;
+    seenProducts.add(key);
+    return true;
+  });
+
   document.getElementById('grid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">등록된 상품이 없어요 🤍</div>';
 }
 function img(p){return p.images&&p.images[0]?`<img src="${p.images[0]}" alt="${p.name}">`:'PRODUCT IMAGE'}
