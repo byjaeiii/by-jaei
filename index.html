@@ -12,16 +12,16 @@
 <style>
 :root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.app{max-width:620px;margin:auto;min-height:100vh;background:var(--bg)}
-header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px solid var(--line)}.head{height:64px;padding:0 18px;display:flex;align-items:center;justify-content:space-between}.logo{font-family:Georgia,serif;letter-spacing:3px;font-size:20px;cursor:pointer}.icon{border:0;background:none;font-size:21px;padding:7px;color:var(--ink);cursor:pointer}.loginLink{border:0;background:none;font-family:Georgia,serif;letter-spacing:1.5px;font-size:12px;padding:9px 8px;color:var(--ink);cursor:pointer}
-.notice{margin:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:18px}.notice b{font-family:Georgia,serif;letter-spacing:2px;font-size:13px}.notice p{font-size:13px;line-height:1.8;margin:10px 0;color:#756960}.notice strong{font-weight:700;color:var(--ink)}.cats{padding:0 16px 20px}.catScroll{width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;box-sizing:border-box;padding:0 4px 7px;scrollbar-width:thin;scrollbar-color:rgba(120,110,100,.32) transparent}.catScroll::-webkit-scrollbar{height:5px}.catScroll::-webkit-scrollbar-track{background:transparent}.catScroll::-webkit-scrollbar-thumb{background:rgba(120,110,100,.32);border-radius:999px}.catTopRow,.catSubRow{display:flex;align-items:center;justify-content:center;gap:38px;flex-wrap:nowrap;width:max-content;min-width:100%;box-sizing:border-box;padding:0 8px}.catTopRow>button{flex:0 0 auto}.catTitle{text-align:center;font-size:17px;font-weight:700;color:var(--ink);margin:28px 0 22px;line-height:1.2}.catSubRow{gap:30px;padding:0 8px 2px}.catItem{flex:0 0 auto;position:relative}.cats button{flex:0 0 auto;white-space:nowrap;border:0;background:transparent;border-radius:0;padding:6px 0;color:var(--muted);cursor:pointer;font-size:12px;font-weight:500;line-height:1.3;transition:.15s}.cats button.parentCat{font-weight:500;color:var(--muted)}.cats button.childCat{font-size:12px}.cats button.active{color:var(--ink);font-weight:700}.cats button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:8px}.catSubRow button.active:after{display:none}.brandCats{display:flex;justify-content:center;gap:28px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;padding:0 16px 18px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.brandCats::-webkit-scrollbar{display:none}.brandCats button{white-space:nowrap;border:0;background:transparent;border-radius:0;padding:5px 0;color:var(--muted);cursor:pointer;font-size:12px}.brandCats button.active{color:var(--ink);font-weight:700}.brandCats button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:7px}.orderMini{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.orderMini img{width:54px;height:62px;border-radius:9px;object-fit:cover;background:#eee7df}.orderMiniText{flex:1;min-width:0}.orderMiniName{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniOption{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniPrice{font-size:12px;font-weight:600;white-space:nowrap}.search{margin:0 18px 18px;border-bottom:1px solid var(--line)}.search input{width:100%;padding:10px 4px;border:0;background:transparent;outline:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 14px 90px}.product{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line)}.photo{aspect-ratio:1/1.12;background:#eee7df;display:flex;align-items:center;justify-content:center;color:#aaa;overflow:hidden;cursor:pointer}.photo img{width:100%;height:100%;object-fit:cover}.info{padding:12px}.name{font-size:14px;margin-bottom:7px;cursor:pointer}.price{font-weight:600;font-size:14px}.member{font-size:12px;color:#9b6f55;margin-top:4px}.opts{display:grid;gap:7px;margin-top:10px}.opts select{width:100%;border:1px solid var(--line);background:white;border-radius:9px;padding:8px;color:var(--ink);font-size:12px}.add{width:100%;border:0;background:var(--ink);color:white;border-radius:10px;padding:10px;margin-top:8px;font-size:12px;cursor:pointer}.empty{text-align:center;padding:70px 20px;color:var(--muted);grid-column:1/-1}.status{text-align:center;color:var(--muted);padding:25px;font-size:13px}
-.detail,.cart,.login{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto}.inner{max-width:620px;margin:auto;min-height:100%;padding-bottom:90px}.topbar{height:62px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#f7f3edf5;z-index:2}.back{border:0;background:none;font-size:15px;color:var(--ink);cursor:pointer}.gallery{display:flex;flex-direction:column;gap:10px;padding:14px}.gallery img{width:100%;aspect-ratio:auto;max-height:none;object-fit:cover;border-radius:16px;display:block}.detailInfo{padding:10px 18px}.detailInfo h1{font-family:Georgia,serif;font-size:24px;font-weight:400}.detailInfo p{line-height:1.8;color:#766a61;font-size:14px;white-space:pre-line}.detailPriceBox{margin-top:22px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fffdf9}.detailPriceRow{display:flex;justify-content:space-between;align-items:center;font-size:14px;line-height:1.8}.detailPriceRow.special{margin-top:5px;color:#9b6f55;font-size:15px}.detailPriceRow b{font-weight:600}.choice{margin:18px 0}.choice label{display:block;font-size:12px;margin-bottom:7px;color:var(--muted)}.choice select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:620px;width:100%;padding:12px 14px;background:#f7f3edf5;border-top:1px solid var(--line);display:flex;gap:8px}.bottom button{flex:1;padding:13px;border-radius:11px;border:1px solid var(--line);background:white;color:var(--ink);cursor:pointer}.bottom .primary{background:var(--ink);color:white}.cartList{padding:18px}.cartItem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.thumb{width:80px;height:90px;border-radius:10px;background:#eee7df;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.cartText{flex:1}.qty{display:flex;align-items:center;gap:10px;margin-top:8px}.qty button{border:1px solid var(--line);background:white;border-radius:7px;width:26px;height:26px;cursor:pointer}.total{padding:18px;font-size:18px;border-top:1px solid var(--line)}.loginForm{padding:24px 18px;display:grid;gap:10px}.loginForm input{padding:12px;border:1px solid var(--line);border-radius:10px}.loginForm button{padding:12px;border:0;border-radius:10px;background:var(--ink);color:white;cursor:pointer}.loginForm .secondary{background:white;color:var(--ink);border:1px solid var(--line)}.small{font-size:12px;color:var(--muted);line-height:1.6}.memberBadge{font-size:11px;color:#9b6f55;margin-top:5px}
+header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px solid var(--line)}.head{height:64px;padding:0 18px;display:flex;align-items:center;justify-content:space-between}.logo{font-family:Georgia,serif;letter-spacing:3px;font-size:20px}.icon{border:0;background:none;font-size:21px;padding:7px;color:var(--ink);cursor:pointer}.loginLink{border:0;background:none;font-family:Georgia,serif;letter-spacing:1.5px;font-size:12px;padding:9px 8px;color:var(--ink);cursor:pointer}
+.notice{margin:18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:18px}.notice b{font-family:Georgia,serif;letter-spacing:2px;font-size:13px}.notice p{font-size:13px;line-height:1.8;margin:10px 0;color:#756960}.notice strong{font-weight:700;color:var(--ink)}.cats{display:flex;gap:6px;overflow:hidden;padding:0 18px 16px}.cats button{white-space:nowrap;flex:1;border:1px solid var(--line);background:transparent;border-radius:99px;padding:8px 8px;color:var(--muted);cursor:pointer;font-size:12px}.cats button.active{background:var(--ink);color:white}.brandCats{display:flex;gap:7px;overflow:auto;padding:0 18px 16px}.brandCats button{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:8px 12px;color:var(--muted);cursor:pointer;font-size:12px}.brandCats button.active{background:#8a786b;color:#fff}.orderMini{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.orderMini img{width:54px;height:62px;border-radius:9px;object-fit:cover;background:#eee7df}.orderMiniText{flex:1;min-width:0}.orderMiniName{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniOption{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orderMiniPrice{font-size:12px;font-weight:600;white-space:nowrap}.search{margin:0 18px 18px;border-bottom:1px solid var(--line)}.search input{width:100%;padding:10px 4px;border:0;background:transparent;outline:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 14px 90px}.product{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line)}.photo{aspect-ratio:1/1.12;background:#eee7df;display:flex;align-items:center;justify-content:center;color:#aaa;overflow:hidden;cursor:pointer}.photo img{width:100%;height:100%;object-fit:cover}.info{padding:12px}.name{font-size:14px;margin-bottom:7px;cursor:pointer}.price{font-weight:600;font-size:14px}.member{font-size:12px;color:#9b6f55;margin-top:4px}.opts{display:grid;gap:7px;margin-top:10px}.opts select{width:100%;border:1px solid var(--line);background:white;border-radius:9px;padding:8px;color:var(--ink);font-size:12px}.add{width:100%;border:0;background:var(--ink);color:white;border-radius:10px;padding:10px;margin-top:8px;font-size:12px;cursor:pointer}.empty{text-align:center;padding:70px 20px;color:var(--muted);grid-column:1/-1}.status{text-align:center;color:var(--muted);padding:25px;font-size:13px}
+.detail,.cart,.login{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto}.inner{max-width:620px;margin:auto;min-height:100%;padding-bottom:90px}.topbar{height:62px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#f7f3edf5;z-index:2}.back{border:0;background:none;font-size:15px;color:var(--ink);cursor:pointer}.gallery{display:flex;flex-direction:column;gap:10px;padding:14px}.gallery img{width:100%;aspect-ratio:auto;max-height:none;object-fit:cover;border-radius:16px;display:block}.detailInfo{padding:10px 18px}.detailInfo h1{font-family:Georgia,serif;font-size:24px;font-weight:400}.detailInfo p{line-height:1.8;color:#766a61;font-size:14px}.choice{margin:18px 0}.choice label{display:block;font-size:12px;margin-bottom:7px;color:var(--muted)}.choice select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:620px;width:100%;padding:12px 14px;background:#f7f3edf5;border-top:1px solid var(--line);display:flex;gap:8px}.bottom button{flex:1;padding:13px;border-radius:11px;border:1px solid var(--line);background:white;color:var(--ink);cursor:pointer}.bottom .primary{background:var(--ink);color:white}.cartList{padding:18px}.cartItem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.thumb{width:80px;height:90px;border-radius:10px;background:#eee7df;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.cartText{flex:1}.qty{display:flex;align-items:center;gap:10px;margin-top:8px}.qty button{border:1px solid var(--line);background:white;border-radius:7px;width:26px;height:26px;cursor:pointer}.total{padding:18px;font-size:18px;border-top:1px solid var(--line)}.loginForm{padding:24px 18px;display:grid;gap:10px}.loginForm input{padding:12px;border:1px solid var(--line);border-radius:10px}.loginForm button{padding:12px;border:0;border-radius:10px;background:var(--ink);color:white;cursor:pointer}.loginForm .secondary{background:white;color:var(--ink);border:1px solid var(--line)}.small{font-size:12px;color:var(--muted);line-height:1.6}.memberBadge{font-size:11px;color:#9b6f55;margin-top:5px}
 .orderForm{padding:20px 18px;display:grid;gap:10px}.orderForm label{font-size:12px;color:var(--muted)}.orderForm input,.orderForm textarea{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}.orderForm textarea{min-height:90px;resize:vertical}.orderSummary{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13px;line-height:1.8}.orderDone{padding:30px 20px;text-align:center;line-height:1.9}.orderDone button{margin-top:16px;padding:12px 18px;border:0;border-radius:10px;background:var(--ink);color:#fff}
 </style></head>
-<body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
+<body><div class="app"><header><div class="head"><div class="logo">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
 <section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><main id="grid" class="grid"></main></div>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
-const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[];
+const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],category='ALL',brandFilter='ALL',user=null,approved=false,cart=[];
 const guestCartKey='byjaei_cart_guest';
 function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
 function loadCart(){
@@ -34,21 +34,9 @@ function loadCart(){
 function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
 const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
 function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
-async function load(){
-  const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
-    sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
-    sb.from('categories').select('id,name,parent_id,sort_order,created_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
-  ]);
-  if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
-  products=productData||[];
-  siteCategories=categoryError?[]:(categoryData||[]);
-  if(categoryError)console.error(categoryError);
-  render();
-}
-function goHome(){category='ALL';categoryId=null;brandFilter='ALL';window.scrollTo({top:0,behavior:'smooth'});render()}
-function setCategory(x,id=null){
+async function load(){const {data,error}=await sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});if(error){console.error(error);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}products=data||[];render()}
+function setCategory(x){
   category=x;
-  categoryId=id?String(id):null;
   brandFilter='ALL';
   render();
 }
@@ -56,51 +44,15 @@ function setBrandFilter(x){
   brandFilter=x;
   render();
 }
-function categoryTreeRows(parentId=null,depth=0,rows=[]){
-  siteCategories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
-  return rows;
-}
-function categoryDescendantNames(name){
-  const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const root=siteCategories.find(c=>String(c.name)===String(name));
-  if(!root)return [String(name)];
-  const out=[];
-  const walk=id=>{
-    const c=siteCategories.find(x=>String(x.id)===String(id));
-    if(c&&clean(c.name)!=='26WINTER(전체보기)')out.push(String(c.name));
-    siteCategories.filter(x=>String(x.parent_id??'')===String(id??'')).forEach(x=>walk(x.id));
-  };
-  walk(root.id);return [...new Set(out)];
-}
 function cats(){
-  const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)');
+  const main=['ALL','BRAND','BEBE','CHILD','ETC'];
   const catEl=document.getElementById('cats');
-  const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
-  const escape=v=>String(v).replaceAll('"','&quot;');
-  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const selectedCategory=category==='ALL'||category==='BRAND'?null:(categoryId?siteCategories.find(x=>String(x.id)===String(categoryId)):siteCategories.find(x=>String(x.name)===String(category)));
-  const rootOf=c=>{
-    let current=c;
-    const seen=new Set();
-    while(current && current.parent_id!=null && !seen.has(String(current.id))){
-      seen.add(String(current.id));
-      current=siteCategories.find(x=>String(x.id)===String(current.parent_id))||null;
-    }
-    return current||c;
-  };
-  const displayRoot=selectedCategory?rootOf(selectedCategory):null;
-  const selectedChildren=displayRoot?childrenOf(displayRoot):[];
-  const title=category==='ALL'?'':category==='BRAND'?'BRAND':String(displayRoot?.name||category);
-  const normalHtml=roots.map(c=>{
-    const isActive=displayRoot?String(displayRoot.id)===String(c.id):category===c.name;
-    return `<button type="button" class="${isActive?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`;
-  }).join('');
-  catEl.innerHTML=`<div class="catScroll"><div class="catTopRow">${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catScroll"><div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${selectedCategory&&String(selectedCategory.id)===String(c.id)?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`).join('')}</div></div>`:''}`;
+  catEl.innerHTML=main.map(x=>`<button type="button" class="${category===x?'active':''}" data-category="${x}">${x}</button>`).join('');
   const brandEl=document.getElementById('brandCats');
   if(category!=='BRAND'){
-    brandEl.hidden=true; brandEl.innerHTML=''; return;
+    brandEl.hidden=true;
+    brandEl.innerHTML='';
+    return;
   }
   const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
   const brands=[...new Set(products.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>collator.compare(a,b));
@@ -110,7 +62,7 @@ function cats(){
 document.getElementById('cats').addEventListener('click',e=>{
   const b=e.target.closest('button[data-category]');
   if(!b) return;
-  setCategory(b.dataset.category,b.dataset.categoryId||null);
+  setCategory(b.dataset.category);
 });
 document.getElementById('brandCats').addEventListener('click',e=>{
   const b=e.target.closest('button[data-brand]');
@@ -119,71 +71,22 @@ document.getElementById('brandCats').addEventListener('click',e=>{
 });
 function render(){
   cats();
-  const q=(document.getElementById('search').value||'').toLowerCase();
+  let q=(document.getElementById('search').value||'').toLowerCase();
   let a=products.filter(p=>{
-    const productCategory=String(p.category||'').trim();
-    const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category).includes(productCategory);
+    const categoryOk=category==='ALL'||category==='BRAND'||String(p.category||'').trim().toUpperCase()===category;
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
-    return categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
+    return categoryOk&&brandOk&&String(p.name).toLowerCase().includes(q);
   });
-
-  const stamp=v=>{
-    const n=Date.parse(v||'');
-    return Number.isFinite(n)?n:0;
-  };
-  const updateStamp=p=>stamp(p.updated_at)||stamp(p.created_at);
-  const isSizeChartProduct=p=>p?.is_size_chart===true||/사이즈\s*표|size\s*guide/i.test(String(p?.name||''));
-  const overallView=category==='ALL'||(category==='BRAND'&&brandFilter==='ALL');
-
-  if(overallView){
-    // 전체보기는 상품 내용이 최근 수정된 순으로 표시합니다.
-    // sort_order의 음수 고정값은 여기서 사용하지 않으므로 사이즈표가 전체 맨 앞으로 고정되지 않습니다.
-    a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
-  }else if(category!=='BRAND'){
-    // 카테고리 화면에서는 해당 카테고리에 직접 속한 고정 상품만 맨 앞으로 둡니다.
-    // 다른 하위 카테고리에 고정된 사이즈표는 상위/다른 카테고리 화면에서 고정 효과를 내지 않습니다.
-    const selectedRow=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
-    const exactCategoryName=String(selectedRow?.name||category).trim();
-    const isPinnedHere=p=>String(p.category||'').trim()===exactCategoryName&&Number(p.sort_order)<0;
-    const scopedOrder=p=>{
-      if(isSizeChartProduct(p)&&Number(p.sort_order)<0&&String(p.category||'').trim()!==exactCategoryName) return Number.MAX_SAFE_INTEGER;
-      return Number(p.sort_order)||0;
-    };
-    a.sort((x,y)=>{
-      const xp=isPinnedHere(x),yp=isPinnedHere(y);
-      if(xp!==yp)return xp?-1:1;
-      return scopedOrder(x)-scopedOrder(y)||updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at);
-    });
-  }else{
-    // 특정 브랜드만 고른 경우에도 최근 수정된 상품이 먼저 오도록 합니다.
-    a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
-  }
-
-  // 여러 카테고리에 별도 행으로 저장된 동일 상품은 정렬 후 첫 번째 것만 남깁니다.
-  // 전체보기에서는 가장 최근 수정된 복제 행이 대표로 남습니다.
-  const normalizeProductName=v=>String(v??'')
-    .normalize('NFKC')
-    .replace(/[\s\u00a0]+/g,'')
-    .trim()
-    .toLocaleLowerCase('ko-KR');
-  const seenProducts=new Set();
-  a=a.filter(p=>{
-    const key=normalizeProductName(p.name);
-    if(!key) return true;
-    if(seenProducts.has(key)) return false;
-    seenProducts.add(key);
-    return true;
-  });
-
   document.getElementById('grid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">등록된 상품이 없어요 🤍</div>';
 }
 function img(p){return p.images&&p.images[0]?`<img src="${p.images[0]}" alt="${p.name}">`:'PRODUCT IMAGE'}
 function options(arr){return (arr||[]).map(v=>{let x=parseSize(v);return `<option value="${x.add}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
-function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}</div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
-function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id);addCart(p,c.value,s.options[s.selectedIndex].text,+s.value)}
+function colorOptions(arr){return (arr||['기본색상']).map(v=>{let x=parseSize(v);return `<option value="${x.add}" data-color="${x.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
+function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}</div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${colorOptions(p.colors)}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
+function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id),co=c.options[c.selectedIndex],color=co.dataset.color||co.textContent.replace(/\s*\(\+[^)]*\)$/,'');addCart(p,color,s.options[s.selectedIndex].text,+s.value+Number(c.value||0))}
 function addCart(p,color,size,add){if(!user){if(confirm('장바구니에 담으려면 로그인이 필요해요.\n\n로그인 화면으로 이동할까요?'))openLogin();return}let key=p.id+'-'+color+'-'+size;let x=cart.find(i=>i.key===key);x?x.qty++:cart.push({key,id:p.id,name:p.name,color,size,add,qty:1});save();alert('장바구니에 담았어요 🤍')}
-function detail(id){let p=products.find(x=>x.id===id);document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('detail')">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><h1>${p.name}</h1><p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div><div class="detailPriceBox"><div class="detailPriceRow"><span>정상가</span><b>${won(p.normal_price)}</b></div>${approved&&user&&p.member_price!=null?`<div class="detailPriceRow special"><span>특별회원가</span><b>${won(p.member_price)}</b></div>`:''}</div></div><div class="bottom"><button onclick="closeLayer('detail')">뒤로</button><button class="primary" onclick="dadd(${p.id})">장바구니 담기</button></div></div>`}
-function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds');addCart(p,document.getElementById('dc').value,s.options[s.selectedIndex].text,+s.value)}
+function detail(id){let p=products.find(x=>x.id===id);document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('detail')">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><h1>${p.name}</h1><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${colorOptions(p.colors)}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div></div><div class="bottom"><button onclick="closeLayer('detail')">뒤로</button><button class="primary" onclick="dadd(${p.id})">장바구니 담기</button></div></div>`}
+function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds'),c=document.getElementById('dc'),co=c.options[c.selectedIndex],color=co.dataset.color||co.textContent.replace(/\s*\(\+[^)]*\)$/,'');addCart(p,color,s.options[s.selectedIndex].text,+s.value+Number(c.value||0))}
 function openCart(){
   closeAll();
   const el=document.getElementById('cart'); el.hidden=false;
