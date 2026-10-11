@@ -9,6 +9,8 @@
 .adminSection.active{display:block}
 .adminSectionTitle{margin:0 0 14px;font-size:16px}
 </style>
+
+<style>.photoFileName{width:100%;max-width:140px;margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;user-select:text}.previewItem{display:flex;flex-direction:column;align-items:center}</style>
 </head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -89,9 +91,16 @@ function selectedFiles(){return photoItems.filter(x=>x.type==='new').map(x=>x.fi
 function setSelectedFiles(files){const dt=new DataTransfer();(files||[]).forEach(f=>dt.items.add(f));$('images').files=dt.files}
 function syncSelectedFiles(){setSelectedFiles(selectedFiles())}
 async function uploadFiles(){const urls=[];for(const item of photoItems){if(item.type==='existing'){urls.push(item.url);continue}const f=item.file;const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=Date.now()+'-'+crypto.randomUUID()+'-'+safe;const r=await fetch(CFG.supabaseUrl+'/storage/v1/object/products/'+encodeURIComponent(path),{method:'POST',headers:{apikey:CFG.supabaseKey,Authorization:'Bearer '+token,'x-upsert':'false','Content-Type':f.type||'application/octet-stream'},body:f});if(!r.ok){let d={};try{d=await r.json()}catch{}throw new Error('사진 업로드 실패: '+(d.message||d.error||r.status))}urls.push(CFG.supabaseUrl+'/storage/v1/object/public/products/'+path)}return urls}
-function renderSelectedImages(){const box=$('preview');if(!box)return;box.innerHTML=photoItems.map(item=>{const src=item.type==='existing'?item.url:URL.createObjectURL(item.file);const alt=item.type==='existing'?'기존 상품사진':'선택한 상품사진';return `<div class="previewItem" draggable="true" data-photo-id="${item.id}"><span class="photoDragHint">↕ 이동</span><img src="${src}" alt="${alt}"><button type="button" title="사진 삭제" onclick="event.stopPropagation();removePhotoItem('${item.id}')">×</button></div>`}).join('');}
+function photoDisplayName(item){
+  if(item.type==='new')return item.file.name;
+  try{
+    const raw=decodeURIComponent(String(item.url||'').split('/').pop().split('?')[0]);
+    return raw.replace(/^\d+-[0-9a-f-]{20,}-/i,'')||'기존 상품사진';
+  }catch(e){return '기존 상품사진'}
+}
+function renderSelectedImages(){const box=$('preview');if(!box)return;box.innerHTML=photoItems.map(item=>{const src=item.type==='existing'?item.url:URL.createObjectURL(item.file);const alt=item.type==='existing'?'기존 상품사진':'선택한 상품사진';const filename=photoDisplayName(item);return `<div class="previewItem" draggable="true" data-photo-id="${item.id}"><span class="photoDragHint">↕ 이동</span><img src="${src}" alt="${alt}"><div class="photoFileName" title="${filename}">${filename}</div><button type="button" title="사진 삭제" onclick="event.stopPropagation();removePhotoItem('${item.id}')">×</button></div>`}).join('');}
 function removePhotoItem(id){photoItems=photoItems.filter(x=>x.id!==id);editingImages=photoItems.filter(x=>x.type==='existing').map(x=>x.url);syncSelectedFiles();renderSelectedImages()}
-function handleImageChange(){const chosen=[...($('images').files||[])];const existingKeys=new Set(photoItems.filter(x=>x.type==='new').map(x=>fileKey(x.file)));chosen.forEach(f=>{const k=fileKey(f);if(!existingKeys.has(k)){photoItems.push({id:'photo-'+crypto.randomUUID(),type:'new',file:f});existingKeys.add(k)}});syncSelectedFiles();renderSelectedImages()}
+function handleImageChange(){const chosen=[...($('images').files||[])].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));const existingKeys=new Set(photoItems.filter(x=>x.type==='new').map(x=>fileKey(x.file)));chosen.forEach(f=>{const k=fileKey(f);if(!existingKeys.has(k)){photoItems.push({id:'photo-'+crypto.randomUUID(),type:'new',file:f});existingKeys.add(k)}});syncSelectedFiles();renderSelectedImages()}
 $('images').addEventListener('change',handleImageChange);
 toggleSizeChartFields();
 $('preview').addEventListener('dragstart',e=>{const item=e.target.closest('.previewItem');if(!item)return;draggedPhotoId=item.dataset.photoId;item.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',draggedPhotoId)});
@@ -301,26 +310,31 @@ function filteredAdminProducts(data){
   return adminCategoryFilter==='ALL'?dedupeAdminAllProducts(filtered):filtered;
 }
 
+function isSizeChartProduct(p){return p?.is_size_chart===true||/사이즈\s*표|size\s*guide/i.test(String(p?.name||''))}
+
 async function pinProduct(id){
   try{
-    const data=await api('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc');
+    const data=await api('/rest/v1/products?select=id,name,category,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
     const target=data.find(x=>String(x.id)===String(id));
     if(!target)return;
 
-    const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);
-    const minOrder=Math.min(...numericOrders,0);
-    const isPinned=Number(target.sort_order)===minOrder-1;
+    // 사이즈표 상품은 같은 카테고리의 상품 순서에만 영향을 줍니다.
+    // 일반 상품의 기존 고정 기능은 전체 상품 범위를 유지합니다.
+    const scope=isSizeChartProduct(target)
+      ? data.filter(x=>String(x.category||'')===String(target.category||''))
+      : data;
+    const numericOrders=scope.map(x=>Number(x.sort_order)).filter(Number.isFinite);
+    const isPinned=Number(target.sort_order)<0;
 
     if(isPinned){
-      const maxOrder=Math.max(...numericOrders,0);
+      const normalOrders=numericOrders.filter(n=>n>=0);
+      const maxOrder=Math.max(...normalOrders,0);
       await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
     }else{
-      // 선택한 상품을 맨 앞으로 보내고, 기존 상품의 상대적인 순서는 유지합니다.
-      for(const item of data){
-        if(String(item.id)===String(id))continue;
-        await api('/rest/v1/products?id=eq.'+item.id,{method:'PATCH',body:JSON.stringify({sort_order:(Number(item.sort_order)||0)+1}),headers:{'Prefer':'return=minimal'}});
-      }
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:0}),headers:{'Prefer':'return=minimal'}});
+      // 음수 sort_order만 고정 상태로 사용합니다. 여러 카테고리의 순서는 건드리지 않습니다.
+      const normalOrders=numericOrders.filter(n=>n>=0);
+      const minOrder=Math.min(...normalOrders,0);
+      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=minimal'}});
     }
     await loadProducts();
   }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
@@ -338,11 +352,10 @@ async function loadProducts(){
     const filtered=filteredAdminProducts(data);
     window.__adminVisibleProducts=filtered;
     updateBulkUI(filtered);
-    const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);
-    const minOrder=Math.min(...numericOrders,0);
     $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
-      const pinned=Number(p.sort_order)===minOrder-1;
-      return `<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${pinned?'고정 해제':'상품고정'}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`;
+      // 음수 sort_order는 고정 상태. 사이즈표 상품은 해당 카테고리 안에서만 고정됩니다.
+      const pinned=Number(p.sort_order)<0;
+      return `<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`;
     }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
   }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
 }
