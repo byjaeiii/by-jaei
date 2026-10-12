@@ -78,6 +78,22 @@ function categoryDescendantNames(name,rootId=null){
   roots.forEach(root=>walk(root.id));
   return [...out];
 }
+function categoryBranchIds(id){
+  const out=new Set();
+  if(id==null||id==='')return out;
+  const walk=currentId=>{
+    const key=String(currentId);
+    if(out.has(key))return;
+    out.add(key);
+    siteCategories.filter(c=>String(c.parent_id??'')===key).forEach(c=>walk(c.id));
+  };
+  walk(id);
+  return out;
+}
+function uniqueCategoryIdForName(name){
+  const matches=siteCategories.filter(c=>String(c.name)===String(name));
+  return matches.length===1?String(matches[0].id):null;
+}
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
   const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)');
@@ -128,7 +144,18 @@ function render(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   let a=products.filter(p=>{
     const productCategory=String(p.category||'').trim();
-    const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category,categoryId).includes(productCategory);
+    let categoryOk=category==='ALL'||category==='BRAND';
+    if(!categoryOk){
+      const branchIds=categoryBranchIds(categoryId);
+      if(p.category_id!=null){
+        categoryOk=branchIds.has(String(p.category_id));
+      }else{
+        // 예전 행에 category_id가 없고 같은 이름의 카테고리가 여러 개면,
+        // 어느 부모에 속하는지 알 수 없으므로 엉뚱한 트리에 섞지 않습니다.
+        const legacyId=uniqueCategoryIdForName(productCategory);
+        categoryOk=!!legacyId&&branchIds.has(String(legacyId));
+      }
+    }
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
     return categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
   });
@@ -149,16 +176,21 @@ function render(){
     // 카테고리 화면에서는 해당 카테고리에 직접 속한 고정 상품만 맨 앞으로 둡니다.
     // 다른 하위 카테고리에 고정된 사이즈표는 상위/다른 카테고리 화면에서 고정 효과를 내지 않습니다.
     const selectedRow=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
-    const exactCategoryName=String(selectedRow?.name||category).trim();
-    const isPinnedHere=p=>String(p.category||'').trim()===exactCategoryName&&Number(p.sort_order)<0;
+    const exactCategoryId=selectedRow?String(selectedRow.id):null;
+    const legacyCanResolve=selectedRow&&siteCategories.filter(c=>String(c.name)===String(selectedRow.name)).length===1;
+    const categoryMatches=p=>p.category_id!=null
+      ? String(p.category_id)===exactCategoryId
+      : (!!legacyCanResolve&&String(p.category||'').trim()===String(selectedRow.name));
+    const isPinnedHere=p=>categoryMatches(p)&&Number(p.sort_order)<0;
     const scopedOrder=p=>{
-      if(isSizeChartProduct(p)&&Number(p.sort_order)<0&&String(p.category||'').trim()!==exactCategoryName) return Number.MAX_SAFE_INTEGER;
+      if(isSizeChartProduct(p)&&Number(p.sort_order)<0&&!categoryMatches(p)) return Number.MAX_SAFE_INTEGER;
       return Number(p.sort_order)||0;
     };
     a.sort((x,y)=>{
       const xp=isPinnedHere(x),yp=isPinnedHere(y);
       if(xp!==yp)return xp?-1:1;
-      return scopedOrder(x)-scopedOrder(y)||updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at);
+      // 고정 상품을 먼저 유지하고, 그 외에는 각 카테고리에서 최근 등록/수정된 상품이 먼저 오도록 합니다.
+      return updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||scopedOrder(x)-scopedOrder(y);
     });
   }else{
     // 특정 브랜드만 고른 경우에도 최근 수정된 상품이 먼저 오도록 합니다.
