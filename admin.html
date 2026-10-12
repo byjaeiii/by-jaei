@@ -367,7 +367,7 @@ document.addEventListener('change',e=>{
 });
 async function loadProducts(){
   try{
-    const data=await api('/rest/v1/products?select=*&order=sort_order.asc,created_at.asc');
+    const data=await api('/rest/v1/products?select=*&order=created_at.desc');
     renderAdminFilters(data);
     window.__allAdminProducts=data;
     const filtered=filteredAdminProducts(data);
