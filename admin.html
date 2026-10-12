@@ -10,7 +10,7 @@
 .adminSectionTitle{margin:0 0 14px;font-size:16px}
 </style>
 
-<style>.photoFileName{width:100%;max-width:140px;margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;user-select:text}.previewItem{display:flex;flex-direction:column;align-items:center}</style>
+<style>.categoryOptionRoot{flex:0 0 100%;width:100%;box-sizing:border-box;padding:8px 10px!important;background:#f7f3ed;border:1px solid var(--line);border-radius:8px;font-weight:700!important}.categoryOptionChild{flex:0 0 auto;padding-top:5px!important;padding-bottom:5px!important}.photoFileName{width:100%;max-width:140px;margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;user-select:text}.previewItem{display:flex;flex-direction:column;align-items:center}</style>
 </head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -141,7 +141,7 @@ function resetForm(){
   $('saveBtn').textContent='상품 등록하기';
 }
 function msg(t){$('msg').textContent=t;$('msg').style.display='block';setTimeout(()=>$('msg').style.display='none',3500)}
-let adminCategoryFilter='ALL',adminBrandFilter='ALL',selectedProductIds=new Set(),categories=[],editingCategoryId=null,categoryOpenIds=new Set();
+let adminCategoryFilter='ALL',adminCategoryFilterId=null,adminBrandFilter='ALL',selectedProductIds=new Set(),categories=[],editingCategoryId=null,categoryOpenIds=new Set();
 
 function normalizeBrand(v){
   return String(v||'').trim().toLocaleLowerCase('ko-KR');
@@ -150,15 +150,32 @@ function categoryTreeRows(parentId=null,depth=0,rows=[]){
   categories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
   return rows;
 }
-function categoryDescendantNames(name){
-  const root=categories.find(c=>String(c.name)===String(name));
-  if(!root)return [String(name)];
-  const out=[];
-  const walk=id=>{const c=categories.find(x=>String(x.id)===String(id));if(c)out.push(String(c.name));categories.filter(x=>String(x.parent_id||'')===String(id)).forEach(x=>walk(x.id))};
-  walk(root.id);return out;
+function categoryDescendantNames(name,rootId=null){
+  const roots=rootId!=null
+    ? categories.filter(c=>String(c.id)===String(rootId))
+    : categories.filter(c=>String(c.name)===String(name));
+  if(!roots.length)return [String(name)];
+  const out=new Set();
+  const walk=(id,visited=new Set())=>{
+    const key=String(id);
+    if(visited.has(key))return;
+    visited.add(key);
+    const c=categories.find(x=>String(x.id)===key);
+    if(c)out.add(String(c.name));
+    categories.filter(x=>String(x.parent_id??'')===key).forEach(x=>walk(x.id,visited));
+  };
+  roots.forEach(root=>walk(root.id));
+  return [...out];
 }
 function renderCategoryOptions(selected=[]){
-  const box=$('categoryOptions');if(!box)return;const set=new Set(selected||[]);box.innerHTML=categoryTreeRows().map(({c,depth})=>`<label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${depth*14}px"><input type="checkbox" name="category" value="${String(c.name).replaceAll('"','&quot;')}" style="width:auto" ${set.has(c.name)?'checked':''}> ${depth?'↳ ':''}${c.name}</label>`).join('');
+  const box=$('categoryOptions');
+  if(!box)return;
+  const set=new Set(selected||[]);
+  box.innerHTML=categoryTreeRows().map(({c,depth})=>{
+    const top=depth===0;
+    const safeName=String(c.name).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    return `<label class="${top?'categoryOptionRoot':'categoryOptionChild'}" style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${top?8:depth*14}px;font-weight:${top?700:400}"><input type="checkbox" name="category" value="${safeName}" style="width:auto" ${set.has(c.name)?'checked':''}> ${top?safeName:`↳ ${safeName}`}</label>`;
+  }).join('');
 }
 function renderBulkCategoryOptions(){
   const el=$('bulkCategory');if(!el)return;const current=el.value;el.innerHTML='<option value="">이동할 카테고리 선택</option>'+categoryTreeRows().map(({c,depth})=>`<option value="${String(c.name).replaceAll('"','&quot;')}">${depth?'↳ ':''}${c.name}</option>`).join('');if(categories.some(c=>c.name===current))el.value=current;
@@ -251,15 +268,28 @@ function renderAdminFilters(data){
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
   const roots=categories.filter(c=>c.parent_id==null && clean(c.name)!=='26WINTER(전체보기)')
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
-  const button=(name,label=name,extra='')=>`<button type="button" class="${adminCategoryFilter===name?'active':''} ${extra}" data-admin-category="${escape(name)}">${label}</button>`;
-  const selectedCategory=categories.find(c=>String(c.name)===String(adminCategoryFilter));
+  const button=(name,label=name,extra='',id=null)=>{
+    const active=id!=null&&adminCategoryFilterId!=null
+      ? String(id)===String(adminCategoryFilterId)
+      : adminCategoryFilterId==null&&adminCategoryFilter===name;
+    return `<button type="button" class="${active?'active':''} ${extra}" data-admin-category="${escape(name)}"${id!=null?` data-admin-category-id="${id}"`:''}>${label}</button>`;
+  };
+  const selectedCategory=adminCategoryFilterId!=null
+    ? categories.find(c=>String(c.id)===String(adminCategoryFilterId))
+    : categories.find(c=>String(c.name)===String(adminCategoryFilter));
   const selectedChildren=adminCategoryFilter==='ALL' || adminCategoryFilter==='BRAND' || !selectedCategory
     ? []
     : childrenOf(selectedCategory);
   const title=adminCategoryFilter==='ALL'?'':adminCategoryFilter==='BRAND'?'BRAND':String(adminCategoryFilter);
-  const normalHtml=roots.map(c=>button(c.name,c.name,c.parent_id==null?'parentCat':'')).join('');
-  catBar.innerHTML=`<div class="adminCatTopRow">${button('ALL')}${normalHtml}${button('BRAND')}</div>${title?`<div class="adminCatTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="adminCatSubRow">${selectedChildren.map(c=>button(c.name,c.name,childrenOf(c).length?'parentCat':'childCat')).join('')}</div>`:''}`;
-  catBar.querySelectorAll('button[data-admin-category]').forEach(btn=>btn.addEventListener('click',()=>{adminCategoryFilter=btn.dataset.adminCategory;adminBrandFilter='ALL';loadProducts()}));
+  const normalHtml=roots.map(c=>button(c.name,c.name,'parentCat',c.id)).join('');
+  catBar.innerHTML=`<div class="adminCatTopRow">${button('ALL')}${normalHtml}${button('BRAND')}</div>${title?`<div class="adminCatTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="adminCatSubRow">${selectedChildren.map(c=>button(c.name,c.name,childrenOf(c).length?'parentCat':'childCat',c.id)).join('')}</div>`:''}`;
+  catBar.querySelectorAll('button[data-admin-category]').forEach(btn=>btn.addEventListener('click',()=>{
+    adminCategoryFilter=btn.dataset.adminCategory;
+    adminCategoryFilterId=btn.dataset.adminCategoryId||null;
+    if(adminCategoryFilter==='ALL'||adminCategoryFilter==='BRAND')adminCategoryFilterId=null;
+    adminBrandFilter='ALL';
+    loadProducts();
+  }));
 
   const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
   if(adminCategoryFilter!=='BRAND'){
@@ -324,7 +354,7 @@ function dedupeAdminAllProducts(data){
 function filteredAdminProducts(data){
   const filtered=data.filter(p=>{
     const category=String(p.category||'').trim();
-    if(adminCategoryFilter!=='ALL' && adminCategoryFilter!=='BRAND' && !categoryDescendantNames(adminCategoryFilter).some(x=>x===category))return false;
+    if(adminCategoryFilter!=='ALL' && adminCategoryFilter!=='BRAND' && !categoryDescendantNames(adminCategoryFilter,adminCategoryFilterId).some(x=>x===category))return false;
     if(adminCategoryFilter==='BRAND' && adminBrandFilter!=='ALL')return normalizeBrand(p.brand)===normalizeBrand(adminBrandFilter);
     return true;
   });
@@ -367,7 +397,8 @@ document.addEventListener('change',e=>{
 });
 async function loadProducts(){
   try{
-    const data=await api('/rest/v1/products?select=*&order=created_at.desc');
+    const data=await api('/rest/v1/products?select=*&order=created_at.desc,id.desc');
+    data.sort((a,b)=>{const at=Date.parse(a.created_at||'')||0,bt=Date.parse(b.created_at||'')||0;return bt-at||(Number(b.id)||0)-(Number(a.id)||0)});
     renderAdminFilters(data);
     window.__allAdminProducts=data;
     const filtered=filteredAdminProducts(data);
