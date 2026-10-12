@@ -18,7 +18,7 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .orderForm{padding:20px 18px;display:grid;gap:10px}.orderForm label{font-size:12px;color:var(--muted)}.orderForm input,.orderForm textarea{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}.orderForm textarea{min-height:90px;resize:vertical}.orderSummary{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13px;line-height:1.8}.orderDone{padding:30px 20px;text-align:center;line-height:1.9}.orderDone button{margin-top:16px;padding:12px 18px;border:0;border-radius:10px;background:var(--ink);color:#fff}
 </style></head>
 <body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
-<section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 <br>필히 확인후 주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 <br>주문서를 제출해 주세요. 🤍<br><br>주문서 제출 후 <strong><br>1:1 채팅으로 성함과 연락처를 남겨주시면</strong><br>확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인후 이용 바랍니다 🤍 </strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><main id="grid" class="grid"></main></div>
+<section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><main id="grid" class="grid"></main></div>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
 const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[];
@@ -33,8 +33,7 @@ function loadCart(){
 }
 function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
 const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
-function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*(\d+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number(m?.[2]||'0')}}
-function colorOptions(arr){return (arr||[]).map(v=>{let x=parseSize(v);return `<option value="${x.name}" data-add="${x.add}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
+function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
 async function load(){
   const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
     sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
@@ -61,17 +60,23 @@ function categoryTreeRows(parentId=null,depth=0,rows=[]){
   siteCategories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
   return rows;
 }
-function categoryDescendantNames(name){
+function categoryDescendantNames(name,rootId=null){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const root=siteCategories.find(c=>String(c.name)===String(name));
-  if(!root)return [String(name)];
-  const out=[];
+  const roots=rootId!=null
+    ? siteCategories.filter(c=>String(c.id)===String(rootId))
+    : siteCategories.filter(c=>String(c.name)===String(name));
+  if(!roots.length)return [String(name)];
+  const out=new Set(),visited=new Set();
   const walk=id=>{
-    const c=siteCategories.find(x=>String(x.id)===String(id));
-    if(c&&clean(c.name)!=='26WINTER(전체보기)')out.push(String(c.name));
-    siteCategories.filter(x=>String(x.parent_id??'')===String(id??'')).forEach(x=>walk(x.id));
+    const key=String(id);
+    if(visited.has(key))return;
+    visited.add(key);
+    const c=siteCategories.find(x=>String(x.id)===key);
+    if(c&&clean(c.name)!=='26WINTER(전체보기)')out.add(String(c.name));
+    siteCategories.filter(x=>String(x.parent_id??'')===key).forEach(x=>walk(x.id));
   };
-  walk(root.id);return [...new Set(out)];
+  roots.forEach(root=>walk(root.id));
+  return [...out];
 }
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
@@ -123,7 +128,7 @@ function render(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   let a=products.filter(p=>{
     const productCategory=String(p.category||'').trim();
-    const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category).includes(productCategory);
+    const categoryOk=category==='ALL'||category==='BRAND'||categoryDescendantNames(category,categoryId).includes(productCategory);
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
     return categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
   });
@@ -180,11 +185,11 @@ function render(){
 }
 function img(p){return p.images&&p.images[0]?`<img src="${p.images[0]}" alt="${p.name}">`:'PRODUCT IMAGE'}
 function options(arr){return (arr||[]).map(v=>{let x=parseSize(v);return `<option value="${x.add}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
-function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}</div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${colorOptions(p.colors&&p.colors.length?p.colors:['기본색상'])}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
-function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id),colorAdd=Number(c.options[c.selectedIndex]?.dataset.add||0);addCart(p,c.value,s.options[s.selectedIndex].text,Number(s.value||0)+colorAdd)}
+function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}</div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div><div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
+function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id);addCart(p,c.value,s.options[s.selectedIndex].text,+s.value)}
 function addCart(p,color,size,add){if(!user){if(confirm('장바구니에 담으려면 로그인이 필요해요.\n\n로그인 화면으로 이동할까요?'))openLogin();return}let key=p.id+'-'+color+'-'+size;let x=cart.find(i=>i.key===key);x?x.qty++:cart.push({key,id:p.id,name:p.name,color,size,add,qty:1});save();alert('장바구니에 담았어요 🤍')}
-function detail(id){let p=products.find(x=>x.id===id);document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('detail')">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><h1>${p.name}</h1><p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${colorOptions(p.colors&&p.colors.length?p.colors:['기본색상'])}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div><div class="detailPriceBox"><div class="detailPriceRow"><span>정상가</span><b>${won(p.normal_price)}</b></div>${approved&&user&&p.member_price!=null?`<div class="detailPriceRow special"><span>특별회원가</span><b>${won(p.member_price)}</b></div>`:''}</div></div><div class="bottom"><button onclick="closeLayer('detail')">뒤로</button><button class="primary" onclick="dadd(${p.id})">장바구니 담기</button></div></div>`}
-function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds'),c=document.getElementById('dc'),colorAdd=Number(c.options[c.selectedIndex]?.dataset.add||0);addCart(p,c.value,s.options[s.selectedIndex].text,Number(s.value||0)+colorAdd)}
+function detail(id){let p=products.find(x=>x.id===id);document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('detail')">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><h1>${p.name}</h1><p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div><div class="detailPriceBox"><div class="detailPriceRow"><span>정상가</span><b>${won(p.normal_price)}</b></div>${approved&&user&&p.member_price!=null?`<div class="detailPriceRow special"><span>특별회원가</span><b>${won(p.member_price)}</b></div>`:''}</div></div><div class="bottom"><button onclick="closeLayer('detail')">뒤로</button><button class="primary" onclick="dadd(${p.id})">장바구니 담기</button></div></div>`}
+function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds');addCart(p,document.getElementById('dc').value,s.options[s.selectedIndex].text,+s.value)}
 function openCart(){
   closeAll();
   const el=document.getElementById('cart'); el.hidden=false;
@@ -226,7 +231,7 @@ async function submitOrder(){
 }
 async function openLogin(){closeAll();const el=document.getElementById('login');el.hidden=false;let {data:{session}}=await sb.auth.getSession();if(session){user=session.user;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><p>${user.email}님, 안녕하세요 🤍</p><p class="small">${approved?'회원 승인이 완료되어 회원가가 적용돼요.':'승인대기중이에요.\n관리자 승인 후 이용 가능해요.'}</p><button onclick="logout()">로그아웃</button></div></div>`}else{const saved=localStorage.getItem('byjaei_saved_email')||'';el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><input id="email" placeholder="이메일" value="${saved.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')login()"><input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:2px 0 8px;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0" ${saved?'checked':''}> 이메일/아이디 저장</label><button onclick="login()">로그인</button><button class="secondary" onclick="signup()">회원가입</button></div></div>`}}
 async function login(){let e=document.getElementById('email').value.trim(),p=document.getElementById('pw').value;if(!e||!p)return alert('이메일과 비밀번호를 입력해주세요.');if(document.getElementById('saveEmail')?.checked)localStorage.setItem('byjaei_saved_email',e);else localStorage.removeItem('byjaei_saved_email');let {error}=await sb.auth.signInWithPassword({email:e,password:p});if(error){return alert(error.message||'로그인에 실패했어요.')}const {data:pr}=await sb.from('profiles').select('approved,withdrawn').eq('id',(await sb.auth.getUser()).data.user.id).maybeSingle();if(pr?.withdrawn){await sb.auth.signOut();user=null;approved=false;return alert('탈퇴 처리된 회원이에요.\n새로 가입해서 이용해주세요.')}if(!pr?.approved){await sb.auth.signOut();user=null;approved=false;return alert('승인대기중이에요.\n관리자 승인 후 이용 가능해요.')}await refreshUser();closeLayer('login');render()}
-async function signup(){closeAll();const el=document.getElementById('login');el.hidden=false;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openLogin()">← 돌아가기</button><b>회원가입</b><span></span></div><div class="loginForm"><input id="signupName" placeholder="이름"><input id="signupPhone" type="tel" placeholder="연락처"><input id="signupEmail" type="email" placeholder="이메일"><input id="signupPw" type="password" placeholder="비밀번호 (6자 이상)"><input id="signupPwConfirm" type="password" placeholder="비밀번호 확인 (다시 입력)"><input id="signupReferral" placeholder="가입경로 또는 추천인 (업자 아님을 증명하기 위해 필히 기재 부탁드려요) "><button onclick="submitSignup()">회원가입</button><div class="small">가입 후 관리자 승인 전까지는 회원가가 적용되지 않아요.</div></div></div>`}
+async function signup(){closeAll();const el=document.getElementById('login');el.hidden=false;el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openLogin()">← 돌아가기</button><b>회원가입</b><span></span></div><div class="loginForm"><input id="signupName" placeholder="이름"><input id="signupPhone" type="tel" placeholder="연락처"><input id="signupEmail" type="email" placeholder="이메일"><input id="signupPw" type="password" placeholder="비밀번호 (6자 이상)"><input id="signupPwConfirm" type="password" placeholder="비밀번호 확인 (다시 입력)"><input id="signupReferral" placeholder="가입경로 (선택)"><button onclick="submitSignup()">회원가입</button><div class="small">가입 후 관리자 승인 전까지는 회원가가 적용되지 않아요.</div></div></div>`}
 async function submitSignup(){const name=document.getElementById('signupName').value.trim(),phone=document.getElementById('signupPhone').value.trim(),e=document.getElementById('signupEmail').value.trim(),p=document.getElementById('signupPw').value,pc=document.getElementById('signupPwConfirm').value,ref=document.getElementById('signupReferral').value.trim();if(!name||!phone||!e||p.length<6)return alert('이름, 연락처, 이메일을 입력하고 비밀번호는 6자 이상으로 설정해주세요.');if(p!==pc)return alert('비밀번호와 비밀번호 확인이 일치하지 않아요.');const {data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{name,phone,referral_source:ref}}});if(error)return alert(error.message);if(data.user){const {error:pe}=await sb.from('profiles').upsert({id:data.user.id,name,email:e,phone,referral_source:ref,approved:false},{onConflict:'id'});if(pe)console.warn('프로필 저장은 트리거에서 처리됩니다.',pe)}alert('가입이 완료됐어요.\n🤍\n\n승인대기중이에요.\n관리자 승인 후 이용 가능해요.');openLogin()}
 async function logout(){await sb.auth.signOut();user=null;closeLayer('login');render()}
 sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')showRecovery()})
