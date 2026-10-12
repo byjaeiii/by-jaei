@@ -21,7 +21,7 @@
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
 <div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2><button class="secondary" onclick="logout()">로그아웃</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
-사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>브랜드</label><input id="brand" placeholder="브랜드명을 입력해주세요."><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div style="margin-top:12px"><label>카테고리</label><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div id="sizeChartOptionFields"><div class="row"><div><label>정상가</label><input id="normal" type="number" min="0" step="1"></div><div><label>회원가 (정상가에서 25% 할인)</label><input id="member" type="number" min="0" step="1"></div></div><div class="uploadHint">정상가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요.</div><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"></div><label>상품 설명</label><textarea id="description"></textarea><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
+사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><label>브랜드</label><input id="brand" placeholder="브랜드명을 입력해주세요."><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표로 구분)</label><input id="colors" placeholder="예: BLACK, PINK"><label>사이즈 (쉼표로 구분)</label><input id="sizes" placeholder="예: S, M, 2XL (+4000)"><div class="row"><div><label>정상가</label><input id="normal" type="number" min="0" step="1"></div><div><label>회원가 (정상가에서 25% 할인)</label><input id="member" type="number" min="0" step="1"></div></div><div class="uploadHint">정상가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요.</div></div><label>상품 설명</label><textarea id="description"></textarea><div style="margin-top:12px"><label>카테고리</label><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
 <script>
 const CFG={supabaseUrl:'https://wquupamwhjwqyhtxctdl.supabase.co',supabaseKey:'sb_publishable_1MJJqt80Nqj4agK3g2YGPA_8CEZRpOh'};
 let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage.getItem('byjaei_admin_user')||'';let editingId=null,editingImages=[],photoItems=[],draggedPhotoId='';const $=id=>document.getElementById(id);
@@ -33,11 +33,11 @@ async function login(){const email=$('email').value.trim(),password=$('pw').valu
 $('loginBtn').addEventListener('click',login);$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 async function logout(){token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user');$('authBox').hidden=false;$('app').hidden=true;status('로그아웃됐어요.')}
 function getSelectedCategories(){
-  return [...document.querySelectorAll('input[name="category"]:checked')].map(x=>x.value);
+  return [...document.querySelectorAll('input[name="category"]:checked')].map(x=>String(x.value));
 }
-function setSelectedCategories(categories){
-  const set=new Set(categories||[]);
-  document.querySelectorAll('input[name="category"]').forEach(x=>x.checked=set.has(x.value));
+function setSelectedCategories(categoryIds){
+  const set=new Set((categoryIds||[]).map(String));
+  document.querySelectorAll('input[name="category"]').forEach(x=>x.checked=set.has(String(x.value)));
 }
 function toggleSizeChartFields(){
   const checked=$('isSizeChart').checked;
@@ -62,10 +62,11 @@ function parseOptionList(value){
 async function saveProduct(){
   const isSizeChart=$('isSizeChart').checked;
   const name=$('name').value.trim(),normal=Number($('normal').value),member=$('member').value?Number($('member').value):null;
-  const categories=getSelectedCategories();
+  const selectedCategoryIds=getSelectedCategories();
+  const selectedCategories=selectedCategoryIds.map(id=>categories.find(c=>String(c.id)===String(id))).filter(Boolean);
   if(!name)return alert('상품명을 입력해주세요.');
   if(!isSizeChart&&!normal)return alert('상품명과 정상가를 입력해주세요.');
-  if(!categories.length)return alert('카테고리를 하나 이상 선택해주세요.');
+  if(!selectedCategories.length)return alert('카테고리를 하나 이상 선택해주세요.');
   try{
     const urls=await uploadFiles();
     const basePayload={
@@ -81,23 +82,23 @@ async function saveProduct(){
     };
 
     if(editingId){
-      const payload={...basePayload,category:categories[0]};
-      await api('/rest/v1/products?id=eq.'+editingId,{method:'PATCH',body:JSON.stringify(payload),headers:{'Prefer':'return=minimal'}});
-      for(const category of categories.slice(1)){
+      const first=selectedCategories[0];
+      await api('/rest/v1/products?id=eq.'+editingId,{method:'PATCH',body:JSON.stringify({...basePayload,category:first.name,category_id:first.id}),headers:{'Prefer':'return=minimal'}});
+      for(const item of selectedCategories.slice(1)){
         const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
-        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category,sort_order:(Number(current?.[0]?.sort_order)||0)+1}),headers:{'Prefer':'return=representation'}});
+        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category:item.name,category_id:item.id,sort_order:(Number(current?.[0]?.sort_order)||0)+1}),headers:{'Prefer':'return=representation'}});
       }
       msg('상품이 수정됐어요 🤍');
     }else{
       const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
       let nextOrder=(Number(current?.[0]?.sort_order)||0)+1;
-      for(const category of categories){
-        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category,sort_order:nextOrder++}),headers:{'Prefer':'return=representation'}});
+      for(const item of selectedCategories){
+        await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...basePayload,category:item.name,category_id:item.id,sort_order:nextOrder++}),headers:{'Prefer':'return=representation'}});
       }
       msg('상품이 등록됐어요 🤍');
     }
     resetForm();
-    loadProducts();
+    await loadProducts();
   }catch(e){alert(e.message)}
 }
 function fileKey(f){return [f?.name||'',f?.size||0,f?.lastModified||0].join('::')}
@@ -170,15 +171,17 @@ function categoryDescendantNames(name,rootId=null){
 function renderCategoryOptions(selected=[]){
   const box=$('categoryOptions');
   if(!box)return;
-  const set=new Set(selected||[]);
+  const set=new Set((selected||[]).map(String));
   box.innerHTML=categoryTreeRows().map(({c,depth})=>{
     const top=depth===0;
     const safeName=String(c.name).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-    return `<label class="${top?'categoryOptionRoot':'categoryOptionChild'}" style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${top?8:depth*14}px;font-weight:${top?700:400}"><input type="checkbox" name="category" value="${safeName}" style="width:auto" ${set.has(c.name)?'checked':''}> ${top?safeName:`↳ ${safeName}`}</label>`;
+    return `<label class="${top?'categoryOptionRoot':'categoryOptionChild'}" style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${top?8:depth*14}px;font-weight:${top?700:400}"><input type="checkbox" name="category" value="${c.id}" data-category-name="${safeName}" style="width:auto" ${set.has(String(c.id))?'checked':''}> ${top?safeName:`↳ ${safeName}`}</label>`;
   }).join('');
 }
 function renderBulkCategoryOptions(){
-  const el=$('bulkCategory');if(!el)return;const current=el.value;el.innerHTML='<option value="">이동할 카테고리 선택</option>'+categoryTreeRows().map(({c,depth})=>`<option value="${String(c.name).replaceAll('"','&quot;')}">${depth?'↳ ':''}${c.name}</option>`).join('');if(categories.some(c=>c.name===current))el.value=current;
+  const el=$('bulkCategory');if(!el)return;const current=el.value;
+  el.innerHTML='<option value="">이동할 카테고리 선택</option>'+categoryTreeRows().map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');
+  if(categories.some(c=>String(c.id)===String(current)))el.value=current;
 }
 function categoryManagerChildren(id){
   return categories.filter(c=>String(c.parent_id??'')===String(id??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
@@ -201,6 +204,21 @@ function renderCategoryManager(){
 function categoryDescendantIds(id,out=new Set()){
   categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
 }
+function categoryBranchIds(id){
+  const out=new Set();
+  if(id==null||id==='')return out;
+  out.add(String(id));
+  categoryDescendantIds(id).forEach(x=>out.add(String(x)));
+  return out;
+}
+function uniqueCategoryIdForName(name){
+  const matches=categories.filter(c=>String(c.name)===String(name));
+  return matches.length===1?String(matches[0].id):null;
+}
+function resolveProductCategoryId(p){
+  if(p?.category_id!=null&&p.category_id!=='')return String(p.category_id);
+  return uniqueCategoryIdForName(p?.category);
+}
 function renderCategoryParentOptions(selected=''){
   const el=$('categoryParentInput');if(!el)return;const blocked=editingCategoryId?new Set([Number(editingCategoryId),...categoryDescendantIds(editingCategoryId)]):new Set();el.innerHTML='<option value="">상위 카테고리 없음</option>'+categoryTreeRows().filter(({c})=>!blocked.has(Number(c.id))).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');if(selected)el.value=String(selected);
 }
@@ -221,7 +239,10 @@ async function saveCategory(){
       const updatedCategory=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(editingCategoryId),{method:'PATCH',body:JSON.stringify({name,parent_id:parentId}),headers:{'Prefer':'return=representation'}});
       if(!Array.isArray(updatedCategory)||updatedCategory.length===0)throw new Error('카테고리 수정 권한이 없거나 해당 카테고리를 찾지 못했어요.');
       if(old&&old.name!==name){
-        await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});
+        await api('/rest/v1/products?category_id=eq.'+encodeURIComponent(editingCategoryId),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});
+        if(categories.filter(c=>String(c.name)===String(old.name)).length===1){
+          await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name)+'&category_id=is.null',{method:'PATCH',body:JSON.stringify({category:name,category_id:old.id}),headers:{'Prefer':'return=minimal'}});
+        }
       }
       alert('카테고리를 수정했어요.');
     }else{
@@ -251,9 +272,13 @@ async function moveCategory(id,direction){
 
 async function deleteCategory(id){
   const c=categories.find(x=>String(x.id)===String(id));if(!c)return;
-  const child=categories.some(x=>String(x.parent_id||'')===String(id));
+  const child=categories.some(x=>String(x.parent_id??'')===String(id));
   if(child)return alert('하위 카테고리가 있어요. 하위 카테고리를 먼저 삭제하거나 이동해주세요.');
-  const used=window.__allAdminProducts?.filter(p=>String(p.category||'')===String(c.name)).length||0;
+  const used=window.__allAdminProducts?.filter(p=>{
+    if(p.category_id!=null)return String(p.category_id)===String(id);
+    // legacy row without category_id: block deletion conservatively if names match
+    return String(p.category||'')===String(c.name);
+  }).length||0;
   if(used)return alert(`이 카테고리에 상품 ${used}개가 있어요. 상품을 다른 카테고리로 먼저 이동해주세요.`);
   if(!confirm(`'${c.name}' 카테고리를 삭제할까요?`))return;
   try{await api('/rest/v1/categories?id=eq.'+encodeURIComponent(id),{method:'DELETE'});if(String(editingCategoryId)===String(id))resetCategoryForm();await loadCategories();await loadProducts();}catch(e){alert('카테고리 삭제에 실패했어요.\n\n'+e.message)}
@@ -319,13 +344,15 @@ function toggleProductSelection(id,checked){
   updateBulkUI(window.__adminVisibleProducts||[]);
 }
 async function moveSelectedProducts(){
-  const ids=[...selectedProductIds],target=$('bulkCategory')?.value||'';
+  const ids=[...selectedProductIds],targetId=$('bulkCategory')?.value||'';
   if(!ids.length)return alert('이동할 상품을 선택해주세요.');
-  if(!target)return alert('이동할 카테고리를 선택해주세요.');
-  if(!confirm(`선택한 ${ids.length}개 상품을 '${target}' 카테고리로 이동할까요?`))return;
+  if(!targetId)return alert('이동할 카테고리를 선택해주세요.');
+  const target=categories.find(c=>String(c.id)===String(targetId));
+  if(!target)return alert('이동할 카테고리를 찾지 못했어요.');
+  if(!confirm(`선택한 ${ids.length}개 상품을 '${target.name}' 카테고리로 이동할까요?`))return;
   try{
     for(const id of ids){
-      await api('/rest/v1/products?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({category:target}),headers:{'Prefer':'return=minimal'}});
+      await api('/rest/v1/products?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({category:target.name,category_id:target.id}),headers:{'Prefer':'return=minimal'}});
     }
     selectedProductIds.clear();
     if($('bulkCategory'))$('bulkCategory').value='';
@@ -352,9 +379,18 @@ function dedupeAdminAllProducts(data){
   });
 }
 function filteredAdminProducts(data){
+  const branchIds=categoryBranchIds(adminCategoryFilterId);
   const filtered=data.filter(p=>{
-    const category=String(p.category||'').trim();
-    if(adminCategoryFilter!=='ALL' && adminCategoryFilter!=='BRAND' && !categoryDescendantNames(adminCategoryFilter,adminCategoryFilterId).some(x=>x===category))return false;
+    if(adminCategoryFilter!=='ALL' && adminCategoryFilter!=='BRAND'){
+      if(adminCategoryFilterId!=null){
+        if(p.category_id!=null){
+          if(!branchIds.has(String(p.category_id)))return false;
+        }else{
+          const legacyId=uniqueCategoryIdForName(p.category);
+          if(!legacyId||!branchIds.has(String(legacyId)))return false;
+        }
+      }else if(!categoryDescendantNames(adminCategoryFilter).some(x=>x===String(p.category||'').trim()))return false;
+    }
     if(adminCategoryFilter==='BRAND' && adminBrandFilter!=='ALL')return normalizeBrand(p.brand)===normalizeBrand(adminBrandFilter);
     return true;
   });
@@ -365,14 +401,15 @@ function isSizeChartProduct(p){return p?.is_size_chart===true||/사이즈\s*표|
 
 async function pinProduct(id){
   try{
-    const data=await api('/rest/v1/products?select=id,name,category,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
+    const data=await api('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
     const target=data.find(x=>String(x.id)===String(id));
     if(!target)return;
 
     // 사이즈표 상품은 같은 카테고리의 상품 순서에만 영향을 줍니다.
     // 일반 상품의 기존 고정 기능은 전체 상품 범위를 유지합니다.
+    const targetCategoryId=resolveProductCategoryId(target);
     const scope=isSizeChartProduct(target)
-      ? data.filter(x=>String(x.category||'')===String(target.category||''))
+      ? (targetCategoryId ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId) : data.filter(x=>String(x.id)===String(target.id)))
       : data;
     const numericOrders=scope.map(x=>Number(x.sort_order)).filter(Number.isFinite);
     const isPinned=Number(target.sort_order)<0;
@@ -407,7 +444,7 @@ async function loadProducts(){
     $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
       // 음수 sort_order는 고정 상태. 사이즈표 상품은 해당 카테고리 안에서만 고정됩니다.
       const pinned=Number(p.sort_order)<0;
-      return `<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`;
+      return `<div class="productCard" onclick="previewProduct(${p.id})"><img class="productCardImg" src="${p.images?.[0]||''}"><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();removeProduct(${p.id})">삭제</button></div></div></div>`;
     }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
   }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
 }
@@ -425,22 +462,22 @@ async function moveProduct(id,direction){
 }
 
 async function getProduct(id){const d=await api('/rest/v1/products?select=*&id=eq.'+id);return d[0]}
-async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([p.category||'CHILD']);$('isSizeChart').checked=!!p.is_size_chart;$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';toggleSizeChartFields();$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
-function categoryPathText(name){
+async function editProduct(id){const p=await getProduct(id);if(!p)return;editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([resolveProductCategoryId(p)].filter(Boolean));$('isSizeChart').checked=!!p.is_size_chart;$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('description').value=p.description||'';toggleSizeChartFields();$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
+function categoryPathText(name,categoryId=null){
   const target=String(name||'').trim();
   if(!target)return '-';
-  const start=categories.find(c=>String(c.name)===target);
+  const sameName=categories.filter(c=>String(c.name)===target);
+  const start=categoryId!=null?categories.find(c=>String(c.id)===String(categoryId)):(sameName.length===1?sameName[0]:null);
   if(!start)return target;
   const chain=[];const seen=new Set();let cur=start;
-  while(cur&& !seen.has(String(cur.id))){
-    seen.add(String(cur.id));
-    chain.unshift(String(cur.name));
+  while(cur&&!seen.has(String(cur.id))){
+    seen.add(String(cur.id));chain.unshift(String(cur.name));
     cur=categories.find(c=>String(c.id)===String(cur.parent_id??''));
   }
   if(chain.length<=1)return chain[0]||target;
   return chain.map((x,i)=>i===chain.length-1?`<span class="current">${x}</span>`:x).join(' &nbsp;›&nbsp; ');
 }
-function previewProduct(id){getProduct(id).then(p=>{if(!p)return;const l=document.createElement('div');l.className='previewLayer';l.id='pv';l.onclick=e=>{if(e.target===l)l.remove()};l.innerHTML=`<div class="previewBox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">상품 미리보기</h2><button class="secondary" onclick="$('pv').remove()">닫기</button></div><div class="previewGrid">${(p.images||[]).map(x=>`<img src="${x}">`).join('')}</div><h2>${p.name}</h2><div class="note">${p.brand||''}</div><div class="previewCategoryPath">${categoryPathText(p.category)}</div><p><b>${Number(p.normal_price).toLocaleString()}원</b>${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}</p><p>COLOR · ${(p.colors||[]).join(', ')||'-'}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</p><p class="descriptionText">${p.description||''}</p><button onclick="$('pv').remove();editProduct(${p.id})">수정하기</button></div>`;document.body.appendChild(l)})}
+function previewProduct(id){getProduct(id).then(p=>{if(!p)return;const l=document.createElement('div');l.className='previewLayer';l.id='pv';l.onclick=e=>{if(e.target===l)l.remove()};l.innerHTML=`<div class="previewBox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">상품 미리보기</h2><button class="secondary" onclick="$('pv').remove()">닫기</button></div><div class="previewGrid">${(p.images||[]).map(x=>`<img src="${x}">`).join('')}</div><h2>${p.name}</h2><div class="note">${p.brand||''}</div><div class="previewCategoryPath">${categoryPathText(p.category,p.category_id)}</div><p><b>${Number(p.normal_price).toLocaleString()}원</b>${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}</p><p>COLOR · ${(p.colors||[]).join(', ')||'-'}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</p><p class="descriptionText">${p.description||''}</p><button onclick="$('pv').remove();editProduct(${p.id})">수정하기</button></div>`;document.body.appendChild(l)})}
 async function removeProduct(id){if(!confirm('이 상품을 삭제할까요?'))return;try{await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});loadProducts()}catch(e){alert(e.message)}}
 function dateKST(v){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date(v))}
 function matchesDate(v,from,to){const d=dateKST(v);return (!from||d>=from)&&(!to||d<=to)}
