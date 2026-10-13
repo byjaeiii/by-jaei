@@ -99,6 +99,11 @@ async function saveProduct(){
     }
     resetForm();
     await loadProducts();
+    // 상품 등록/수정이 끝나면 다음 작업을 위해 사진 파일 선택 영역으로 이동합니다.
+    requestAnimationFrame(()=>{
+      const fileInput=$('images');
+      if(fileInput) fileInput.scrollIntoView({behavior:'smooth',block:'center'});
+    });
   }catch(e){alert(e.message)}
 }
 function fileKey(f){return [f?.name||'',f?.size||0,f?.lastModified||0].join('::')}
