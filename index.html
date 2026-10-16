@@ -53,6 +53,18 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .orderEmptyText{margin:0;font-size:13px;color:#827366;line-height:1.8}
 .orderEmptyAction{margin-top:22px;padding:10px 18px;border:1px solid #d7c4b1;border-radius:999px;background:#fffaf3;color:#594537;font-size:10px;font-weight:700;letter-spacing:1.3px;cursor:pointer}
 @media(max-width:390px){.grid{gap:9px;padding-left:9px;padding-right:9px}.info{padding:9px}.name{font-size:13px}.cartPriceBlock{max-width:126px;font-size:10px}.thumb{width:66px;height:76px}.cartItem{gap:8px}.bottom{gap:5px;padding:10px 8px}.bottom button{padding:12px 6px;font-size:12px}}
+
+/* Product cards: align title, brand, price, options and buttons across each row */
+.grid{align-items:stretch}
+.product{display:flex;flex-direction:column;height:100%;min-width:0}
+.photo{flex:0 0 auto}
+.info{display:flex;flex:1;flex-direction:column;min-width:0}
+.name{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;height:2.8em;min-height:2.8em;line-height:1.4;overflow:hidden;overflow-wrap:anywhere;margin-bottom:7px}
+.brandName,.brandNameEmpty{display:block;height:1.4em;min-height:1.4em;max-height:1.4em;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;margin-top:-4px;margin-bottom:8px}
+.brandNameEmpty,.memberEmpty{visibility:hidden}
+.price{line-height:1.4;min-height:1.4em}
+.member{line-height:1.5;min-height:1.5em}
+
 </style></head>
 <body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
 <section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><main id="grid" class="grid"></main></div>
@@ -279,7 +291,12 @@ function render(){
 }
 function img(p){return p.images&&p.images[0]?`<img src="${p.images[0]}" alt="${p.name}">`:'PRODUCT IMAGE'}
 function options(arr){return (arr||[]).map(v=>{let x=parseSize(v);return `<option value="${x.add}">${x.name}${x.add?' (+'+won(x.add)+')':''}</option>`}).join('')}
-function card(p){return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}<button type="button" class="favoriteToggle" aria-label="찜하기" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button></div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div>${p.brand?`<div class="brandName">${safeText(p.brand)}</div>`:''}<div class="price">${won(p.normal_price)}</div>${approved&&user&&p.member_price!=null?`<div class="member">회원가 ${won(p.member_price)}</div>`:''}<div class="opts"><select id="c${p.id}" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`}
+function card(p){
+ const memberAvailable=!!(approved&&user&&p.member_price!=null);
+ const brandHtml=p.brand?`<div class="brandName">${safeText(p.brand)}</div>`:`<div class="brandName brandNameEmpty" aria-hidden="true"></div>`;
+ const memberHtml=memberAvailable?`<div class="member">회원가 ${won(p.member_price)}</div>`:`<div class="member memberEmpty" aria-hidden="true"></div>`;
+ return `<article class="product"><div class="photo" onclick="detail(${p.id})">${img(p)}<button type="button" class="favoriteToggle" aria-label="찜하기" onclick="event.stopPropagation();toggleFavorite(${p.id})">${isFavorite(p.id)?'♥':'♡'}</button></div><div class="info"><div class="name" onclick="detail(${p.id})">${p.name}</div>${brandHtml}<div class="price">${won(p.normal_price)}</div>${memberHtml}<div class="opts"><select id="c${p.id}" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select><select id="s${p.id}" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select><button class="add" onclick="quick(${p.id})">장바구니 담기</button></div></div></article>`
+}
 function quick(id){let p=products.find(x=>x.id===id),s=document.getElementById('s'+id),c=document.getElementById('c'+id);addCart(p,c.value,s.options[s.selectedIndex].text,+s.value)}
 function addCart(p,color,size,add){if(!user){if(confirm('장바구니에 담으려면 로그인이 필요해요.\n\n로그인 화면으로 이동할까요?'))openLogin();return}let key=p.id+'-'+color+'-'+size;let x=cart.find(i=>i.key===key);x?x.qty++:cart.push({key,id:p.id,name:p.name,color,size,add,qty:1});save();alert('장바구니에 담았어요 🤍')}
 function detailFromCart(id){detailReturnToCart=true;document.getElementById('cart').hidden=true;detail(id)}
