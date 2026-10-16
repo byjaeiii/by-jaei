@@ -95,7 +95,7 @@ function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$
 async function load(){
   const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
     sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
-    sb.from('categories').select('id,name,parent_id,sort_order,created_at').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+    sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
   ]);
   if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
   products=productData||[];
@@ -154,13 +154,39 @@ function uniqueCategoryIdForName(name){
   const matches=siteCategories.filter(c=>String(c.name)===String(name));
   return matches.length===1?String(matches[0].id):null;
 }
+function isCustomerCategoryHidden(id){
+  if(id==null||id==='')return false;
+  let current=siteCategories.find(c=>String(c.id)===String(id));
+  const seen=new Set();
+  while(current&&!seen.has(String(current.id))){
+    if(current.is_hidden===true)return true;
+    seen.add(String(current.id));
+    current=current.parent_id==null?null:siteCategories.find(c=>String(c.id)===String(current.parent_id));
+  }
+  return false;
+}
+function productBelongsToHiddenCategory(p){
+  if(p?.category_id!=null&&p.category_id!=='')return isCustomerCategoryHidden(p.category_id);
+  const matches=siteCategories.filter(c=>String(c.name)===String(p?.category||'').trim());
+  if(matches.length===1)return isCustomerCategoryHidden(matches[0].id);
+  // 레거시 상품에 category_id가 없고 동명 카테고리가 여러 개면, 모두 숨김일 때만 숨깁니다.
+  return matches.length>1&&matches.every(c=>isCustomerCategoryHidden(c.id));
+}
+function normalizedCustomerProductName(v){
+  return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
+}
+function customerVisibleProducts(){
+  const hiddenNames=new Set();
+  products.forEach(p=>{if(productBelongsToHiddenCategory(p)){const key=normalizedCustomerProductName(p.name);if(key)hiddenNames.add(key)}});
+  return products.filter(p=>!productBelongsToHiddenCategory(p)&&(!normalizedCustomerProductName(p.name)||!hiddenNames.has(normalizedCustomerProductName(p.name))));
+}
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)');
+  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(c.id));
   const catEl=document.getElementById('cats');
   const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
   const escape=v=>String(v).replaceAll('"','&quot;');
-  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
+  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(x.id))
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
   const selectedCategory=category==='ALL'||category==='BRAND'?null:(categoryId?siteCategories.find(x=>String(x.id)===String(categoryId)):siteCategories.find(x=>String(x.name)===String(category)));
   const rootOf=c=>{
@@ -185,7 +211,7 @@ function cats(){
     brandEl.hidden=true; brandEl.innerHTML=''; return;
   }
   const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
-  const brands=[...new Set(products.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>collator.compare(a,b));
+  const brands=[...new Set(customerVisibleProducts().map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>collator.compare(a,b));
   brandEl.hidden=false;
   brandEl.innerHTML=['ALL',...brands].map(x=>`<button type="button" class="${brandFilter===x?'active':''}" data-brand="${x.replaceAll('"','&quot;')}">${x}</button>`).join('');
 }
@@ -206,7 +232,8 @@ function render(){
   cats();renderQuickLinks();
   const q=(document.getElementById('search').value||'').toLowerCase();
   const favIds=favoriteIds(),recentProductIds=recentIds(),newCutoff=Date.now()-30*24*60*60*1000;
-  let a=products.filter(p=>{
+  const visibleProducts=customerVisibleProducts();
+  let a=visibleProducts.filter(p=>{
     const created=Date.parse(p.created_at||'')||0;
     const viewOk=quickView==='new'?created>=newCutoff:quickView==='favorites'?favIds.includes(String(p.id)):quickView==='recent'?recentProductIds.includes(String(p.id)):true;
     const productCategory=String(p.category||'').trim();

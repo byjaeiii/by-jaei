@@ -105,6 +105,16 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 }
 </style>
 
+<style id="category-visibility-admin-style">
+.categoryVisibilityTag{display:inline-flex;align-items:center;margin-top:5px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);font-size:10px;line-height:1.4;color:var(--muted);background:#fffdf9}
+.categoryVisibilityTag.isHidden{color:#9b5d50;border-color:#e4c9c2;background:#fbefec}
+.categoryVisibilityTag.inheritedHidden{color:#876f52;border-color:#e7d8c6;background:#f8f1e8}
+.categoryManagerRow{flex-wrap:wrap}
+.categoryManagerRow .grow{flex:1 1 145px;min-width:100px}
+.categoryManagerRow .categoryVisibilityBtn{white-space:nowrap}
+@media(max-width:560px){.categoryManagerRow{gap:5px}.categoryManagerRow .grow{flex:1 1 calc(100% - 42px)}.categoryManagerRow>button{flex:1 1 auto;min-width:42px}.categoryManagerRow .categoryVisibilityBtn{flex:1 1 100%;width:100%}}
+</style>
+
 </head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -114,7 +124,7 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
   <button type="button" data-admin-section="orders">주문관리</button>
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
-<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
+<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
 사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">이동할 카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
 <div class="box" id="adminPushBox" style="margin:14px 0;background:#f7f3ed">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -432,15 +442,50 @@ function toggleCategoryOpen(id){
   categoryOpenIds.has(key)?categoryOpenIds.delete(key):categoryOpenIds.add(key);
   renderCategoryManager();
 }
+function categoryIsHiddenInAdminTree(id, includeSelf=true){
+  let current=categories.find(c=>String(c.id)===String(id));
+  const seen=new Set();
+  if(!includeSelf&&current){seen.add(String(current.id));current=current.parent_id==null?null:categories.find(c=>String(c.id)===String(current.parent_id));}
+  while(current&&!seen.has(String(current.id))){
+    if(current.is_hidden===true)return true;
+    seen.add(String(current.id));
+    current=current.parent_id==null?null:categories.find(c=>String(c.id)===String(current.parent_id));
+  }
+  return false;
+}
 function renderCategoryManager(){
   const list=$('categoryManagerList');if(!list)return;
   const roots=categories.filter(c=>c.parent_id==null && String(c.name).replace(/\s+/g,'').toUpperCase()!=='26WINTER(전체보기)').sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
   const row=(c,depth=0)=>{
     const children=categoryManagerChildren(c.id);
     const open=categoryOpenIds.has(String(c.id));
-    return `<div class="categoryTreeNode"><div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="categoryToggle">${children.length?`<button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen(${c.id})">${open?'−':'+'}</button>`:'<span class="categoryExpandSpacer"></span>'}</div><div class="grow"><b>${c.name}</b>${children.length?`<div class="categoryDepth">하위 ${children.length}개</div>`:''}</div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button></div>${open?`<div class="categoryTreeChildren">${children.map(ch=>row(ch,depth+1)).join('')}</div>`:''}</div>`;
+    const ownHidden=c.is_hidden===true;
+    const inheritedHidden=!ownHidden&&categoryIsHiddenInAdminTree(c.id,false);
+    const statusText=ownHidden?'고객페이지 숨김 설정':inheritedHidden?'상위 카테고리 숨김으로 고객 비노출':'고객페이지 표시 중';
+    const statusClass=ownHidden?'isHidden':inheritedHidden?'inheritedHidden':'';
+    const toggleText=ownHidden?'다시 표시':'숨기기';
+    const toggleClass=ownHidden?'secondary categoryVisibilityBtn':'secondary categoryVisibilityBtn';
+    return `<div class="categoryTreeNode"><div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="categoryToggle">${children.length?`<button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen(${c.id})">${open?'−':'+'}</button>`:'<span class="categoryExpandSpacer"></span>'}</div><div class="grow"><b>${c.name}</b>${children.length?`<div class="categoryDepth">하위 ${children.length}개</div>`:''}<div><span class="categoryVisibilityTag ${statusClass}">${statusText}</span></div></div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button><button type="button" class="${toggleClass}" onclick="toggleCategoryVisibility('${String(c.id)}')">${toggleText}</button></div>${open?`<div class="categoryTreeChildren">${children.map(ch=>row(ch,depth+1)).join('')}</div>`:''}</div>`;
   };
   list.innerHTML=roots.map(c=>row(c,0)).join('') || '<p class="note">등록된 카테고리가 없어요.</p>';
+}
+async function toggleCategoryVisibility(id){
+  const c=categories.find(x=>String(x.id)===String(id));if(!c)return;
+  const willHide=c.is_hidden!==true;
+  const childCount=categoryDescendantIds(id).size;
+  const action=willHide?'숨기기':'다시 표시하기';
+  const detail=willHide?`\n\n하위 카테고리 ${childCount}개가 있으면 함께 고객페이지에서 숨겨집니다. 해당 카테고리에 속한 상품도 고객페이지에서 보이지 않지만 삭제되지는 않습니다.`:'\n\n이 카테고리가 다시 표시되면 개별적으로 숨김 설정된 하위 카테고리를 제외하고 고객페이지에 표시됩니다.';
+  if(!confirm(`'${c.name}' 카테고리를 ${action}할까요?${detail}`))return;
+  try{
+    const updated=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({is_hidden:willHide}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(updated)||!updated.length)throw new Error('카테고리 변경 권한이 없거나 수정 결과를 확인하지 못했어요.');
+    await loadCategories();
+    await loadProducts();
+    alert(willHide?'카테고리를 숨겼어요. 고객페이지의 하위 카테고리와 상품도 숨겨집니다.':'카테고리를 다시 표시했어요.');
+  }catch(e){
+    const message=String(e?.message||e);
+    alert('카테고리 표시 설정을 저장하지 못했어요.\n\nSupabase에서 BYJAEI_category_visibility_migration.sql을 먼저 실행했는지 확인해주세요.\n\n오류: '+message);
+  }
 }
 function categoryDescendantIds(id,out=new Set()){
   categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
@@ -464,7 +509,7 @@ function renderCategoryParentOptions(selected=''){
   const el=$('categoryParentInput');if(!el)return;const blocked=editingCategoryId?new Set([Number(editingCategoryId),...categoryDescendantIds(editingCategoryId)]):new Set();el.innerHTML='<option value="">상위 카테고리 없음</option>'+categoryTreeRows().filter(({c})=>!blocked.has(Number(c.id))).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');if(selected)el.value=String(selected);
 }
 async function loadCategories(){
-  const data=await api('/rest/v1/categories?select=id,name,parent_id,sort_order,created_at&order=sort_order.asc,created_at.asc');
+  const data=await api('/rest/v1/categories?select=id,name,parent_id,sort_order,created_at,is_hidden&order=sort_order.asc,created_at.asc');
   categories=Array.isArray(data)?data:[];
   renderCategoryOptions();renderBulkCategoryOptions();renderCategoryParentOptions();renderCategoryManager();
 }
