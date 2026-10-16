@@ -71,6 +71,40 @@
   }
 }
 </style>
+
+<style id="mobile-members-no-clipping-fix">
+/* 회원관리 모바일 화면 잘림 방지: 기존 기능/데이터 처리는 유지 */
+html, body { width:100%; max-width:100%; overflow-x:hidden; }
+.wrap { width:100%; min-width:0; max-width:760px; }
+.adminSection, .adminSection .box, #members, #memberFilterCount { width:100%; min-width:0; max-width:100%; }
+#adminSection-members .filterBar {
+  width:100%; min-width:0; max-width:100%; box-sizing:border-box;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+#adminSection-members .filterBar > * { min-width:0; max-width:100%; box-sizing:border-box; }
+#adminSection-members #memberNameSearch,
+#adminSection-members #memberPhoneSearch,
+#adminSection-members .filterBar button { grid-column:1 / -1; width:100%; }
+#adminSection-members #memberFrom { grid-column:1; }
+#adminSection-members #memberTo { grid-column:2; }
+#adminSection-members .filterBar input[type="date"] { min-width:0; width:100%; padding-left:8px; padding-right:6px; font-size:12px; }
+#adminSection-members .memberRow { width:100%; min-width:0; gap:10px; }
+#adminSection-members .memberRow > div:first-child { flex:1 1 auto; min-width:0; max-width:100%; overflow-wrap:anywhere; word-break:break-word; }
+#adminSection-members .memberRow .smallText { min-width:0; max-width:100%; overflow-wrap:anywhere; word-break:break-word; }
+#adminSection-members .memberActions { min-width:0; max-width:100%; }
+#adminSection-members .memberActions button { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+@media (max-width:700px) {
+  .wrap { padding:12px; }
+  .box { padding:14px; }
+  #adminSection-members .memberRow { display:flex; flex-direction:column; align-items:stretch !important; justify-content:flex-start; }
+  #adminSection-members .memberRow > div:first-child { width:100%; flex:none; }
+  #adminSection-members .memberActions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); justify-content:stretch; width:100%; gap:8px; }
+  #adminSection-members .memberActions button { width:100%; min-width:0; padding:10px 8px; font-size:12px; }
+  #adminSection-members .filterBar { gap:8px; }
+  #adminSection-members .filterBar button { padding:12px 10px; }
+}
+</style>
+
 </head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
