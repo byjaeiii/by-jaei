@@ -190,7 +190,7 @@ document.getElementById('brandCats').addEventListener('click',e=>{
 document.getElementById('quickLinks').addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(b)setQuickView(b.dataset.view)});
 function render(){
   const accountLink=document.querySelector('.loginLink');
-  if(accountLink)accountLink.textContent=user?'MY PAGE':'LOGIN';
+  if(accountLink)accountLink.textContent=user?'MYPAGE':'LOGIN';
   cats();renderQuickLinks();
   const q=(document.getElementById('search').value||'').toLowerCase();
   const favIds=favoriteIds(),recentProductIds=recentIds(),newCutoff=Date.now()-30*24*60*60*1000;
@@ -340,8 +340,8 @@ async function loadMyOrders(){
   closeAll();
   const el=document.getElementById('login');
   el.hidden=false;
-  el.innerHTML='<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="openLogin()">← MY PAGE</button><b>MY ORDERS</b><span></span></div><div class="myOrders"><div class="myOrdersLoading">LOADING YOUR ORDERS...</div></div></div>';
-  const emptyOrderMessage='<div class="orderEmpty"><div class="orderEmptyMark">♡</div><p class="orderEmptyTitle">NO ORDERS YET</p><p class="orderEmptyText">주문하신 정보가 없습니다.</p><button class="orderEmptyAction" onclick="openLogin()">MY PAGE</button></div>';
+  el.innerHTML='<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="openLogin()">← MYPAGE</button><b>주문 내역</b><span></span></div><div class="myOrders"><div class="myOrdersLoading">주문 내역을 불러오는 중이에요...</div></div></div>';
+  const emptyOrderMessage='<div class="orderEmpty"><div class="orderEmptyMark">♡</div><p class="orderEmptyTitle">주문 내역 없음</p><p class="orderEmptyText">주문하신 정보가 없습니다.</p><button class="orderEmptyAction" onclick="openLogin()">MYPAGE</button></div>';
   try{
     let result=await sb.from('orders').select('id,created_at,items,total_price,status,shipping_carrier,tracking_number').eq('user_id',user.id).order('created_at',{ascending:false});
     if(result.error){
@@ -378,7 +378,7 @@ async function openLogin(){
   let {data:{session}}=await sb.auth.getSession();
   if(session){
     user=session.user;
-    el.innerHTML=`<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="closeLayer('login')">←</button><b>MY PAGE</b><span></span></div><div class="loginForm myPageForm"><div class="accountWelcome"><span class="accountEyebrow">YOUR ACCOUNT</span><p class="accountEmail">${safeText(user.email)}</p><p class="small">${approved?'Membership approved · member pricing is applied.':'Your membership is awaiting approval.'}</p></div><button onclick="loadMyOrders()">ORDER HISTORY <span aria-hidden="true">↗</span></button><button class="secondary" onclick="logout()">LOG OUT</button></div></div>`;
+    el.innerHTML=`<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="closeLayer('login')">←</button><b>MYPAGE</b><span></span></div><div class="loginForm myPageForm"><div class="accountWelcome"><span class="accountEyebrow">회원 정보</span><p class="accountEmail">${safeText(user.email)}</p><p class="small">${approved?'회원 승인이 완료되어 회원가가 적용돼요.':'회원 승인 대기 중이에요.'}</p></div><button onclick="loadMyOrders()">주문 내역 확인 <span aria-hidden="true">↗</span></button><button class="secondary" onclick="logout()">LOG OUT</button></div></div>`;
   }else{
     const saved=localStorage.getItem('byjaei_saved_email')||'';
     el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><input id="email" placeholder="이메일" value="${saved.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')login()"><input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:2px 0 8px;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0" ${saved?'checked':''}> 이메일/아이디 저장</label><button onclick="login()">로그인</button><button class="secondary" onclick="signup()">회원가입</button></div></div>`;
