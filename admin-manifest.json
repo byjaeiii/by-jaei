@@ -1,0 +1,19 @@
+{
+  "id": "/admin-app",
+  "name": "BYJAEI 관리자",
+  "short_name": "JAEI ADMIN",
+  "start_url": "/admin.html?section=orders",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ed",
+  "theme_color": "#f7f3ed",
+  "description": "BYJAEI 관리자 주문 및 회원 알림",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
