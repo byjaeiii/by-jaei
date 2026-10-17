@@ -163,6 +163,104 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 .pointGrantDialog .actions>*{flex:1}
 @media(max-width:560px){.memberPointHistoryRow{gap:6px}.pointGrantDialog{padding:16px}}
 </style>
+
+<style id="byjaei-mobile-admin-layout-alignment-fix">
+/* Mobile alignment fixes: product cards, order filters and member cards */
+html, body { width:100%; max-width:100%; overflow-x:hidden; }
+.wrap { width:100%; max-width:760px; min-width:0; }
+.wrap, .adminSection, .adminSection .box, #list, #orders, #members { min-width:0; max-width:100%; }
+.adminSection .box, .adminSection .box * { box-sizing:border-box; }
+.logo { max-width:100%; overflow-wrap:anywhere; }
+
+@media (max-width:700px) {
+  /* Product-card buttons should be readable, not letter-stacked in narrow columns. */
+  .productAdminGrid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .productCard, .productCardBody { min-width:0; }
+  .productCardActions {
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;
+    width:100%; min-width:0; gap:6px;
+  }
+  .productCardActions button {
+    display:flex; align-items:center; justify-content:center;
+    width:100%; min-width:0; max-width:100%; min-height:38px;
+    flex:none !important; margin:0; padding:8px 5px !important;
+    font-size:11px !important; line-height:1.35;
+    white-space:normal !important; word-break:keep-all; overflow-wrap:anywhere;
+  }
+  .productCardActions button:first-child { grid-column:1 / -1; }
+
+  /* Search filters: name and phone full-width; dates share one row; search full-width. */
+  .filterBar {
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important; width:100%; min-width:0; max-width:100%;
+  }
+  .filterBar > * { min-width:0 !important; width:100% !important; max-width:100%; grid-column:auto; }
+  .filterBar input:first-child,
+  .filterBar input:nth-child(2),
+  .filterBar button { grid-column:1 / -1 !important; }
+  .filterBar input[type="date"] {
+    min-width:0 !important; width:100% !important; max-width:100%;
+    padding:10px 7px !important; font-size:12px !important;
+  }
+  .filterBar button { padding:11px 10px !important; }
+
+  /* Consistent order cards and prevent long emails/address text from widening the page. */
+  .orderRow {
+    display:flex; flex-direction:column; align-items:stretch !important;
+    justify-content:flex-start; gap:12px; width:100%; min-width:0; max-width:100%;
+  }
+  .orderRow > div:first-child {
+    width:100%; max-width:100%; min-width:0; flex:1 1 auto;
+    overflow-wrap:anywhere; word-break:normal;
+  }
+  .orderRow .smallText, .orderRow .orderItems, .orderRow .orderItemLine,
+  .orderRow textarea, .orderRow input { max-width:100%; min-width:0; overflow-wrap:anywhere; }
+  .orderRow textarea { width:100% !important; }
+  .orderRow .orderActions {
+    display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:center; gap:8px; width:100%; min-width:0; max-width:100%;
+  }
+  .orderRow .orderActions > b { grid-column:1 / -1; }
+  .orderRow .orderActions select, .orderRow .orderActions button {
+    width:100% !important; min-width:0; max-width:100%; margin:0;
+    padding:10px 7px !important; font-size:12px !important; white-space:normal;
+    word-break:keep-all; overflow-wrap:anywhere;
+  }
+  #orders input[id^="memo_"] { flex:1 1 100%; width:100% !important; min-width:0; }
+  #orders input[id^="memo_"] ~ button { flex:1 1 auto; min-width:0; }
+
+  /* Member details and action buttons use the same alignment on every card. */
+  .memberRow {
+    display:flex; flex-direction:column; align-items:stretch !important;
+    justify-content:flex-start; gap:10px; width:100%; min-width:0; max-width:100%;
+  }
+  .memberRow > div:first-child {
+    width:100%; max-width:100%; min-width:0; flex:1 1 auto;
+    overflow-wrap:anywhere; word-break:normal;
+  }
+  .memberRow .smallText { width:100%; max-width:100%; min-width:0; overflow-wrap:anywhere; }
+  .memberActions {
+    display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px; width:100%; min-width:0; max-width:100%; justify-content:stretch;
+  }
+  .memberActions button {
+    width:100% !important; min-width:0; max-width:100%; padding:10px 8px !important;
+    font-size:12px !important; line-height:1.35; white-space:normal;
+    word-break:keep-all; overflow-wrap:anywhere;
+  }
+  .memberPointsInline { width:100%; min-width:0; max-width:100%; align-items:center; }
+  .memberPointHistory { width:100%; min-width:0; max-width:100%; }
+
+  /* Category-manager rows may wrap but controls remain normal-sized. */
+  .categoryManagerRow { min-width:0; max-width:100%; }
+  .categoryManagerRow .grow { min-width:0; overflow-wrap:anywhere; }
+  .categoryManagerRow > button { white-space:normal; word-break:keep-all; }
+}
+</style>
+
 </head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
