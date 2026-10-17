@@ -92,6 +92,8 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .pagination button:disabled{opacity:.35;cursor:default}
 .pagination .pageGap{color:var(--muted);font-size:12px;padding:0 2px}
 @media(max-width:390px){.pagination{gap:4px}.pagination button{min-width:31px;height:32px;padding:0 8px}}
+/* Mobile pagination: keep page controls above the browser floating/toolbar controls */
+@media(max-width:560px){.pagination{position:relative;transform:translateY(-64px);margin-bottom:-64px;z-index:2}.pagination button{position:relative;z-index:2}}
 
 </style></head>
 <body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
