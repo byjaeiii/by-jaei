@@ -65,12 +65,31 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .price{line-height:1.4;min-height:1.4em}
 .member{line-height:1.5;min-height:1.5em}
 
+
+.loyaltyCard{border:1px solid #e6d8c7;background:linear-gradient(145deg,#fffdf8,#f6eee4);border-radius:16px;padding:16px;margin:2px 0 8px}
+.loyaltyCardHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.loyaltyCardLabel{font-size:12px;color:#806c5b}
+.loyaltyCardValue{font-size:22px;font-weight:700;color:#594537}
+.loyaltyHistory{border-top:1px solid #e6d8c7;margin-top:12px;padding-top:8px;display:grid;gap:7px}
+.loyaltyHistoryRow{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#827366;line-height:1.5}
+.loyaltyHistoryRow b{white-space:nowrap;color:#594537}
+.checkoutPoints{margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fffdf8;font-size:13px;line-height:1.75}
+.checkoutPointsHead,.checkoutPointsTotal{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.checkoutPointsHead b{font-size:15px}
+.checkoutPointsInputRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:10px}
+.checkoutPointsInputRow label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px}
+.checkoutPointsInputRow input{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit}
+.checkoutPointsInputRow button{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);white-space:nowrap}
+.checkoutPointsHint{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
+.checkoutPointsTotal{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-weight:600}
+@media(max-width:380px){.checkoutPointsInputRow{grid-template-columns:minmax(0,1fr)}.checkoutPointsInputRow button{width:100%}}
 </style></head>
 <body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
 <section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><main id="grid" class="grid"></main></div>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
 const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[],detailReturnToCart=false,quickView='all',checkoutDraft=null;
+let loyaltyPointsBalance=0, checkoutProductTotal=0, loyaltyPointsReady=false;
 const guestCartKey='byjaei_cart_guest',favoriteKey='byjaei_favorites_v1',recentKey='byjaei_recent_v1';
 function readIdList(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v.map(String):[]}catch{return []}}
 function writeIdList(key,ids){localStorage.setItem(key,JSON.stringify(ids.map(String)))}
@@ -359,8 +378,45 @@ function openOrder(itemsOverride=null){
   const total=itemsToOrder.reduce((a,x)=>{const p=products.find(p=>String(p.id)===String(x.id));return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
   const discount=Math.max(0,normalTotal-total);
   const rows=itemsToOrder.map(x=>{const p=products.find(p=>String(p.id)===String(x.id));if(!p)return '';const line=(getPrice(p)+Number(x.add||0))*x.qty;return `<div class="orderMini"><img src="${p.images?.[0]||''}" alt="${p.name}"><div class="orderMiniText"><div class="orderMiniName">${p.name}</div><div class="orderMiniOption">${x.color} / ${x.size} · ${x.qty}개</div></div><div class="orderMiniPrice">${won(line)}</div></div>`}).join('');
-  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openCart()">← 장바구니</button><b>주문서</b><span></span></div><div class="orderSummary">${checkoutDraft?'<div style="padding:0 0 9px;color:#9b6f55;font-weight:600">바로 구매 상품</div>':''}${rows}<div style="padding-top:12px;font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:16px"><span>총주문금액</span><b>${won(total)}</b></div></div></div><div class="orderForm"><label>성함</label><input id="orderName" placeholder="성함을 입력해주세요"><label>연락처</label><input id="orderPhone" placeholder="연락처를 입력해주세요"><label>배송지 <span style="font-size:11px;color:var(--muted);font-weight:400">(주소를 정확히 입력해주세요.)</span></label><input id="orderAddress" placeholder="배송지를 직접 입력해주세요"><label>요청사항</label><textarea id="orderMemo" placeholder="요청사항이 있다면 입력해주세요"></textarea><button class="primary" style="padding:13px;border:0;border-radius:11px;background:var(--ink);color:white;cursor:pointer" onclick="submitOrder()">주문서 제출하기</button></div></div>`;
+  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openCart()">← 장바구니</button><b>주문서</b><span></span></div><div class="orderSummary">${checkoutDraft?'<div style="padding:0 0 9px;color:#9b6f55;font-weight:600">바로 구매 상품</div>':''}${rows}<div style="padding-top:12px;font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:16px"><span>총주문금액</span><b>${won(total)}</b></div></div></div><div class="orderForm"><label>성함</label><input id="orderName" placeholder="성함을 입력해주세요"><label>연락처</label><input id="orderPhone" placeholder="연락처를 입력해주세요"><label>배송지 <span style="font-size:11px;color:var(--muted);font-weight:400">(주소를 정확히 입력해주세요.)</span></label><input id="orderAddress" placeholder="배송지를 직접 입력해주세요"><label>요청사항</label><textarea id="orderMemo" placeholder="요청사항이 있다면 입력해주세요"></textarea><div class="checkoutPoints"><div class="checkoutPointsHead"><span>보유 적립금</span><b id="checkoutPointsBalance">조회 중...</b></div><div class="checkoutPointsInputRow"><div><label for="pointsToUse">사용할 적립금 (1원 = 1P)</label><input id="pointsToUse" type="number" min="0" step="1" inputmode="numeric" value="0" disabled oninput="updateCheckoutPointsPreview()" onblur="normalizeCheckoutPointsInput()"></div><button type="button" onclick="useAllLoyaltyPoints()" id="useAllPointsButton" disabled>모두 사용</button></div><div id="checkoutPointsHint" class="checkoutPointsHint">적립금 잔액을 불러오고 있어요.</div><div class="checkoutPointsTotal"><span>적립금 적용 후 입금 예정액<br><small style="font-weight:400;color:var(--muted)">배송비 3,500원 포함</small></span><b id="checkoutPointsFinalTotal">${won(total+3500)}</b></div></div><button class="primary" style="padding:13px;border:0;border-radius:11px;background:var(--ink);color:white;cursor:pointer" onclick="submitOrder()">주문서 제출하기</button></div></div>`;
+  loadCheckoutPointBalance(total);
 }
+async function loadCheckoutPointBalance(subtotal){
+  checkoutProductTotal=Math.max(0,Math.round(Number(subtotal)||0));
+  loyaltyPointsBalance=0;loyaltyPointsReady=false;
+  const balanceEl=document.getElementById('checkoutPointsBalance');
+  const input=document.getElementById('pointsToUse');
+  const allBtn=document.getElementById('useAllPointsButton');
+  const hint=document.getElementById('checkoutPointsHint');
+  if(!balanceEl||!input)return;
+  input.value='0';input.disabled=true;if(allBtn)allBtn.disabled=true;
+  const {data:{user:currentUser},error:authError}=await sb.auth.getUser();
+  if(authError||!currentUser){balanceEl.textContent='0원';if(hint)hint.textContent='로그인한 회원만 적립금을 사용할 수 있어요.';updateCheckoutPointsPreview();return}
+  try{
+    const {data,error}=await sb.rpc('get_my_loyalty_points_balance');
+    if(error)throw error;
+    loyaltyPointsBalance=Math.max(0,Math.floor(Number(data)||0));loyaltyPointsReady=true;
+    balanceEl.textContent=won(loyaltyPointsBalance);
+    input.disabled=false;input.max=String(Math.min(loyaltyPointsBalance,checkoutProductTotal));
+    if(allBtn)allBtn.disabled=!(loyaltyPointsBalance>0&&checkoutProductTotal>0);
+    if(hint)hint.textContent=loyaltyPointsBalance>0?`최대 ${won(Math.min(loyaltyPointsBalance,checkoutProductTotal))}까지 사용할 수 있어요.`:'사용 가능한 적립금이 없어요.';
+  }catch(e){
+    console.warn('체크아웃 적립금 조회 실패:',e);
+    balanceEl.textContent='확인 필요';input.disabled=true;if(allBtn)allBtn.disabled=true;
+    if(hint)hint.textContent='적립금 설정을 확인할 수 없어 이번 주문에서는 적립금 사용을 잠시 제한했어요.';
+  }
+  updateCheckoutPointsPreview();
+}
+function requestedCheckoutPoints(){const el=document.getElementById('pointsToUse');return Math.max(0,Math.floor(Number(el?.value)||0))}
+function updateCheckoutPointsPreview(){
+  const input=document.getElementById('pointsToUse');const hint=document.getElementById('checkoutPointsHint');const totalEl=document.getElementById('checkoutPointsFinalTotal');if(!totalEl)return;
+  const requested=requestedCheckoutPoints();const maximum=Math.min(loyaltyPointsBalance,checkoutProductTotal);const applied=Math.min(requested,maximum,checkoutProductTotal);totalEl.textContent=won(Math.max(0,checkoutProductTotal-applied)+3500);
+  if(input&&requested>maximum){if(hint)hint.textContent=`사용 가능 적립금은 최대 ${won(maximum)}이에요. 금액을 확인해주세요.`}
+  else if(hint&&loyaltyPointsReady&&loyaltyPointsBalance>0)hint.textContent=`${requested>0?won(requested)+' 사용 · ':''}최대 ${won(maximum)}까지 사용할 수 있어요.`;
+}
+function normalizeCheckoutPointsInput(){const input=document.getElementById('pointsToUse');if(!input||input.disabled)return;const max=Math.min(loyaltyPointsBalance,checkoutProductTotal);input.value=String(Math.max(0,Math.min(max,Math.floor(Number(input.value)||0))));updateCheckoutPointsPreview()}
+function useAllLoyaltyPoints(){const input=document.getElementById('pointsToUse');if(!input||input.disabled)return;input.value=String(Math.min(loyaltyPointsBalance,checkoutProductTotal));updateCheckoutPointsPreview()}
+
 async function submitOrder(){
   // 주문은 로그인한 회원만 가능하며, 주문 저장 시 반드시 해당 회원 ID를 연결합니다.
   const {data:{user:authenticatedUser},error:authError}=await sb.auth.getUser();
@@ -374,11 +430,22 @@ async function submitOrder(){
   if(!sourceItems?.length)return alert('주문할 상품이 없어요 🤍');
   const items=sourceItems.map(x=>{const p=products.find(p=>String(p.id)===String(x.id));if(!p)return null;const unit=getPrice(p)+Number(x.add||0);return {id:p.id,name:p.name,brand:p.brand||'',color:x.color||'',size:x.size||'',qty:x.qty,unit_price:unit,line_total:unit*x.qty,image:p.images?.[0]||''}}).filter(Boolean);
   if(!items.length)return alert('주문할 상품을 다시 확인해주세요.');
-  const total=items.reduce((a,x)=>a+x.line_total,0);
-  const {error}=await sb.from('orders').insert({user_id:authenticatedUser.id,customer_name:n,phone:ph,address:ad,memo,items,total_price:total,status:'주문접수'});
-  if(error){console.error(error);return alert('주문서 저장 중 문제가 생겼어요. '+error.message);}
+  const total=Math.round(items.reduce((a,x)=>a+x.line_total,0));
+  const pointsInput=document.getElementById('pointsToUse');
+  const pointsUsed=pointsInput&&!pointsInput.disabled?Math.max(0,Math.floor(Number(pointsInput.value)||0)):0;
+  if(pointsUsed>0&&!loyaltyPointsReady)return alert('적립금 잔액을 확인하지 못했어요. 페이지를 새로 열고 다시 시도해주세요.');
+  if(pointsUsed>Math.min(loyaltyPointsBalance,total))return alert('사용할 적립금이 보유 적립금 또는 상품 금액을 초과했어요.');
+  const {data:orderResult,error}=await sb.rpc('create_order_with_points',{p_customer_name:n,p_phone:ph,p_address:ad,p_memo:memo,p_items:items,p_total_price:total,p_points_used:pointsUsed});
+  if(error){
+    console.error('order with loyalty points failed:',error);
+    const message=String(error.message||'');
+    if(message.includes('INSUFFICIENT_POINTS'))return alert('보유 적립금이 변경되었어요. 적립금 잔액을 새로 확인한 뒤 다시 주문해주세요.');
+    if(message.includes('AUTH_REQUIRED'))return alert('로그인이 만료되었어요. 다시 로그인해주세요.');
+    return alert('주문서 저장 중 문제가 생겼어요. '+message+'\n\n적립금 설정 SQL이 적용되어 있는지 확인해주세요.');
+  }
   checkoutDraft=null;
-  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문해주셔서 감사합니다 🤍</strong><br><br>바이재이에게 1:1 채팅으로 <strong>성함과 연락처</strong>를 남겨주세요!<br><a class="orderDoneChat" href="https://open.kakao.com/o/gGODiiSi" target="_blank" rel="noopener noreferrer" onclick="if(!${isDirectBuy}){cart=[];save()}">채팅방 바로 이동하기 ↗</a><button class="continueShopping" onclick="if(!${isDirectBuy}){cart=[];save()}closeLayer('cart')">쇼핑 계속하기</button></div></div>`;
+  const payable=Math.max(0,total-pointsUsed)+3500;
+  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문해주셔서 감사합니다 🤍</strong><br><br>${pointsUsed>0?`적립금 ${won(pointsUsed)} 사용 · 배송비 포함 입금 예정액 ${won(payable)}<br><br>`:''}바이재이에게 1:1 채팅으로 <strong>성함과 연락처</strong>를 남겨주세요!<br><a class="orderDoneChat" href="https://open.kakao.com/o/gGODiiSi" target="_blank" rel="noopener noreferrer" onclick="if(!${isDirectBuy}){cart=[];save()}">채팅방 바로 이동하기 ↗</a><button class="continueShopping" onclick="if(!${isDirectBuy}){cart=[];save()}closeLayer('cart')">쇼핑 계속하기</button></div></div>`;
 }
 function orderStatusClass(status){return ({'입금확인':'paid','배송준비':'prep','배송중':'shipped','배송완료':'done','취소':'cancel'})[status]||''}
 function orderStatusMessage(status){return ({'주문접수':'주문서가 접수되었어요. 입금 안내를 기다려주세요.','입금확인':'입금 확인이 완료되었어요.','배송준비':'상품을 준비하고 있어요.','배송중':'상품이 발송되었어요. 아래 배송 조회를 이용해 주세요.','배송완료':'배송 완료로 처리되었어요.','취소':'취소 처리된 주문이에요.'})[status]||'주문 상태를 확인 중이에요.'}
@@ -391,13 +458,13 @@ async function loadMyOrders(){
   el.innerHTML='<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="openLogin()">← MYPAGE</button><b>주문 내역</b><span></span></div><div class="myOrders"><div class="myOrdersLoading">주문 내역을 불러오는 중이에요...</div></div></div>';
   const emptyOrderMessage='<div class="orderEmpty"><div class="orderEmptyMark">♡</div><p class="orderEmptyTitle">주문 내역 없음</p><p class="orderEmptyText">주문하신 정보가 없습니다.</p><button class="orderEmptyAction" onclick="openLogin()">MYPAGE</button></div>';
   try{
-    let result=await sb.from('orders').select('id,created_at,items,total_price,status,shipping_carrier,tracking_number').eq('user_id',user.id).order('created_at',{ascending:false});
+    let result=await sb.from('orders').select('id,created_at,items,total_price,points_used,payable_total,status,shipping_carrier,tracking_number').eq('user_id',user.id).order('created_at',{ascending:false});
     if(result.error){
       const message=String(result.error.message||'');
       const missingShippingColumn=/shipping_carrier|tracking_number/i.test(message)&&/(column|schema cache|does not exist|could not find|not found)/i.test(message);
       if(missingShippingColumn){
         // 이전 DB에 배송 컬럼이 아직 없어도 주문 내역 자체는 조회합니다.
-        result=await sb.from('orders').select('id,created_at,items,total_price,status').eq('user_id',user.id).order('created_at',{ascending:false});
+        result=await sb.from('orders').select('id,created_at,items,total_price,points_used,payable_total,status').eq('user_id',user.id).order('created_at',{ascending:false});
       }
     }
     if(result.error)throw result.error;
@@ -411,7 +478,7 @@ async function loadMyOrders(){
       const carrier=safeText(o.shipping_carrier||''),tracking=safeText(o.tracking_number||'');
       const trackingUrl=o.shipping_carrier&&o.tracking_number?'https://search.naver.com/search.naver?query='+encodeURIComponent(`${o.shipping_carrier} ${o.tracking_number} 배송조회`):'';
       const date=o.created_at?new Date(o.created_at).toLocaleString('ko-KR'):'-';
-      return `<article class="myOrder"><div class="myOrderHead"><div><div class="myOrderDate">주문일 ${safeText(date)}</div><b>주문번호 #${safeText(o.id)}</b></div><div class="myOrderStatus ${orderStatusClass(status)}">${safeText(status)}</div></div><div class="small" style="margin-top:7px">${safeText(orderStatusMessage(status))}</div><div class="myOrderItems">${itemHtml}</div><div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:12px;padding-top:10px;font-size:14px"><span>주문금액</span><b>${won(o.total_price)}</b></div>${carrier||tracking?`<div class="myOrderShipping"><b>배송 정보</b><br>${carrier?`택배사 · ${carrier}<br>`:''}${tracking?`송장번호 · ${tracking}`:''}${trackingUrl?`<a href="${trackingUrl}" target="_blank" rel="noopener noreferrer">배송 조회 ↗</a>`:''}</div>`:status==='배송중'||status==='배송완료'?'<div class="myOrderShipping">배송 정보가 아직 등록되지 않았어요.</div>':''}</article>`;
+      return `<article class="myOrder"><div class="myOrderHead"><div><div class="myOrderDate">주문일 ${safeText(date)}</div><b>주문번호 #${safeText(o.id)}</b></div><div class="myOrderStatus ${orderStatusClass(status)}">${safeText(status)}</div></div><div class="small" style="margin-top:7px">${safeText(orderStatusMessage(status))}</div><div class="myOrderItems">${itemHtml}</div><div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px;font-size:13px;line-height:1.8"><div style="display:flex;justify-content:space-between"><span>상품 금액</span><b>${won(o.total_price)}</b></div>${Number(o.points_used||0)>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>사용 적립금</span><b>- ${won(o.points_used)}</b></div>`:''}<div style="display:flex;justify-content:space-between;font-size:14px"><span>적립금 적용 후 상품 금액</span><b>${won(o.payable_total??Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)))}</b></div></div>${carrier||tracking?`<div class="myOrderShipping"><b>배송 정보</b><br>${carrier?`택배사 · ${carrier}<br>`:''}${tracking?`송장번호 · ${tracking}`:''}${trackingUrl?`<a href="${trackingUrl}" target="_blank" rel="noopener noreferrer">배송 조회 ↗</a>`:''}</div>`:status==='배송중'||status==='배송완료'?'<div class="myOrderShipping">배송 정보가 아직 등록되지 않았어요.</div>':''}</article>`;
     }).join('');
   }catch(e){
     console.error('Order history request failed:',e);
@@ -419,6 +486,31 @@ async function loadMyOrders(){
     if(target)target.innerHTML=emptyOrderMessage;
   }
 }
+async function loadMyPageLoyalty(){
+  const balanceEl=document.getElementById('myPagePointsBalance');
+  const hintEl=document.getElementById('myPagePointsHint');
+  const historyEl=document.getElementById('myPagePointsHistory');
+  if(!balanceEl||!user?.id)return;
+  try{
+    const {data,error}=await sb.rpc('get_my_loyalty_points_balance');
+    if(error)throw error;
+    const balance=Math.max(0,Math.floor(Number(data)||0));
+    balanceEl.textContent=won(balance);
+    if(hintEl)hintEl.textContent='주문 시 보유 적립금을 사용할 수 있어요.';
+    try{
+      const {data:history,error:historyError}=await sb.from('loyalty_point_transactions').select('amount,reason,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(5);
+      if(!historyError&&Array.isArray(history)&&history.length&&historyEl){
+        historyEl.hidden=false;
+        historyEl.innerHTML=history.map(row=>{const amount=Number(row.amount)||0;const date=row.created_at?new Date(row.created_at).toLocaleDateString('ko-KR'):'-';return `<div class="loyaltyHistoryRow"><span>${safeText(date)} · ${safeText(row.reason||'적립금 내역')}</span><b>${amount>0?'+':''}${won(amount)}</b></div>`}).join('');
+      }
+    }catch(historyError){console.warn('적립금 내역을 표시하지 못했어요.',historyError)}
+  }catch(e){
+    console.warn('적립금 조회 실패:',e);
+    balanceEl.textContent='확인 필요';
+    if(hintEl)hintEl.textContent='적립금 설정이 완료되지 않았거나 잔액을 불러오지 못했어요.';
+  }
+}
+
 async function openLogin(){
   closeAll();
   const el=document.getElementById('login');
@@ -426,7 +518,8 @@ async function openLogin(){
   let {data:{session}}=await sb.auth.getSession();
   if(session){
     user=session.user;
-    el.innerHTML=`<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="closeLayer('login')">←</button><b>MYPAGE</b><span></span></div><div class="loginForm myPageForm"><div class="accountWelcome"><span class="accountEyebrow">회원 정보</span><p class="accountEmail">${safeText(user.email)}</p><p class="small">${approved?'회원 승인이 완료되어 회원가가 적용돼요.':'회원 승인 대기 중이에요.'}</p></div><button onclick="loadMyOrders()">주문 내역 확인 <span aria-hidden="true">↗</span></button><button class="secondary" onclick="logout()">LOG OUT</button></div></div>`;
+    el.innerHTML=`<div class="inner"><div class="topbar myPageTopbar"><button class="back" onclick="closeLayer('login')">←</button><b>MYPAGE</b><span></span></div><div class="loginForm myPageForm"><div class="accountWelcome"><span class="accountEyebrow">회원 정보</span><p class="accountEmail">${safeText(user.email)}</p><p class="small">${approved?'회원 승인이 완료되어 회원가가 적용돼요.':'회원 승인 대기 중이에요.'}</p></div><div class="loyaltyCard" id="myPageLoyaltyCard"><div class="loyaltyCardHead"><div><div class="loyaltyCardLabel">보유 적립금</div><div id="myPagePointsBalance" class="loyaltyCardValue">조회 중...</div></div><span aria-hidden="true" style="font-size:24px;color:#a78c73">♡</span></div><div id="myPagePointsHint" class="small" style="margin-top:5px">적립금 잔액을 확인하고 있어요.</div><div id="myPagePointsHistory" class="loyaltyHistory" hidden></div></div><button onclick="loadMyOrders()">주문 내역 확인 <span aria-hidden="true">↗</span></button><button class="secondary" onclick="logout()">LOG OUT</button></div></div>`;
+    loadMyPageLoyalty();
   }else{
     const saved=localStorage.getItem('byjaei_saved_email')||'';
     el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('login')">←</button><b>회원</b><span></span></div><div class="loginForm"><input id="email" placeholder="이메일" value="${saved.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')login()"><input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:2px 0 8px;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0" ${saved?'checked':''}> 이메일/아이디 저장</label><button onclick="login()">로그인</button><button class="secondary" onclick="signup()">회원가입</button></div></div>`;
