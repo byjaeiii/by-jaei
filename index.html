@@ -93,6 +93,8 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .pagination button:disabled{opacity:.35;cursor:default}
 .pagination .pageGap{color:var(--muted);font-size:12px;padding:0 2px}
 @media(max-width:390px){.catSubRow{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}.pagination{gap:4px;margin-top:18px;padding:0 10px 100px}.pagination button{min-width:31px;height:32px;padding:0 8px}}
+/* Smooth product-page transition on mobile */
+@media(max-width:620px){#grid{transition:opacity .18s ease,transform .18s ease}#grid.page-fade-out{opacity:0;transform:translateY(5px)}#grid.page-fade-in{opacity:1;transform:translateY(0)}}
 /* Mobile-only back-to-top control */
 #backToTop{display:none}
 @media(max-width:620px){#backToTop{position:fixed;right:16px;bottom:22px;z-index:20;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:#fffdf9ee;color:var(--ink);font-size:23px;line-height:1;box-shadow:0 3px 12px rgba(81,70,61,.14);cursor:pointer;align-items:center;justify-content:center}#backToTop.is-visible{display:flex}}
@@ -378,20 +380,30 @@ function renderPagination(totalItems){
   parts.push(`<button type="button" aria-label="다음 페이지" ${currentProductPage>=pages?'disabled':''} onclick="goToProductPage(${currentProductPage+1})">›</button>`);
   nav.innerHTML=parts.join('');
 }
+let productPageChangeTimer=null;
 function goToProductPage(page){
   const nav=document.getElementById('pagination');
   const totalPages=Number(nav?.dataset.totalPages)||Math.max(1,Math.ceil(products.length/PRODUCTS_PER_PAGE));
-  currentProductPage=Math.max(1,Math.min(totalPages,Math.floor(Number(page)||1)));
-  render();
-  // 상품 페이지 변경 시 모바일에서만 상품 목록 상단으로 이동합니다.
-  if(window.matchMedia('(max-width: 620px)').matches){
-    requestAnimationFrame(()=>{
-      const grid=document.getElementById('grid');
-      if(!grid)return;
-      const top=grid.getBoundingClientRect().top+window.scrollY-72;
-      window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
-    });
+  const nextPage=Math.max(1,Math.min(totalPages,Math.floor(Number(page)||1)));
+  if(nextPage===currentProductPage)return;
+  const grid=document.getElementById('grid');
+  // 모바일에서는 화면을 위로 끌어올리지 않고, 상품 목록만 부드럽게 전환합니다.
+  if(window.matchMedia('(max-width: 620px)').matches&&grid){
+    if(productPageChangeTimer)clearTimeout(productPageChangeTimer);
+    grid.classList.remove('page-fade-in');
+    grid.classList.add('page-fade-out');
+    productPageChangeTimer=setTimeout(()=>{
+      currentProductPage=nextPage;
+      render();
+      grid.classList.remove('page-fade-out');
+      grid.classList.add('page-fade-in');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>grid.classList.remove('page-fade-in')));
+      productPageChangeTimer=null;
+    },150);
+    return;
   }
+  currentProductPage=nextPage;
+  render();
 }
 function scrollPageToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 function updateBackToTop(){
