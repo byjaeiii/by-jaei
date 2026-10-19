@@ -387,9 +387,13 @@ function goToProductPage(page){
   const nextPage=Math.max(1,Math.min(totalPages,Math.floor(Number(page)||1)));
   if(nextPage===currentProductPage)return;
   const grid=document.getElementById('grid');
-  // 모바일에서는 화면을 위로 끌어올리지 않고, 상품 목록만 부드럽게 전환합니다.
+  // 모바일에서는 상품 목록 상단으로 부드럽게 이동하면서 상품도 자연스럽게 전환합니다.
   if(window.matchMedia('(max-width: 620px)').matches&&grid){
     if(productPageChangeTimer)clearTimeout(productPageChangeTimer);
+    const header=document.querySelector('header');
+    const headerHeight=header?header.getBoundingClientRect().height:0;
+    const targetTop=window.scrollY+grid.getBoundingClientRect().top-headerHeight-12;
+    window.scrollTo({top:Math.max(0,targetTop),behavior:'smooth'});
     grid.classList.remove('page-fade-in');
     grid.classList.add('page-fade-out');
     productPageChangeTimer=setTimeout(()=>{
