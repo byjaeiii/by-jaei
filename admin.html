@@ -168,26 +168,10 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 @media(max-width:560px){.memberPointHistoryRow{gap:6px}.pointGrantDialog{padding:16px}}
 </style>
 
-<style id="byjaei-desktop-scale-restore">
-/* Restore the wider desktop admin layout; keep the current mobile layout unchanged. */
-@media (min-width: 701px) {
-  .wrap { width:100%; max-width:1440px; margin-left:auto; margin-right:auto; padding:28px 36px; }
-  .productAdminGrid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
-  .productCardBody { padding:13px; }
-  .productCardName { font-size:15px; }
-  .productCardMeta { font-size:12px; }
-  .productCardActions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-  .productCardActions button { font-size:11px; padding:9px 6px; }
-}
-@media (max-width:700px) {
-  .wrap { width:100%; max-width:100%; padding:20px; }
-}
-</style>
-
 <style id="byjaei-mobile-admin-layout-alignment-fix">
 /* Mobile alignment fixes: product cards, order filters and member cards */
 html, body { width:100%; max-width:100%; overflow-x:hidden; }
-.wrap { width:100%; max-width:1440px; min-width:0; margin-left:auto; margin-right:auto; }
+.wrap { width:100%; max-width:760px; min-width:0; }
 .wrap, .adminSection, .adminSection .box, #list, #orders, #members { min-width:0; max-width:100%; }
 .adminSection .box, .adminSection .box * { box-sizing:border-box; }
 .logo { max-width:100%; overflow-wrap:anywhere; }
@@ -910,7 +894,7 @@ async function loadProducts(){
     $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
       // 음수 sort_order는 고정 상태. 사이즈표 상품은 해당 카테고리 안에서만 고정됩니다.
       const pinned=Number(p.sort_order)<0;
-      return `<div class="productCard" onclick="previewProduct(${p.id})"><div class="productCardImgWrap"><img class="productCardImg" src="${p.images?.[0]||''}" style="${p.is_sold_out?'filter:blur(1.5px) brightness(.78)':''}">${p.is_sold_out?'<div class="soldOutOverlay"><span>SOLD OUT</span></div>':''}</div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();toggleSoldOut(${p.id},${p.is_sold_out?'true':'false'})">${p.is_sold_out?'품절 해제':'SOLD OUT'}</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button></div></div></div>`;
+      return `<div class="productCard" onclick="previewProduct(${p.id})"><div class="productCardImgWrap"><img class="productCardImg" src="${p.images?.[0]||''}" style="${p.is_sold_out?'filter:blur(1.5px) brightness(.78)':''}">${p.is_sold_out?'<div class="soldOutOverlay"><span>SOLD OUT</span></div>':''}</div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();toggleSoldOut(${p.id},${p.is_sold_out?'true':'false'})">${p.is_sold_out?'품절 해제':'SOLD OUT'}</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();deleteProduct(${p.id})">삭제</button></div></div></div>`;
     }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
   }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
 }
@@ -966,7 +950,20 @@ function categoryPathText(name,categoryId=null){
   return chain.map((x,i)=>i===chain.length-1?`<span class="current">${x}</span>`:x).join(' &nbsp;›&nbsp; ');
 }
 function previewProduct(id){getProduct(id).then(p=>{if(!p)return;const l=document.createElement('div');l.className='previewLayer';l.id='pv';l.onclick=e=>{if(e.target===l)l.remove()};l.innerHTML=`<div class="previewBox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">상품 미리보기</h2><button class="secondary" onclick="$('pv').remove()">닫기</button></div><div class="previewGrid">${(p.images||[]).map(x=>`<img src="${x}">`).join('')}</div><h2>${p.name}</h2><div class="note">${p.brand||''}</div><div class="previewCategoryPath">${categoryPathText(p.category,p.category_id)}</div><p><b>${Number(p.normal_price).toLocaleString()}원</b>${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}</p><p>COLOR · ${(p.colors||[]).join(', ')||'-'}<br>SIZE · ${(p.sizes||[]).join(', ')||'-'}</p><p class="descriptionText">${p.description||''}</p><button onclick="$('pv').remove();editProduct(${p.id})">수정하기</button></div>`;document.body.appendChild(l)})}
-// 상품 데이터 보호를 위해 등록 상품 목록에서는 상품 삭제 기능을 제공하지 않습니다. 품절 상태로 판매를 중지/재개하세요.
+async function deleteProduct(id){
+  const product=await getProduct(id);
+  if(!product)return alert('삭제할 상품을 찾을 수 없어요.');
+  const name=String(product.name||'이 상품');
+  if(!confirm(`'${name}' 상품을 삭제할까요?\n\n이 작업은 상품 데이터에서 제거되며 복구하기 어려울 수 있어요. 주문 내역은 별도로 유지됩니다.`))return;
+  try{
+    // 관리자 전용 도매가 정보가 있으면 함께 정리하되, 실패 시 상품 삭제는 계속 진행합니다.
+    try{await api('/rest/v1/product_private_costs?product_id=eq.'+encodeURIComponent(String(id)),{method:'DELETE',headers:{'Prefer':'return=minimal'}})}catch(e){console.warn('상품 도매가 정보 정리 실패',e)}
+    await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    selectedProductIds.delete(String(id));
+    alert('상품을 삭제했어요.');
+    await loadProducts();
+  }catch(e){alert('상품 삭제에 실패했어요.\n\n'+(e.message||e))}
+}
 function dateKST(v){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date(v))}
 function matchesDate(v,from,to){const d=dateKST(v);return (!from||d>=from)&&(!to||d<=to)}
 function filterValue(id){return ($(id)?.value||'').trim()}
