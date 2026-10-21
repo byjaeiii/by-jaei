@@ -202,27 +202,21 @@ function isCustomerCategoryHidden(id){
   return false;
 }
 function productBelongsToHiddenCategory(p){
-  if(p?.category_id!=null&&p.category_id!=='')return isCustomerCategoryHidden(p.category_id);
-  const matches=siteCategories.filter(c=>String(c.name)===String(p?.category||'').trim());
-  if(matches.length===1)return isCustomerCategoryHidden(matches[0].id);
-  // 레거시 상품에 category_id가 없고 동명 카테고리가 여러 개면, 모두 숨김일 때만 숨깁니다.
-  return matches.length>1&&matches.every(c=>isCustomerCategoryHidden(c.id));
+  return false;
 }
 function normalizedCustomerProductName(v){
   return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
 }
 function customerVisibleProducts(){
-  // 상품명 중복 때문에 공개 카테고리에 등록된 상품까지 숨겨지지 않도록
-  // 각 상품의 실제 category_id와 해당 카테고리 공개 상태만 확인합니다.
-  return products.filter(p=>!productBelongsToHiddenCategory(p));
+  return products;
 }
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(c.id));
+  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)');
   const catEl=document.getElementById('cats');
   const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
   const escape=v=>String(v).replaceAll('"','&quot;');
-  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(x.id))
+  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
   const selectedCategory=category==='ALL'||category==='BRAND'?null:(categoryId?siteCategories.find(x=>String(x.id)===String(categoryId)):siteCategories.find(x=>String(x.name)===String(category)));
   const rootOf=c=>{
@@ -281,8 +275,6 @@ function render(){
       if(p.category_id!=null){
         categoryOk=branchIds.has(String(p.category_id));
       }else{
-        // 예전 행에 category_id가 없고 같은 이름의 카테고리가 여러 개면,
-        // 어느 부모에 속하는지 알 수 없으므로 엉뚱한 트리에 섞지 않습니다.
         const legacyId=uniqueCategoryIdForName(productCategory);
         categoryOk=!!legacyId&&branchIds.has(String(legacyId));
       }
@@ -300,12 +292,8 @@ function render(){
   const overallView=category==='ALL'||(category==='BRAND'&&brandFilter==='ALL');
 
   if(overallView){
-    // 전체보기는 상품 내용이 최근 수정된 순으로 표시합니다.
-    // sort_order의 음수 고정값은 여기서 사용하지 않으므로 사이즈표가 전체 맨 앞으로 고정되지 않습니다.
     a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
   }else if(category!=='BRAND'){
-    // 카테고리 화면에서는 해당 카테고리에 직접 속한 고정 상품만 맨 앞으로 둡니다.
-    // 다른 하위 카테고리에 고정된 사이즈표는 상위/다른 카테고리 화면에서 고정 효과를 내지 않습니다.
     const selectedRow=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
     const exactCategoryId=selectedRow?String(selectedRow.id):null;
     const legacyCanResolve=selectedRow&&siteCategories.filter(c=>String(c.name)===String(selectedRow.name)).length===1;
@@ -320,11 +308,9 @@ function render(){
     a.sort((x,y)=>{
       const xp=isPinnedHere(x),yp=isPinnedHere(y);
       if(xp!==yp)return xp?-1:1;
-      // 고정 상품을 먼저 유지하고, 그 외에는 각 카테고리에서 최근 등록/수정된 상품이 먼저 오도록 합니다.
       return updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||scopedOrder(x)-scopedOrder(y);
     });
   }else{
-    // 특정 브랜드만 고른 경우에도 최근 수정된 상품이 먼저 오도록 합니다.
     a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
   }
 
@@ -336,8 +322,6 @@ function render(){
     a.sort((x,y)=>recentProductIds.indexOf(String(x.id))-recentProductIds.indexOf(String(y.id)));
   }
 
-  // 여러 카테고리에 별도 행으로 저장된 동일 상품은 정렬 후 첫 번째 것만 남깁니다.
-  // 전체보기에서는 가장 최근 수정된 복제 행이 대표로 남습니다.
   const normalizeProductName=v=>String(v??'')
     .normalize('NFKC')
     .replace(/[\s\u00a0]+/g,'')
@@ -387,7 +371,6 @@ function goToProductPage(page){
   const nextPage=Math.max(1,Math.min(totalPages,Math.floor(Number(page)||1)));
   if(nextPage===currentProductPage)return;
   const grid=document.getElementById('grid');
-  // 모바일에서는 상품 목록 상단으로 부드럽게 이동하면서 상품도 자연스럽게 전환합니다.
   if(window.matchMedia('(max-width: 620px)').matches&&grid){
     if(productPageChangeTimer)clearTimeout(productPageChangeTimer);
     const header=document.querySelector('header');
@@ -502,7 +485,6 @@ function normalizeCheckoutPointsInput(){const input=document.getElementById('poi
 function useAllLoyaltyPoints(){const input=document.getElementById('pointsToUse');if(!input||input.disabled)return;input.value=String(Math.min(loyaltyPointsBalance,checkoutProductTotal));updateCheckoutPointsPreview()}
 
 async function submitOrder(){
-  // 주문은 로그인한 회원만 가능하며, 주문 저장 시 반드시 해당 회원 ID를 연결합니다.
   const {data:{user:authenticatedUser},error:authError}=await sb.auth.getUser();
   if(authError||!authenticatedUser){alert('주문하시려면 먼저 로그인해주세요.');closeAll();openLogin();return}
   user=authenticatedUser;
@@ -533,8 +515,6 @@ async function submitOrder(){
     if(message.includes('AUTH_REQUIRED'))return alert('로그인이 만료되었어요. 다시 로그인해주세요.');
     return alert('주문서 저장 중 문제가 생겼어요. '+message+'\n\n적립금 설정 SQL이 적용되어 있는지 확인해주세요.');
   }
-  // 주문 RPC가 성공한 직후, 장바구니 주문이면 저장된 카트를 즉시 비웁니다.
-  // 성공 화면 버튼을 눌러야만 비워지던 기존 동작을 제거해 재방문 시 주문 상품이 남지 않도록 합니다.
   if(!isDirectBuy){
     cart=[];
     save();
@@ -561,7 +541,6 @@ async function loadMyOrders(){
       const message=String(result.error.message||'');
       const missingShippingColumn=/shipping_carrier|tracking_number/i.test(message)&&/(column|schema cache|does not exist|could not find|not found)/i.test(message);
       if(missingShippingColumn){
-        // 이전 DB에 배송 컬럼이 아직 없어도 주문 내역 자체는 조회합니다.
         result=await sb.from('orders').select('id,created_at,items,total_price,points_used,payable_total,status').eq('user_id',user.id).order('created_at',{ascending:false});
       }
     }
@@ -640,13 +619,4 @@ async function refreshUser(){
 function closeLayer(id){document.getElementById(id).hidden=true}function closeAll(){detailReturnToCart=false;['detail','cart','login'].forEach(x=>document.getElementById(x).hidden=true)}
 sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;loadCart();render()});
 refreshUser().then(()=>{loadCart();return load()});
-// 관리자 페이지에서 상품을 등록한 뒤 고객 페이지로 돌아오면 상품 목록을 새로 불러옵니다.
-let customerRefreshInProgress=false;
-async function refreshCustomerProducts(){
-  if(customerRefreshInProgress||document.visibilityState==='hidden')return;
-  customerRefreshInProgress=true;
-  try{await load()}catch(e){console.error('상품 목록 새로고침 실패',e)}finally{customerRefreshInProgress=false}
-}
-window.addEventListener('focus',refreshCustomerProducts);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCustomerProducts()});
 </script></body></html>
