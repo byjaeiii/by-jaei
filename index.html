@@ -212,9 +212,9 @@ function normalizedCustomerProductName(v){
   return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
 }
 function customerVisibleProducts(){
-  const hiddenNames=new Set();
-  products.forEach(p=>{if(productBelongsToHiddenCategory(p)){const key=normalizedCustomerProductName(p.name);if(key)hiddenNames.add(key)}});
-  return products.filter(p=>!productBelongsToHiddenCategory(p)&&(!normalizedCustomerProductName(p.name)||!hiddenNames.has(normalizedCustomerProductName(p.name))));
+  // 상품명 중복 때문에 공개 카테고리에 등록된 상품까지 숨겨지지 않도록
+  // 각 상품의 실제 category_id와 해당 카테고리 공개 상태만 확인합니다.
+  return products.filter(p=>!productBelongsToHiddenCategory(p));
 }
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
@@ -640,4 +640,13 @@ async function refreshUser(){
 function closeLayer(id){document.getElementById(id).hidden=true}function closeAll(){detailReturnToCart=false;['detail','cart','login'].forEach(x=>document.getElementById(x).hidden=true)}
 sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;loadCart();render()});
 refreshUser().then(()=>{loadCart();return load()});
+// 관리자 페이지에서 상품을 등록한 뒤 고객 페이지로 돌아오면 상품 목록을 새로 불러옵니다.
+let customerRefreshInProgress=false;
+async function refreshCustomerProducts(){
+  if(customerRefreshInProgress||document.visibilityState==='hidden')return;
+  customerRefreshInProgress=true;
+  try{await load()}catch(e){console.error('상품 목록 새로고침 실패',e)}finally{customerRefreshInProgress=false}
+}
+window.addEventListener('focus',refreshCustomerProducts);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCustomerProducts()});
 </script></body></html>
