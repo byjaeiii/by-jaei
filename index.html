@@ -202,10 +202,13 @@ function isCustomerCategoryHidden(id){
   return false;
 }
 function productBelongsToHiddenCategory(p){
-  if(p?.category_id!=null&&p.category_id!=='')return isCustomerCategoryHidden(p.category_id);
-  const matches=siteCategories.filter(c=>String(c.name)===String(p?.category||'').trim());
+  const id=p?.category_id;
+  // category_id가 현재 카테고리 목록에 실제로 존재할 때만 ID를 우선 사용합니다.
+  // 엑셀 등록 시 오래된/잘못된 category_id가 저장된 상품은 카테고리명으로 복구 판별합니다.
+  if(id!=null&&id!==''&&siteCategories.some(c=>String(c.id)===String(id)))return isCustomerCategoryHidden(id);
+  const matches=siteCategories.filter(c=>String(c.name).trim()===String(p?.category||'').trim());
   if(matches.length===1)return isCustomerCategoryHidden(matches[0].id);
-  // 레거시 상품에 category_id가 없고 동명 카테고리가 여러 개면, 모두 숨김일 때만 숨깁니다.
+  // 동명 카테고리가 여러 개면 모두 숨김인 경우에만 상품을 숨깁니다.
   return matches.length>1&&matches.every(c=>isCustomerCategoryHidden(c.id));
 }
 function normalizedCustomerProductName(v){
@@ -277,11 +280,12 @@ function render(){
     let categoryOk=category==='ALL'||category==='BRAND';
     if(!categoryOk){
       const branchIds=categoryBranchIds(categoryId);
-      if(p.category_id!=null){
-        categoryOk=branchIds.has(String(p.category_id));
+      const productCategoryId=p.category_id==null?'':String(p.category_id);
+      const idExists=productCategoryId!==''&&siteCategories.some(c=>String(c.id)===productCategoryId);
+      if(idExists){
+        categoryOk=branchIds.has(productCategoryId);
       }else{
-        // 예전 행에 category_id가 없고 같은 이름의 카테고리가 여러 개면,
-        // 어느 부모에 속하는지 알 수 없으므로 엉뚱한 트리에 섞지 않습니다.
+        // category_id가 없거나 현재 카테고리 목록에 없는 엑셀 상품은 카테고리명으로 연결을 복구합니다.
         const legacyId=uniqueCategoryIdForName(productCategory);
         categoryOk=!!legacyId&&branchIds.has(String(legacyId));
       }
