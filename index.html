@@ -104,12 +104,7 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 <section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
-const {createClient}=supabase;
-// 고객페이지도 관리자페이지와 동일한 Supabase 프로젝트를 사용합니다.
-// config.js가 다른 프로젝트 주소/키를 가리키면 엑셀 등록 상품이 고객페이지에 나타나지 않을 수 있습니다.
-const BYJAEI_DB_URL='https://wquupamwhjwqyhtxctdl.supabase.co';
-const BYJAEI_DB_KEY='sb_publishable_1MJJqt80Nqj4agK3g2YGPA_8CEZRpOh';
-const sb=createClient(BYJAEI_DB_URL,BYJAEI_DB_KEY);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[],detailReturnToCart=false,quickView='all',checkoutDraft=null;
+const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[],detailReturnToCart=false,quickView='all',checkoutDraft=null;
 let loyaltyPointsBalance=0, checkoutProductTotal=0, loyaltyPointsReady=false;
 let currentProductPage=1, lastProductFilterKey='', orderSubmissionInProgress=false; const PRODUCTS_PER_PAGE=30;
 const guestCartKey='byjaei_cart_guest',favoriteKey='byjaei_favorites_v1',recentKey='byjaei_recent_v1';
@@ -134,30 +129,14 @@ function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
 const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
 function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
 async function load(){
-  let productResult, categoryResult;
-  try {
-    [productResult, categoryResult] = await Promise.all([
-      sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
-      sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
-    ]);
-    // DB에 sort_order 컬럼이 없으면 대체 정렬로 상품을 다시 불러옵니다.
-    if(productResult.error && /sort_order|column/i.test(String(productResult.error.message||''))) {
-      productResult = await sb.from('products').select('*').order('created_at',{ascending:false});
-    }
-    if(categoryResult.error && /sort_order|column/i.test(String(categoryResult.error.message||''))) {
-      categoryResult = await sb.from('categories').select('id,name,parent_id,created_at,is_hidden').order('created_at',{ascending:true});
-    }
-  } catch(e) {
-    console.error('상품 조회 중 오류:',e);
-    grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. 페이지를 새로고침하거나 관리자에게 문의해주세요.</div>';
-    return;
-  }
-  const productData=productResult?.data, productError=productResult?.error;
-  const categoryData=categoryResult?.data, categoryError=categoryResult?.error;
-  if(productError){console.error('상품 조회 실패:',productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결 또는 상품 테이블 권한을 확인해주세요.</div>';return}
-  products=Array.isArray(productData)?productData:[];
+  const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
+    sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+    sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+  ]);
+  if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
+  products=productData||[];
   siteCategories=categoryError?[]:(categoryData||[]);
-  if(categoryError)console.error('카테고리 조회 실패:',categoryError);
+  if(categoryError)console.error(categoryError);
   render();
 }
 function goHome(){category='ALL';categoryId=null;brandFilter='ALL';quickView='all';window.scrollTo({top:0,behavior:'smooth'});render()}
@@ -223,18 +202,14 @@ function isCustomerCategoryHidden(id){
   return false;
 }
 function productBelongsToHiddenCategory(p){
-  // 상품 노출 여부는 상품이 직접 연결된 카테고리의 명시적인 숨김 설정만 따릅니다.
-  // 상위 카테고리의 숨김/오래된 category_id 때문에 정상 상품까지 전체 고객페이지에서
-  // 사라지는 문제를 방지합니다. category_id가 잘못된 엑셀 상품은 카테고리명으로 복구합니다.
   const id=p?.category_id;
-  if(id!=null&&id!== ''){
-    const direct=siteCategories.find(c=>String(c.id)===String(id));
-    if(direct)return direct.is_hidden===true;
-  }
+  // category_id가 현재 카테고리 목록에 실제로 존재할 때만 ID를 우선 사용합니다.
+  // 엑셀 등록 시 오래된/잘못된 category_id가 저장된 상품은 카테고리명으로 복구 판별합니다.
+  if(id!=null&&id!==''&&siteCategories.some(c=>String(c.id)===String(id)))return isCustomerCategoryHidden(id);
   const matches=siteCategories.filter(c=>String(c.name).trim()===String(p?.category||'').trim());
-  if(matches.length===1)return matches[0].is_hidden===true;
-  // 이름이 중복된 카테고리는 모든 동일 이름 카테고리가 명시적으로 숨겨졌을 때만 숨깁니다.
-  return matches.length>1&&matches.every(c=>c.is_hidden===true);
+  if(matches.length===1)return isCustomerCategoryHidden(matches[0].id);
+  // 동명 카테고리가 여러 개면 모두 숨김인 경우에만 상품을 숨깁니다.
+  return matches.length>1&&matches.every(c=>isCustomerCategoryHidden(c.id));
 }
 function normalizedCustomerProductName(v){
   return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
