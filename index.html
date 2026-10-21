@@ -130,7 +130,7 @@ const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approv
 function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
 async function load(){
   const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
-    sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+    sb.from('products').select('*').order('created_at',{ascending:false}),
     sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
   ]);
   if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
@@ -212,11 +212,11 @@ function customerVisibleProducts(){
 }
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
-  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)');
+  const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(c.id));
   const catEl=document.getElementById('cats');
   const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
   const escape=v=>String(v).replaceAll('"','&quot;');
-  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)')
+  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(x.id))
     .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
   const selectedCategory=category==='ALL'||category==='BRAND'?null:(categoryId?siteCategories.find(x=>String(x.id)===String(categoryId)):siteCategories.find(x=>String(x.name)===String(category)));
   const rootOf=c=>{
@@ -292,7 +292,7 @@ function render(){
   const overallView=category==='ALL'||(category==='BRAND'&&brandFilter==='ALL');
 
   if(overallView){
-    a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
+    a.sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at));
   }else if(category!=='BRAND'){
     const selectedRow=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
     const exactCategoryId=selectedRow?String(selectedRow.id):null;
@@ -308,20 +308,21 @@ function render(){
     a.sort((x,y)=>{
       const xp=isPinnedHere(x),yp=isPinnedHere(y);
       if(xp!==yp)return xp?-1:1;
-      return updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||scopedOrder(x)-scopedOrder(y);
+      return scopedOrder(x)-scopedOrder(y)||updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at);
     });
   }else{
-    a.sort((x,y)=>updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
+    a.sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||updateStamp(y)-updateStamp(x)||stamp(y.created_at)-stamp(x.created_at));
   }
 
   if(quickView==='new'){
     a.sort((x,y)=>(Date.parse(y.created_at||'')||0)-(Date.parse(x.created_at||'')||0)||(Date.parse(y.updated_at||'')||0)-(Date.parse(x.updated_at||'')||0));
   }else if(quickView==='favorites'){
-    a.sort((x,y)=>favIds.indexOf(String(x.id))-favIds.indexOf(String(y.id)));
+    a.sort((x,y)=>favIds.indexOf(String(x.id))-favIds.indexOf(String(p?.id||'')));
   }else if(quickView==='recent'){
-    a.sort((x,y)=>recentProductIds.indexOf(String(x.id))-recentProductIds.indexOf(String(y.id)));
+    a.sort((x,y)=>recentProductIds.indexOf(String(x.id))-recentProductIds.indexOf(String(p?.id||'')));
   }
 
+  // 중복 상품 제거 기능 유지
   const normalizeProductName=v=>String(v??'')
     .normalize('NFKC')
     .replace(/[\s\u00a0]+/g,'')
@@ -415,21 +416,21 @@ function addCart(p,color,size,add){if(!user){if(confirm('장바구니에 담으�
 function detailFromCart(id){detailReturnToCart=true;document.getElementById('cart').hidden=true;detail(id)}
 function backFromDetail(){if(detailReturnToCart){detailReturnToCart=false;document.getElementById('detail').hidden=true;openCart()}else{closeLayer('detail')}}
 function detail(id){let p=products.find(x=>String(x.id)===String(id));if(!p)return;rememberRecent(id);renderQuickLinks();document.getElementById('detail').hidden=false;document.getElementById('detail').innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="backFromDetail()">← 돌아가기</button><b>BY JAEI</b><button class="icon" onclick="openCart()">🛒</button></div><div class="gallery">${p.images&&p.images.length?p.images.map(x=>`<img src="${x}" alt="${p.name}">`).join(''):'<div class="photo" style="min-width:100%">PRODUCT IMAGE</div>'}</div><div class="detailInfo"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div style="min-width:0;flex:1"><h1 style="margin:12px 0 4px">${p.name}</h1>${p.brand?`<div class="detailBrandName">${safeText(p.brand)}</div>`:''}</div><button class="detailFavorite" onclick="toggleFavorite(${p.id});document.querySelector('.detailFavorite').textContent=isFavorite(${p.id})?'♥ 찜 완료':'♡ 찜하기'">${isFavorite(p.id)?'♥ 찜 완료':'♡ 찜하기'}</button></div><p>${p.description||''}</p><div class="choice"><label>COLOR</label><select id="dc" >${(p.colors||['기본색상']).map(x=>`<option>${x}</option>`).join('')}</select></div><div class="choice"><label>SIZE</label><select id="ds" >${options(p.sizes&&p.sizes.length?p.sizes:['기본사이즈'])}</select></div><div class="detailPriceBox"><div class="detailPriceRow"><span>정상가</span><b>${won(p.normal_price)}</b></div>${approved&&user&&p.member_price!=null?`<div class="detailPriceRow special"><span>특별회원가</span><b>${won(p.member_price)}</b></div>`:''}</div></div><div class="bottom"><button onclick="backFromDetail()">뒤로</button><button onclick="dadd(${p.id})">장바구니</button><button class="primary" onclick="buyNow(${p.id})">바로 구매</button></div></div>`}
-function dadd(id){let p=products.find(x=>x.id===id),s=document.getElementById('ds');addCart(p,document.getElementById('dc').value,s.options[s.selectedIndex].text,+s.value)}
+function dadd(id){let p=products.find(x=>String(x.id)===String(id)),s=document.getElementById('ds');addCart(p,document.getElementById('dc').value,s.options[s.selectedIndex].text,+s.value)}
 function buyNow(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;if(!user){if(confirm('바로 구매하려면 로그인이 필요해요.\n\n로그인 화면으로 이동할까요?'))openLogin();return}const s=document.getElementById('ds');const c=document.getElementById('dc');const item={key:p.id+'-'+c.value+'-'+s.options[s.selectedIndex].text,id:p.id,name:p.name,color:c.value,size:s.options[s.selectedIndex].text,add:Number(s.value||0),qty:1};openOrder([item])}
 function openCart(){
   checkoutDraft=null;closeAll();
   const el=document.getElementById('cart'); el.hidden=false;
   loadCart();
-  const valid=cart.filter(x=>products.some(p=>p.id===x.id));
+  const valid=cart.filter(x=>products.some(p=>String(p.id)===String(x.id)));
   if(valid.length!==cart.length){cart=valid;save()}
   const member=!!(approved&&user);
-  const selectedTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
-  const normalTotal=cart.reduce((a,x)=>{const p=products.find(p=>p.id===x.id);return a+(p?(Number(p.normal_price)+Number(x.add||0)):0)*x.qty},0);
+  const selectedTotal=cart.reduce((a,x)=>{const p=products.find(p=>String(p.id)===String(x.id));return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
+  const normalTotal=cart.reduce((a,x)=>{const p=products.find(p=>String(p.id)===String(x.id));return a+(p?(Number(p.normal_price)+Number(x.add||0)):0)*x.qty},0);
   const discount=Math.max(0,normalTotal-selectedTotal);
   el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">← 계속 쇼핑</button><b>장바구니</b><span></span></div><div class="cartList">
   ${cart.length?`<div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 12px"><label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;cursor:pointer"><input id="cartAll" type="checkbox" onchange="toggleAllCart(this.checked)" style="width:auto"> 전체선택</label><button onclick="removeSelected()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer">선택삭제</button></div>`:''}
-  ${cart.length?cart.map((x,i)=>{let p=products.find(p=>p.id===x.id);const optionAdd=Number(x.add||0),unitMember=Number(getPrice(p)||0),lineTotal=(unitMember+optionAdd)*x.qty,sizeLabel=String(x.size||'').replace(/\s*\(\+\s*[\d,]+원\)\s*$/,'');return `<div class="cartItem" style="cursor:pointer" onclick="detailFromCart(${p.id})"><div style="display:flex;align-items:flex-start;gap:9px"><input class="cartCheck" type="checkbox" data-index="${i}" style="width:auto;margin-top:4px" onclick="event.stopPropagation()"><div class="thumb">${img(p)}</div></div><div class="cartText"><b>${x.name}</b><div class="small" style="margin-top:5px">${x.color} / ${sizeLabel}</div><div class="qty"><button onclick="event.stopPropagation();qty(${i},-1)">−</button>${x.qty}<button onclick="event.stopPropagation();qty(${i},1)">+</button></div></div><div class="cartPriceBlock"><div class="cartPriceNormal">정상가 ${won(p.normal_price)}</div>${member&&p.member_price!=null?`<div class="cartPriceMember">회원가 ${won(p.member_price)}</div>`:''}${optionAdd>0?`<div class="cartPriceOption">옵션 (+${won(optionAdd)})</div>`:''}<div class="cartLineTotal">합계 ${won(lineTotal)}</div></div></div>`}).join(''):`<div class="empty">장바구니가 비어 있어요 🤍</div>`}
+  ${cart.length?cart.map((x,i)=>{let p=products.find(p=>String(p.id)===String(x.id));const optionAdd=Number(x.add||0),unitMember=Number(getPrice(p)||0),lineTotal=(unitMember+optionAdd)*x.qty,sizeLabel=String(x.size||'').replace(/\s*\(\+\s*[\d,]+원\)\s*$/,'');return `<div class="cartItem" style="cursor:pointer" onclick="detailFromCart(${p.id})"><div style="display:flex;align-items:flex-start;gap:9px"><input class="cartCheck" type="checkbox" data-index="${i}" style="width:auto;margin-top:4px" onclick="event.stopPropagation()"><div class="thumb">${img(p)}</div></div><div class="cartText"><b>${x.name}</b><div class="small" style="margin-top:5px">${x.color} / ${sizeLabel}</div><div class="qty"><button onclick="event.stopPropagation();qty(${i},-1)">−</button>${x.qty}<button onclick="event.stopPropagation();qty(${i},1)">+</button></div></div><div class="cartPriceBlock"><div class="cartPriceNormal">정상가 ${won(p.normal_price)}</div>${member&&p.member_price!=null?`<div class="cartPriceMember">회원가 ${won(p.member_price)}</div>`:''}${optionAdd>0?`<div class="cartPriceOption">옵션 (+${won(optionAdd)})</div>`:''}<div class="cartLineTotal">합계 ${won(lineTotal)}</div></div></div>`}).join(''):`<div class="empty">장바구니가 비어 있어요 🤍</div>`}
   </div><div class="total" style="font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:17px"><span>총주문금액</span><b>${won(selectedTotal)}</b></div></div><div class="bottom"><button class="primary" onclick="openOrder()">주문서 작성하기</button></div></div>`;
 }
 function toggleAllCart(checked){document.querySelectorAll('.cartCheck').forEach(x=>x.checked=checked)}
