@@ -129,14 +129,30 @@ function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
 const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
 function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
 async function load(){
-  const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
-    sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
-    sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
-  ]);
-  if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
-  products=productData||[];
+  let productResult, categoryResult;
+  try {
+    [productResult, categoryResult] = await Promise.all([
+      sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+      sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+    ]);
+    // DB에 sort_order 컬럼이 없으면 대체 정렬로 상품을 다시 불러옵니다.
+    if(productResult.error && /sort_order|column/i.test(String(productResult.error.message||''))) {
+      productResult = await sb.from('products').select('*').order('created_at',{ascending:false});
+    }
+    if(categoryResult.error && /sort_order|column/i.test(String(categoryResult.error.message||''))) {
+      categoryResult = await sb.from('categories').select('id,name,parent_id,created_at,is_hidden').order('created_at',{ascending:true});
+    }
+  } catch(e) {
+    console.error('상품 조회 중 오류:',e);
+    grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. 페이지를 새로고침하거나 관리자에게 문의해주세요.</div>';
+    return;
+  }
+  const productData=productResult?.data, productError=productResult?.error;
+  const categoryData=categoryResult?.data, categoryError=categoryResult?.error;
+  if(productError){console.error('상품 조회 실패:',productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결 또는 상품 테이블 권한을 확인해주세요.</div>';return}
+  products=Array.isArray(productData)?productData:[];
   siteCategories=categoryError?[]:(categoryData||[]);
-  if(categoryError)console.error(categoryError);
+  if(categoryError)console.error('카테고리 조회 실패:',categoryError);
   render();
 }
 function goHome(){category='ALL';categoryId=null;brandFilter='ALL';quickView='all';window.scrollTo({top:0,behavior:'smooth'});render()}
