@@ -1,9 +1,13 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="/admin-manifest.json"><title>BY JAEI ADMIN v13</title><style>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="/admin-manifest.json"><title>BY JAEI ADMIN v13</title>
+<!-- 엑셀 및 ZIP 처리 라이브러리 추가 -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
 :root{--bg:#f7f3ed;--card:#fffdf9;--ink:#51463d;--muted:#9b8f84;--line:#e7ded4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}.wrap{max-width:760px;margin:auto;padding:20px}.logo{font:24px Georgia,serif;letter-spacing:3px;margin:10px 0 25px}.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}h2{font:20px Georgia,serif;font-weight:400;margin:0 0 18px}label{display:block;font-size:12px;color:var(--muted);margin:14px 0 7px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);outline:0}textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.priceRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.priceRow>div{min-width:0}.priceRow input{width:100%;min-width:0}@media(max-width:560px){.priceRow{grid-template-columns:1fr;gap:9px}}button{border:0;border-radius:11px;padding:13px 16px;background:var(--ink);color:#fff;cursor:pointer}.secondary{background:white;color:var(--ink);border:1px solid var(--line)}.brandLockActive{background:#51463d!important;color:#fff!important;border-color:#51463d!important}.categoryLockActive{background:#51463d!important;color:#fff!important;border-color:#51463d!important}.sizeLockActive{background:#51463d!important;color:#fff!important;border-color:#51463d!important}.actions{display:flex;gap:8px;margin-top:18px}.preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.previewItem{position:relative;width:100px;height:100px;cursor:grab;user-select:none}.previewItem:active{cursor:grabbing}.previewItem img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block;pointer-events:none}.previewItem.dragging{opacity:.45}.previewItem.dragOver{outline:2px dashed var(--line);outline-offset:3px}.photoDragHint{position:absolute;left:5px;top:5px;z-index:2;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.9);font-size:10px;line-height:16px;color:var(--muted);pointer-events:none}.previewItem button{position:absolute;right:4px;top:4px;width:24px;height:24px;padding:0;border-radius:50%;background:rgba(81,70,61,.88);font-size:15px;line-height:24px;z-index:3}.uploadHint{font-size:11px;color:var(--muted);margin-top:7px}.note{font-size:12px;color:var(--muted);line-height:1.7}.msg{padding:12px;border-radius:10px;background:#eee8df;margin-top:12px;line-height:1.6}.item{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;cursor:pointer}.item img{width:64px;height:64px;object-fit:cover;border-radius:9px}.productAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.productCard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}.productCardImg{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.productCardBody{padding:11px}.productCardName{font-size:13px;font-weight:700;margin-bottom:5px}.productCardMeta{font-size:11px;color:var(--muted);line-height:1.55}.productCardCategory{display:inline-flex;align-items:flex-start;max-width:100%;margin-top:4px;padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:#f7f3ed;color:var(--ink);font-size:10px;font-weight:700;line-height:1.45;white-space:normal;overflow:visible}.productCardCategoryLabel{font-size:9px;color:var(--muted);font-weight:500;margin-right:4px;flex:0 0 auto}.productCardCategoryValue{min-width:0;white-space:normal;overflow-wrap:anywhere}.productCardCategoryValue .current{font-weight:700}.productCardActions{display:flex;gap:5px;margin-top:9px}.productCardActions button{flex:1;padding:8px 5px;font-size:10px}.adminCatBar{padding:0 0 20px;margin-bottom:0}.adminCatTopRow{display:flex;align-items:center;justify-content:safe center;gap:38px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:thin;scrollbar-color:#cfc7bd transparent;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;padding:0 12px 8px;scroll-padding-inline:12px}.adminCatTopRow::-webkit-scrollbar{height:5px}.adminCatTopRow::-webkit-scrollbar-track{background:transparent}.adminCatTopRow::-webkit-scrollbar-thumb{background:#cfc7bd;border-radius:999px}.adminCatTopRow::-webkit-scrollbar-thumb:hover{background:#aaa198}.adminCatTopRow>button,.adminCatTopRow>.adminCatItem{flex:0 0 auto}.adminCatTitle{text-align:center;font-size:17px;font-weight:700;color:var(--ink);margin:28px 0 22px;line-height:1.2}.adminCatSubRow{display:flex;align-items:center;justify-content:safe center;gap:30px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;scrollbar-width:thin;scrollbar-color:#cfc7bd transparent;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;padding:0 12px 8px;scroll-padding-inline:12px}.adminCatSubRow::-webkit-scrollbar{height:5px}.adminCatSubRow::-webkit-scrollbar-track{background:transparent}.adminCatSubRow::-webkit-scrollbar-thumb{background:#cfc7bd;border-radius:999px}.adminCatSubRow::-webkit-scrollbar-thumb:hover{background:#aaa198}.adminCatItem{flex:0 0 auto}.adminCatBar button{flex:0 0 auto;white-space:nowrap;border:0;background:transparent;border-radius:0;padding:6px 0;color:var(--muted);cursor:pointer;font-size:12px;line-height:1.3;transition:.15s}.adminCatBar button.parentCat{font-weight:500;color:var(--muted)}.adminCatBar button.childCat{font-size:12px}.adminCatBar button.active{color:var(--ink);font-weight:700}.adminCatBar button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:8px}.adminBrandBar{display:flex;justify-content:center;gap:28px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;padding:0 16px 18px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.adminBrandBar::-webkit-scrollbar{display:none}.adminBrandBar button{white-space:nowrap;border:0;background:transparent;border-radius:0;padding:5px 0;color:var(--muted);cursor:pointer;font-size:12px}.adminBrandBar button.active{color:var(--ink);font-weight:700}.adminBrandBar button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:7px}.adminBrandBar button.active{background:var(--ink);color:#fff}@media(max-width:560px){.productAdminGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.productCardBody{padding:9px}.productCardActions{gap:4px}.productCardActions button{font-size:9px;padding:7px 3px}}.item .grow{flex:1}.danger{background:#9b5d50}.previewLayer{position:fixed;inset:0;background:rgba(40,30,25,.38);z-index:20;display:flex;align-items:flex-end;justify-content:center}.previewBox{background:var(--card);width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px}.previewGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.previewGrid img{width:100%;height:180px;object-fit:cover;border-radius:12px}.memberRow,.orderRow{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between}.statusBadge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-top:5px}.status-received{background:#eee8df;color:#6d625a}.status-paid{background:#e5efe5;color:#557055}.status-prep{background:#e7edf5;color:#536b86}.status-done{background:#e8e1f0;color:#705b80}.status-cancel{background:#f4e3e0;color:#9a5a50}.filterBar{display:grid;grid-template-columns:1.3fr 1.1fr 1fr 1fr auto;gap:7px;margin:0 0 14px}.orderFilterBar{margin-top:10px}.orderFilterBar{margin-top:10px}.filterBar input{padding:10px}.filterBar button{padding:10px 12px;font-size:12px}.filterCount{font-size:11px;color:var(--muted);margin:-7px 0 10px}@media(max-width:560px){.filterBar{grid-template-columns:1fr 1fr}.filterBar input:first-child{grid-column:1/-1}.filterBar button{grid-column:1/-1}.filterBar input{font-size:12px;padding:9px}.filterBar button{font-size:11px;padding:9px 8px}}.smallText,.orderItems{font-size:12px;color:var(--muted);line-height:1.6}.orderItemLine{padding:4px 0;border-bottom:1px dashed var(--line)}.orderItemBrand{font-size:11px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}.orderItemMoney{font-size:11px;color:var(--muted);padding-left:4px}.descriptionText{white-space:pre-line;line-height:1.7}.previewCategoryPath{font-size:11px;color:var(--muted);line-height:1.6;margin-top:-8px;margin-bottom:4px}.previewCategoryPath .current{color:var(--ink);font-weight:700}.bulkBar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 10px;margin:0 0 10px;background:#f7f3ed;border:1px solid var(--line);border-radius:10px}.bulkBar select{width:auto;min-width:170px;padding:8px}.bulkBar button{padding:8px 10px;font-size:11px}.bulkCount{font-size:11px;color:var(--muted);margin-right:auto}.categoryManagerRow{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}.categoryManagerRow .grow{flex:1}.categoryManagerRow .categoryDepth{color:var(--muted);font-size:11px}.categoryManagerRow button{padding:7px 9px;font-size:10px}.categoryManagerChild{padding-left:4px}.categoryToggle{width:28px;display:flex;justify-content:center;flex:0 0 28px}.categoryExpandBtn{width:24px;height:24px;padding:0!important;border-radius:7px;font-size:13px;line-height:22px}.categoryExpandSpacer{display:block;width:24px;height:24px}.categoryTreeChildren{margin-left:20px;border-left:1px solid var(--line);padding-left:8px}.categoryVirtualGroup{margin-bottom:6px;padding-bottom:2px}.categoryManagerRow{gap:6px}.categoryManagerRow .grow{min-width:0}.productSelectWrap{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);margin-bottom:6px}.productSelectWrap input{width:auto;margin:0}.memberActions,.orderActions{display:flex;gap:6px;flex-wrap:wrap}.memberActions button,.orderActions button{padding:8px 10px;font-size:11px}@media(max-width:560px){.row{grid-template-columns:1fr}.memberRow,.orderRow{align-items:flex-start}.memberActions,.orderActions{justify-content:flex-end}}
 
 .orderProductLink{display:inline;background:transparent!important;color:var(--ink)!important;border:0!important;padding:0!important;margin:0;font:inherit;text-decoration:underline;text-align:left;cursor:pointer;line-height:inherit}.orderProductLink:hover{opacity:.72}
 
-/* 관리자 전용 알림함: 고객페이지에는 노출하지 않음 */
+/* 관리자 전용 알림함 */
 .adminNotificationArea{margin:0 0 14px}
 .adminNotificationTop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .adminNotificationToggle{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;font-weight:700}
@@ -24,247 +28,16 @@
 [hidden]{display:none!important}
 @media(max-width:560px){.adminNotificationTop{align-items:flex-start;flex-direction:column}.adminNotificationPanelHead{align-items:flex-start;flex-direction:column}.adminNotificationItem{gap:7px}}
 
-/* PC에서는 기존처럼 넓은 배율로, 모바일은 현재 배열 유지 */
 @media(min-width:900px){.wrap{max-width:1440px;padding:28px 36px}.productAdminGrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.productCardBody{padding:13px}.productCardName{font-size:15px}.productCardMeta{font-size:12px}.productCardActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.productCardActions button{font-size:11px;padding:9px 6px}.box{padding:24px}}
 .productSearchTools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}.productSearchTools input{flex:1;min-width:180px}.productSearchTools button{white-space:nowrap}.productCard{position:relative}.productCardImgWrap{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#eee8df}.productCardImgWrap .productCardImg{height:100%;aspect-ratio:auto}.soldOutOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,253,249,.48);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);color:#fff;font-weight:800;font-size:clamp(20px,3vw,32px);letter-spacing:3px;text-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none}.soldOutOverlay span{border:2px solid rgba(255,255,255,.9);padding:8px 14px;transform:rotate(-8deg)}
-</style>
-<style>
 .adminSectionNav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px;padding:4px}
 .adminSectionNav button{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:10px;padding:10px 13px;font-size:12px;cursor:pointer}
 .adminSectionNav button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 .adminSection{display:none}
 .adminSection.active{display:block}
 .adminSectionTitle{margin:0 0 14px;font-size:16px}
+.categoryOptionRoot{flex:0 0 100%;width:100%;box-sizing:border-box;padding:8px 10px!important;background:#f7f3ed;border:1px solid var(--line);border-radius:8px;font-weight:700!important}.categoryOptionChild{flex:0 0 auto;padding-top:5px!important;padding-bottom:5px!important}.photoFileName{width:100%;max-width:140px;margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;user-select:text}.previewItem{display:flex;flex-direction:column;align-items:center}
 </style>
-
-<style>.categoryOptionRoot{flex:0 0 100%;width:100%;box-sizing:border-box;padding:8px 10px!important;background:#f7f3ed;border:1px solid var(--line);border-radius:8px;font-weight:700!important}.categoryOptionChild{flex:0 0 auto;padding-top:5px!important;padding-bottom:5px!important}.photoFileName{width:100%;max-width:140px;margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;user-select:text}.previewItem{display:flex;flex-direction:column;align-items:center}</style>
-<style>
-/* 주문관리 모바일 레이아웃: 상세정보가 좁은 열에 세로로 찢어지지 않도록 카드 구조를 세로 배치 */
-@media (max-width: 560px) {
-  .orderRow {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch !important;
-    justify-content: flex-start;
-    gap: 12px;
-    width: 100%;
-    min-width: 0;
-  }
-  .orderRow > div:first-child {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    flex: 1 1 auto;
-    overflow-wrap: anywhere;
-    word-break: normal;
-  }
-  .orderRow .smallText,
-  .orderRow .orderItems,
-  .orderRow .orderItemLine {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    word-break: normal;
-  }
-  .orderRow .orderActions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-width: 0;
-  }
-  .orderRow .orderActions > b {
-    grid-column: 1 / -1;
-  }
-  .orderRow .orderActions select,
-  .orderRow .orderActions button {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
-  }
-  .orderRow .orderActions select {
-    padding: 10px 8px;
-    font-size: 12px;
-  }
-  .orderRow .orderActions button {
-    padding: 10px 8px !important;
-    font-size: 12px !important;
-    white-space: normal;
-  }
-  .orderRow .orderActions > * {
-    min-width: 0;
-  }
-}
-</style>
-
-<style id="mobile-members-no-clipping-fix">
-/* 회원관리 모바일 화면 잘림 방지: 기존 기능/데이터 처리는 유지 */
-html, body { width:100%; max-width:100%; overflow-x:hidden; }
-.wrap { width:100%; min-width:0; max-width:760px; }
-.adminSection, .adminSection .box, #members, #memberFilterCount { width:100%; min-width:0; max-width:100%; }
-#adminSection-members .filterBar {
-  width:100%; min-width:0; max-width:100%; box-sizing:border-box;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-}
-#adminSection-members .filterBar > * { min-width:0; max-width:100%; box-sizing:border-box; }
-#adminSection-members #memberNameSearch,
-#adminSection-members #memberPhoneSearch,
-#adminSection-members .filterBar button { grid-column:1 / -1; width:100%; }
-#adminSection-members #memberFrom { grid-column:1; }
-#adminSection-members #memberTo { grid-column:2; }
-#adminSection-members .filterBar input[type="date"] { min-width:0; width:100%; padding-left:8px; padding-right:6px; font-size:12px; }
-#adminSection-members .memberRow { width:100%; min-width:0; gap:10px; }
-#adminSection-members .memberRow > div:first-child { flex:1 1 auto; min-width:0; max-width:100%; overflow-wrap:anywhere; word-break:break-word; }
-#adminSection-members .memberRow .smallText { min-width:0; max-width:100%; overflow-wrap:anywhere; word-break:break-word; }
-#adminSection-members .memberActions { min-width:0; max-width:100%; }
-#adminSection-members .memberActions button { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
-@media (max-width:700px) {
-  .wrap { padding:12px; }
-  .box { padding:14px; }
-  #adminSection-members .memberRow { display:flex; flex-direction:column; align-items:stretch !important; justify-content:flex-start; }
-  #adminSection-members .memberRow > div:first-child { width:100%; flex:none; }
-  #adminSection-members .memberActions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); justify-content:stretch; width:100%; gap:8px; }
-  #adminSection-members .memberActions button { width:100%; min-width:0; padding:10px 8px; font-size:12px; }
-  #adminSection-members .filterBar { gap:8px; }
-  #adminSection-members .filterBar button { padding:12px 10px; }
-}
-</style>
-
-<style id="category-visibility-admin-style">
-.categoryVisibilityTag{display:inline-flex;align-items:center;margin-top:5px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);font-size:10px;line-height:1.4;color:var(--muted);background:#fffdf9}
-.categoryVisibilityTag.isHidden{color:#9b5d50;border-color:#e4c9c2;background:#fbefec}
-.categoryVisibilityTag.inheritedHidden{color:#876f52;border-color:#e7d8c6;background:#f8f1e8}
-.categoryManagerRow{flex-wrap:wrap}
-.categoryManagerRow .grow{flex:1 1 145px;min-width:100px}
-.categoryManagerRow .categoryVisibilityBtn{white-space:nowrap}
-@media(max-width:560px){.categoryManagerRow{gap:5px}.categoryManagerRow .grow{flex:1 1 calc(100% - 42px)}.categoryManagerRow>button{flex:1 1 auto;min-width:42px}.categoryManagerRow .categoryVisibilityBtn{flex:1 1 100%;width:100%}}
-</style>
-
-<style>
-.memberPointsInline{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
-.memberPointsInline b{color:var(--ink);font-size:13px}
-.memberPointsInline .pointsDisabledNote{font-size:11px;color:#9b5d50}
-@media(max-width:560px){.memberRow>div:first-child{flex:1 1 100%;min-width:0}.memberActions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.memberActions button{width:100%;min-width:0;white-space:normal}.memberPointsInline{align-items:stretch}.memberPointsInline button{width:auto!important}}
-</style>
-
-<style id="loyalty-points-history-grant-style">
-.memberPointsInline{flex-wrap:wrap}
-.memberPointsInline button{padding:7px 10px;font-size:11px}
-.memberPointHistory{width:100%;margin-top:9px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fffdf9;box-sizing:border-box}
-.memberPointHistoryTitle{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px}
-.memberPointHistoryRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:11px;line-height:1.55}
-.memberPointHistoryRow:first-of-type{border-top:0}
-.memberPointHistoryRow .details{min-width:0;overflow-wrap:anywhere;color:var(--muted)}
-.memberPointHistoryRow .details b{display:block;color:var(--ink);font-size:12px;margin-bottom:2px}
-.memberPointHistoryRow .amount{white-space:nowrap;font-weight:700;color:var(--ink);font-size:12px}
-.pointGrantBackdrop{position:fixed;inset:0;z-index:200;background:rgba(40,30,25,.45);display:flex;align-items:center;justify-content:center;padding:16px}
-.pointGrantDialog{width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 16px 50px rgba(40,30,25,.2)}
-.pointGrantDialog h3{margin:0 0 8px;font-size:17px;font-weight:600}
-.pointGrantDialog .note{margin:0 0 12px}
-.pointGrantDialog label{display:block;margin:12px 0 6px}
-.pointGrantDialog input,.pointGrantDialog select{width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit}
-.pointGrantDialog .actions{display:flex;gap:8px}
-.pointGrantDialog .actions>*{flex:1}
-@media(max-width:560px){.memberPointHistoryRow{gap:6px}.pointGrantDialog{padding:16px}}
-</style>
-
-<style id="byjaei-mobile-admin-layout-alignment-fix">
-/* Mobile alignment fixes: product cards, order filters and member cards */
-html, body { width:100%; max-width:100%; overflow-x:hidden; }
-.wrap { width:100%; max-width:760px; min-width:0; }
-.wrap, .adminSection, .adminSection .box, #list, #orders, #members { min-width:0; max-width:100%; }
-.adminSection .box, .adminSection .box * { box-sizing:border-box; }
-.logo { max-width:100%; overflow-wrap:anywhere; }
-
-@media (max-width:700px) {
-  /* Product-card buttons should be readable, not letter-stacked in narrow columns. */
-  .productAdminGrid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-  .productCard, .productCardBody { min-width:0; }
-  .productCardActions {
-    display:grid !important;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    align-items:stretch;
-    width:100%; min-width:0; gap:6px;
-  }
-  .productCardActions button {
-    display:flex; align-items:center; justify-content:center;
-    width:100%; min-width:0; max-width:100%; min-height:38px;
-    flex:none !important; margin:0; padding:8px 5px !important;
-    font-size:11px !important; line-height:1.35;
-    white-space:normal !important; word-break:keep-all; overflow-wrap:anywhere;
-  }
-  .productCardActions button:first-child { grid-column:1 / -1; }
-
-  /* Search filters: name and phone full-width; dates share one row; search full-width. */
-  .filterBar {
-    display:grid !important;
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    gap:8px !important; width:100%; min-width:0; max-width:100%;
-  }
-  .filterBar > * { min-width:0 !important; width:100% !important; max-width:100%; grid-column:auto; }
-  .filterBar input:first-child,
-  .filterBar input:nth-child(2),
-  .filterBar button { grid-column:1 / -1 !important; }
-  .filterBar input[type="date"] {
-    min-width:0 !important; width:100% !important; max-width:100%;
-    padding:10px 7px !important; font-size:12px !important;
-  }
-  .filterBar button { padding:11px 10px !important; }
-
-  /* Consistent order cards and prevent long emails/address text from widening the page. */
-  .orderRow {
-    display:flex; flex-direction:column; align-items:stretch !important;
-    justify-content:flex-start; gap:12px; width:100%; min-width:0; max-width:100%;
-  }
-  .orderRow > div:first-child {
-    width:100%; max-width:100%; min-width:0; flex:1 1 auto;
-    overflow-wrap:anywhere; word-break:normal;
-  }
-  .orderRow .smallText, .orderRow .orderItems, .orderRow .orderItemLine,
-  .orderRow textarea, .orderRow input { max-width:100%; min-width:0; overflow-wrap:anywhere; }
-  .orderRow textarea { width:100% !important; }
-  .orderRow .orderActions {
-    display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr));
-    align-items:center; gap:8px; width:100%; min-width:0; max-width:100%;
-  }
-  .orderRow .orderActions > b { grid-column:1 / -1; }
-  .orderRow .orderActions select, .orderRow .orderActions button {
-    width:100% !important; min-width:0; max-width:100%; margin:0;
-    padding:10px 7px !important; font-size:12px !important; white-space:normal;
-    word-break:keep-all; overflow-wrap:anywhere;
-  }
-  #orders input[id^="memo_"] { flex:1 1 100%; width:100% !important; min-width:0; }
-  #orders input[id^="memo_"] ~ button { flex:1 1 auto; min-width:0; }
-
-  /* Member details and action buttons use the same alignment on every card. */
-  .memberRow {
-    display:flex; flex-direction:column; align-items:stretch !important;
-    justify-content:flex-start; gap:10px; width:100%; min-width:0; max-width:100%;
-  }
-  .memberRow > div:first-child {
-    width:100%; max-width:100%; min-width:0; flex:1 1 auto;
-    overflow-wrap:anywhere; word-break:normal;
-  }
-  .memberRow .smallText { width:100%; max-width:100%; min-width:0; overflow-wrap:anywhere; }
-  .memberActions {
-    display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:8px; width:100%; min-width:0; max-width:100%; justify-content:stretch;
-  }
-  .memberActions button {
-    width:100% !important; min-width:0; max-width:100%; padding:10px 8px !important;
-    font-size:12px !important; line-height:1.35; white-space:normal;
-    word-break:keep-all; overflow-wrap:anywhere;
-  }
-  .memberPointsInline { width:100%; min-width:0; max-width:100%; align-items:center; }
-  .memberPointHistory { width:100%; min-width:0; max-width:100%; }
-
-  /* Category-manager rows may wrap but controls remain normal-sized. */
-  .categoryManagerRow { min-width:0; max-width:100%; }
-  .categoryManagerRow .grow { min-width:0; overflow-wrap:anywhere; }
-  .categoryManagerRow > button { white-space:normal; word-break:keep-all; }
-}
-</style>
-
 </head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -286,7 +59,29 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
   <button type="button" data-admin-section="orders">주문관리</button>
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
-<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
+<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2>
+
+<!-- 📦 엑셀 + ZIP 이미지 일괄 상품 자동 등록 영역 -->
+<div class="box" style="background:#fffdf8; border:1px solid #e7dbcd;">
+  <h2>📦 엑셀 + ZIP 이미지 자동 일괄 등록</h2>
+  <p class="note">엑셀 파일(.xlsx)과 이미지 압축파일(.zip)을 선택하여 한 번에 여러 상품을 등록할 수 있어요.<br>등록 후 내용이나 금액이 틀린 경우, 아래 상품 목록에서 <b>[수정]</b> 버튼을 눌러 언제든 수정하실 수 있습니다.</p>
+  <div class="row" style="margin-top:10px">
+    <div>
+      <label>1. 엑셀 파일 (.xlsx)</label>
+      <input type="file" id="batchExcel" accept=".xlsx, .xls">
+    </div>
+    <div>
+      <label>2. 이미지 압축파일 (.zip)</label>
+      <input type="file" id="batchZip" accept=".zip">
+    </div>
+  </div>
+  <div class="actions" style="margin-top:12px">
+    <button type="button" onclick="uploadBatchProducts()" style="background:#51463d; font-weight:bold;">🚀 자동 일괄 등록 시작</button>
+  </div>
+  <div id="batchStatus" class="note" style="margin-top:10px; font-weight:bold; color:#876f52;"></div>
+</div>
+
+<div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
 사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="loadProducts()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
 <div class="box" id="adminPushBox" style="margin:14px 0;background:#f7f3ed">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -312,6 +107,119 @@ async function savePrivateWholesalePrice(productId,price){
     return;
   }
   await api('/rest/v1/product_private_costs?on_conflict=product_id',{method:'POST',body:JSON.stringify({product_id:id,wholesale_price:Number(price),updated_at:new Date().toISOString()}),headers:{'Prefer':'resolution=merge-duplicates,return=minimal'}});
+}
+
+// 📦 엑셀 + ZIP 파일 자동 일괄 등록 함수
+async function uploadBatchProducts(){
+  const excelInput=$('batchExcel'), zipInput=$('batchZip'), statusEl=$('batchStatus');
+  if(!excelInput.files[0]||!zipInput.files[0]){
+    return alert('엑셀 파일(.xlsx)과 ZIP 압축파일(.zip)을 모두 선택해주세요.');
+  }
+
+  statusEl.textContent='⏳ 파일 파싱 및 ZIP 이미지 압축 해제 중...';
+
+  try {
+    // 1. ZIP 파일 파싱
+    const zip=await JSZip.loadAsync(zipInput.files[0]);
+    const zipFiles={};
+    for(const path in zip.files){
+      if(!zip.files[path].dir){
+        const blob=await zip.files[path].async('blob');
+        const filename=path.split('/').pop().trim();
+        zipFiles[filename]=blob;
+      }
+    }
+
+    // 2. 엑셀 파일 파싱
+    const buffer=await excelInput.files[0].arrayBuffer();
+    const workbook=XLSX.read(buffer,{type:'array'});
+    const sheetName=workbook.SheetNames[0];
+    const rows=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    if(!rows||!rows.length) return alert('엑셀 파일에 데이터가 없습니다.');
+
+    statusEl.textContent=`총 ${rows.length}개 상품 업로드 시작...`;
+    let successCount=0;
+
+    for(let i=0; i<rows.length; i++){
+      const row=rows[i];
+      const name=String(row['상품명']||'').trim();
+      if(!name) continue;
+
+      statusEl.textContent=`[${i+1}/${rows.length}] '${name}' 이미지 업로드 중...`;
+
+      // 3. 이미지 Storage 업로드
+      const imgNames=String(row['대표 이미지파일명']||'').split(',').map(s=>s.trim()).filter(Boolean);
+      const imageUrls=[];
+
+      for(const imgName of imgNames){
+        if(zipFiles[imgName]){
+          const blob=zipFiles[imgName];
+          const ext=imgName.split('.').pop()||'jpg';
+          const path=`batch_${Date.now()}_${Math.random().toString(36).substring(2,7)}.${ext}`;
+
+          const r=await fetch(CFG.supabaseUrl+'/storage/v1/object/products/'+encodeURIComponent(path),{
+            method:'POST',
+            headers:{apikey:CFG.supabaseKey, Authorization:'Bearer '+token, 'Content-Type':blob.type||'image/jpeg'},
+            body:blob
+          });
+
+          if(r.ok){
+            imageUrls.push(CFG.supabaseUrl+'/storage/v1/object/public/products/'+path);
+          }
+        }
+      }
+
+      // 4. 카테고리 매칭
+      const categoryName=String(row['카테고리']||'ALL').trim();
+      const matchedCat=categories.find(c=>String(c.name).trim()===categoryName);
+      const categoryId=matchedCat?matchedCat.id:null;
+
+      const normalPrice=Number(row['정상가'])||0;
+      const memberPrice=row['회원가']?Number(row['회원가']):Math.round(normalPrice*0.75);
+      const wholesalePrice=row['도매가']?Number(row['도매가']):null;
+
+      const colors=row['색상']?parseOptionList(row['색상']):[];
+      const sizes=row['사이즈']?parseOptionList(row['사이즈']):[];
+
+      const payload={
+        name,
+        brand: String(row['브랜드']||'').trim(),
+        normal_price: normalPrice,
+        member_price: memberPrice,
+        category: categoryName,
+        category_id: categoryId,
+        colors,
+        sizes,
+        description: String(row['상세설명']||'').trim(),
+        images: imageUrls,
+        created_at: new Date().toISOString()
+      };
+
+      const inserted=await api('/rest/v1/products',{
+        method:'POST',
+        body:JSON.stringify(payload),
+        headers:{'Prefer':'return=representation'}
+      });
+
+      if(inserted?.[0]?.id!=null){
+        if(wholesalePrice!=null){
+          await savePrivateWholesalePrice(inserted[0].id, wholesalePrice);
+        }
+        successCount++;
+      }
+    }
+
+    statusEl.textContent=`✅ 등록 완료! 총 ${successCount}개 상품이 성공적으로 자동 등록되었습니다.`;
+    alert(`총 ${successCount}개 상품이 등록되었습니다.\n\n틀린 부분이 있으면 아래 등록된 상품 목록에서 [수정]을 통해 변경해주세요.`);
+    excelInput.value=''; zipInput.value='';
+    await loadProducts();
+
+  } catch(err) {
+    console.error('일괄 등록 에러:', err);
+    statusEl.textContent='❌ 등록 실패: '+err.message;
+    alert('등록 중 오류가 발생했습니다.\n\n'+err.message);
+  }
 }
 
 async function login(){const email=$('email').value.trim(),password=$('pw').value;if($('saveEmail').checked)localStorage.setItem('byjaei_admin_saved_email',email);else localStorage.removeItem('byjaei_admin_saved_email');if(!email||!password){alert('이메일과 비밀번호를 입력해주세요.');return}const b=$('loginBtn');b.disabled=true;b.textContent='로그인 확인 중...';status('1단계 · Supabase 인증 서버에 연결 중...');try{const r=await fetch(CFG.supabaseUrl+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:CFG.supabaseKey,'Content-Type':'application/json'},body:JSON.stringify({email,password})});let d={};try{d=await r.json()}catch{}if(!r.ok){const raw=d.error_description||d.msg||d.message||('HTTP '+r.status);let msg=raw;if(raw.toLowerCase().includes('invalid login credentials')){msg='관리자 이메일 또는 비밀번호가 맞지 않아요.\n\nSupabase에서 관리자 계정이 존재하는지, 이메일이 정확한지 확인해주세요.'}else if(raw.toLowerCase().includes('email not confirmed')){msg='관리자 이메일 인증이 완료되지 않았어요.\n\nSupabase Authentication에서 관리자 계정의 이메일 인증 상태를 확인해주세요.'}status('로그인 실패 · '+msg.split('\n')[0]);alert('로그인 실패\n\n'+msg);return}if(!d.access_token||!d.user?.id){status('로그인 응답은 받았지만 세션 정보가 없어요.');alert('세션 정보가 없습니다.');return}token=d.access_token;userId=d.user.id;localStorage.setItem('byjaei_admin_token',token);localStorage.setItem('byjaei_admin_user',userId);status('2단계 · 관리자 권한 확인 중...');const rows=await api('/rest/v1/profiles?select=id,name,is_admin& id=eq.'+encodeURIComponent(userId)).catch(async()=>api('/rest/v1/profiles?select=id,name,is_admin&id=eq.'+encodeURIComponent(userId)));const p=rows?.[0];if(!p){throw new Error('profiles에 이 관리자 계정의 프로필이 없습니다.')}if(p.is_admin!==true){throw new Error('이 계정의 is_admin 값이 true가 아닙니다.')}status('관리자 로그인 성공 🤍');$('authBox').hidden=true;$('app').hidden=false;if(location.hash==='#members'||new URLSearchParams(location.search).get('section')==='members')switchAdminSection('members');await refreshAdminPushStatus();await loadCategories();await Promise.all([loadProducts(),loadMembers(),loadOrders()]);startAdminNotificationPolling()}catch(e){status('확인 실패 · '+e.message);alert('관리자 확인 실패\n\n'+e.message);token='';userId='';localStorage.removeItem('byjaei_admin_token');localStorage.removeItem('byjaei_admin_user')}finally{b.disabled=false;b.textContent='로그인'}}
@@ -442,7 +350,6 @@ function scrollToProductImageInput(){
     window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
   };
   scroll();
-  // Recalculate once after the browser has completed the form reset/layout.
   setTimeout(scroll,180);
 }
 async function saveProduct(){
@@ -475,10 +382,7 @@ async function saveProduct(){
     };
     if(editingId){
       const first=selectedCategories[0];
-      const updated=await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(editingId)),{method:'PATCH',body:JSON.stringify({...basePayload,category:first.name,category_id:first.id}),headers:{'Prefer':'return=representation'}});
-      if(!Array.isArray(updated)||updated.length===0){
-        throw new Error('상품 수정 요청은 전송됐지만 Supabase에서 수정된 상품을 확인하지 못했어요. 상품 ID 또는 관리자 권한(RLS)을 확인해야 합니다. 기존 상품은 변경되지 않았을 수 있어요.');
-      }
+      await api('/rest/v1/products?id=eq.'+editingId,{method:'PATCH',body:JSON.stringify({...basePayload,category:first.name,category_id:first.id}),headers:{'Prefer':'return=minimal'}});
       savedProductIds.push(String(editingId));
       for(const item of selectedCategories.slice(1)){
         const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
@@ -727,7 +631,6 @@ async function deleteCategory(id){
   if(child)return alert('하위 카테고리가 있어요. 하위 카테고리를 먼저 삭제하거나 이동해주세요.');
   const used=window.__allAdminProducts?.filter(p=>{
     if(p.category_id!=null)return String(p.category_id)===String(id);
-    // legacy row without category_id: block deletion conservatively if names match
     return String(p.category||'')===String(c.name);
   }).length||0;
   if(used)return alert(`이 카테고리에 상품 ${used}개가 있어요. 상품을 다른 카테고리로 먼저 이동해주세요.`);
@@ -877,46 +780,28 @@ function isSizeChartProduct(p){return p?.is_size_chart===true||/사이즈\s*표|
 
 async function pinProduct(id){
   try{
-    // 화면에 이미 표시된 상품 목록에서 먼저 찾습니다. 전체 조회 응답이 제한되거나
-    // 정렬/필터 상태가 달라도 현재 버튼을 누른 상품을 놓치지 않도록 합니다.
-    const cached=Array.isArray(window.__allAdminProducts)?window.__allAdminProducts:[];
-    let target=cached.find(x=>String(x.id)===String(id));
-    if(!target){
-      const exact=await api('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&id=eq.'+encodeURIComponent(String(id)));
-      target=Array.isArray(exact)?exact.find(x=>String(x.id)===String(id)):null;
-    }
-    if(!target)throw new Error('상품 정보를 불러오지 못했어요. 상품 목록을 새로고침한 뒤 다시 눌러주세요.');
+    const data=await api('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
+    const target=data.find(x=>String(x.id)===String(id));
+    if(!target)return;
 
-    // 범위 계산에는 전체 상품을 사용하되, 실패하면 화면 캐시를 유지합니다.
-    let data=cached;
-    try{
-      const all=await api('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
-      if(Array.isArray(all)&&all.length)data=all;
-    }catch(loadError){console.warn('전체 상품 목록 조회 실패',loadError)}
-    if(!data.some(x=>String(x.id)===String(id)))data=[...data,target];
-    target=data.find(x=>String(x.id)===String(id))||target;
-
-    // 사이즈표는 같은 카테고리 안에서만 고정하고, 일반 상품의 기존 고정 범위는 유지합니다.
     const targetCategoryId=resolveProductCategoryId(target);
     const scope=isSizeChartProduct(target)
-      ? (targetCategoryId ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId) : [target])
+      ? (targetCategoryId ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId) : data.filter(x=>String(x.id)===String(target.id)))
       : data;
     const numericOrders=scope.map(x=>Number(x.sort_order)).filter(Number.isFinite);
     const isPinned=Number(target.sort_order)<0;
-    const nextOrder=isPinned
-      ? Math.max(0,...numericOrders.filter(n=>n>=0))+1
-      : Math.min(0,...numericOrders)-1;
 
-    await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{
-      method:'PATCH',body:JSON.stringify({sort_order:nextOrder}),
-      headers:{'Prefer':'return=minimal'}
-    });
-    const check=await api('/rest/v1/products?select=id,sort_order&id=eq.'+encodeURIComponent(String(id)));
-    if(!Array.isArray(check)||!check.length||Number(check[0].sort_order)!==nextOrder){
-      throw new Error('Supabase에 고정 순서가 저장되지 않았어요. 관리자 권한 또는 데이터베이스 정책을 확인해주세요.');
+    if(isPinned){
+      const normalOrders=numericOrders.filter(n=>n>=0);
+      const maxOrder=Math.max(...normalOrders,0);
+      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
+    }else{
+      const normalOrders=numericOrders.filter(n=>n>=0);
+      const minOrder=Math.min(...normalOrders,0);
+      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=minimal'}});
     }
     await loadProducts();
-  }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+(e.message||String(e)))}
+  }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
 }
 
 document.addEventListener('change',e=>{
@@ -935,7 +820,6 @@ async function loadProducts(){
     window.__adminVisibleProducts=filtered;
     updateBulkUI(filtered);
     $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
-      // 음수 sort_order는 고정 상태. 사이즈표 상품은 해당 카테고리 안에서만 고정됩니다.
       const pinned=Number(p.sort_order)<0;
       return `<div class="productCard" onclick="previewProduct(${p.id})"><div class="productCardImgWrap"><img class="productCardImg" src="${p.images?.[0]||''}" style="${p.is_sold_out?'filter:blur(1.5px) brightness(.78)':''}">${p.is_sold_out?'<div class="soldOutOverlay"><span>SOLD OUT</span></div>':''}</div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">COLOR · ${(p.colors||[]).join(', ')||'-'}</span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();toggleSoldOut(${p.id},${p.is_sold_out?'true':'false'})">${p.is_sold_out?'품절 해제':'SOLD OUT'}</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();deleteProduct(${p.id})">삭제</button></div></div></div>`;
     }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
@@ -999,7 +883,6 @@ async function deleteProduct(id){
   const name=String(product.name||'이 상품');
   if(!confirm(`'${name}' 상품을 삭제할까요?\n\n이 작업은 상품 데이터에서 제거되며 복구하기 어려울 수 있어요. 주문 내역은 별도로 유지됩니다.`))return;
   try{
-    // 관리자 전용 도매가 정보가 있으면 함께 정리하되, 실패 시 상품 삭제는 계속 진행합니다.
     try{await api('/rest/v1/product_private_costs?product_id=eq.'+encodeURIComponent(String(id)),{method:'DELETE',headers:{'Prefer':'return=minimal'}})}catch(e){console.warn('상품 도매가 정보 정리 실패',e)}
     await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'DELETE',headers:{'Prefer':'return=minimal'}});
     selectedProductIds.delete(String(id));
@@ -1037,7 +920,6 @@ async function enableAdminPushNotifications(){
   }catch(e){console.error('푸시 알림 설정 실패',e);pushStatus('설정에 실패했어요: '+(e.message||'알 수 없는 오류')+' · SQL 설정과 사이트 배포 여부를 확인해주세요.');alert('푸시 알림 설정 실패\n\n'+(e.message||e)+'\n\n안내 파일의 SQL과 서비스 워커를 먼저 적용했는지 확인해주세요.');if(btn)btn.textContent='다시 설정하기'}finally{if(btn)btn.disabled=false}
 }
 
-// 관리자 전용 알림함: 알림 데이터는 서버 테이블에 기록하고 고객페이지에는 UI를 노출하지 않습니다.
 let adminNotificationRows=[];
 let adminNotificationTimer=null;
 let adminNotificationPollingReady=false;
@@ -1084,7 +966,6 @@ async function refreshAdminNotifications(silent=true){
     adminNotificationRows=next;
     adminNotificationKnownIds=new Set(next.map(n=>String(n.id)));
     if(!adminNotificationPollingReady){
-      // On first use, show fresh events (last 5 minutes) as unread instead of silently marking them read.
       adminNotificationPollingReady=true;
     }
     renderAdminNotifications();
@@ -1215,6 +1096,8 @@ ${lines.length?lines.join('\n'):'주문 상품 정보를 확인해주세요.'}
 배송비: ${shipping.toLocaleString('ko-KR')}원
 적립금 사용: ${pointsUsed>0?pointsUsed.toLocaleString('ko-KR')+'원 사용':'미사용 (0원)'}
 입금하실 금액: ${(payableTotal+shipping).toLocaleString('ko-KR')}원
+
+입금 계좌로 배송비 3,500원 포함하여 입금 부탁드립니다.
 
 [입금계좌]
 KB국민은행 29160204280174 고*진
