@@ -202,20 +202,18 @@ function isCustomerCategoryHidden(id){
   return false;
 }
 function productBelongsToHiddenCategory(p){
-  const id=p?.category_id;
-  // category_id가 현재 카테고리 목록에 실제로 존재할 때만 ID를 우선 사용합니다.
-  // 엑셀 등록 시 오래된/잘못된 category_id가 저장된 상품은 카테고리명으로 복구 판별합니다.
-  if(id!=null&&id!==''&&siteCategories.some(c=>String(c.id)===String(id)))return isCustomerCategoryHidden(id);
-  const matches=siteCategories.filter(c=>String(c.name).trim()===String(p?.category||'').trim());
+  if(p?.category_id!=null&&p.category_id!=='')return isCustomerCategoryHidden(p.category_id);
+  const matches=siteCategories.filter(c=>String(c.name)===String(p?.category||'').trim());
   if(matches.length===1)return isCustomerCategoryHidden(matches[0].id);
-  // 동명 카테고리가 여러 개면 모두 숨김인 경우에만 상품을 숨깁니다.
+  // 레거시 상품에 category_id가 없고 동명 카테고리가 여러 개면, 모두 숨김일 때만 숨깁니다.
   return matches.length>1&&matches.every(c=>isCustomerCategoryHidden(c.id));
 }
 function normalizedCustomerProductName(v){
   return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
 }
 function customerVisibleProducts(){
-  // 상품명 중복만으로 공개 상품까지 숨기지 않고, 각 상품 행의 실제 카테고리 공개 상태만 확인합니다.
+  // 상품명 중복 때문에 공개 카테고리에 등록된 상품까지 숨겨지지 않도록
+  // 각 상품의 실제 category_id와 해당 카테고리 공개 상태만 확인합니다.
   return products.filter(p=>!productBelongsToHiddenCategory(p));
 }
 function cats(){
@@ -280,12 +278,11 @@ function render(){
     let categoryOk=category==='ALL'||category==='BRAND';
     if(!categoryOk){
       const branchIds=categoryBranchIds(categoryId);
-      const productCategoryId=p.category_id==null?'':String(p.category_id);
-      const idExists=productCategoryId!==''&&siteCategories.some(c=>String(c.id)===productCategoryId);
-      if(idExists){
-        categoryOk=branchIds.has(productCategoryId);
+      if(p.category_id!=null){
+        categoryOk=branchIds.has(String(p.category_id));
       }else{
-        // category_id가 없거나 현재 카테고리 목록에 없는 엑셀 상품은 카테고리명으로 연결을 복구합니다.
+        // 예전 행에 category_id가 없고 같은 이름의 카테고리가 여러 개면,
+        // 어느 부모에 속하는지 알 수 없으므로 엉뚱한 트리에 섞지 않습니다.
         const legacyId=uniqueCategoryIdForName(productCategory);
         categoryOk=!!legacyId&&branchIds.has(String(legacyId));
       }
@@ -643,7 +640,7 @@ async function refreshUser(){
 function closeLayer(id){document.getElementById(id).hidden=true}function closeAll(){detailReturnToCart=false;['detail','cart','login'].forEach(x=>document.getElementById(x).hidden=true)}
 sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;loadCart();render()});
 refreshUser().then(()=>{loadCart();return load()});
-// 관리자 페이지에서 엑셀로 상품을 등록한 뒤 고객 페이지로 돌아오면 최신 상품을 다시 불러옵니다.
+// 관리자 페이지에서 상품을 등록한 뒤 고객 페이지로 돌아오면 상품 목록을 새로 불러옵니다.
 let customerRefreshInProgress=false;
 async function refreshCustomerProducts(){
   if(customerRefreshInProgress||document.visibilityState==='hidden')return;
