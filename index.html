@@ -212,9 +212,9 @@ function normalizedCustomerProductName(v){
   return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
 }
 function customerVisibleProducts(){
-  const hiddenNames=new Set();
-  products.forEach(p=>{if(productBelongsToHiddenCategory(p)){const key=normalizedCustomerProductName(p.name);if(key)hiddenNames.add(key)}});
-  return products.filter(p=>!productBelongsToHiddenCategory(p)&&(!normalizedCustomerProductName(p.name)||!hiddenNames.has(normalizedCustomerProductName(p.name))));
+  // 숨김 카테고리의 상품 행만 제외합니다. 같은 이름의 상품이 숨김 카테고리에
+  // 하나 더 있다는 이유로, 공개 카테고리에 정상 등록된 상품까지 숨기지 않습니다.
+  return products.filter(p=>!productBelongsToHiddenCategory(p));
 }
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
