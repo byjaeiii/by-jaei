@@ -306,17 +306,15 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 <div class="adminSection" id="adminSection-excel">
  <h2 class="adminSectionTitle">엑셀 자동입력</h2>
  <div class="box">
-  <h2>엑셀 상품 가져오기</h2>
-  <p class="note">업체에서 받은 알집 ZIP 파일을 그대로 올려도 됩니다. ZIP 안의 엑셀 단가표와 상품별 사진 폴더를 자동으로 찾아 연결합니다. 엑셀과 사진 ZIP을 따로 선택하는 방식도 지원합니다.</p>
-  <p class="note">업체마다 다른 열 이름과 파일명 규칙을 자동으로 분석합니다. 사진 연결이 불확실하거나 가격 구조가 여러 개인 상품은 등록 전 미리보기에서 반드시 확인해주세요. 실제 등록은 아래 등록 버튼을 누른 뒤에만 진행됩니다.</p>
-  <label for="excelFile">엑셀/CSV 파일 (ZIP 안에 있으면 생략 가능)</label><input id="excelFile" type="file" accept=".xlsx,.xls,.csv">
-  <label for="excelZipFile">업체 알집 ZIP 파일 (엑셀 + 상품 사진)</label><input id="excelZipFile" type="file" accept=".zip,application/zip">
-  <div class="uploadHint">ZIP은 한 업체씩 올려주세요. 알집 .alz 형식은 브라우저에서 직접 해제할 수 없으므로 .zip으로 압축해 올려주세요.</div>
+  <h2>상품 ZIP 자동등록</h2>
+  <p class="note">업체에서 받은 ZIP 파일 하나만 선택하면 엑셀 상품표와 사진을 함께 읽어요.</p>
+  <label for="excelZipFile">상품 ZIP 파일</label><input id="excelZipFile" type="file" accept=".zip,application/zip">
+  <div class="uploadHint">일반 .zip 파일을 올려주세요. .alz 형식은 지원하지 않아요.</div>
   <label for="excelCategorySearch">등록 카테고리</label><div class="excelCategoryPicker"><input id="excelCategorySearch" type="search" autocomplete="off" placeholder="카테고리 검색 또는 아래 목록에서 선택"><div id="excelCategoryList" class="excelCategoryList"></div><div id="excelCategorySelected" class="excelCategorySelected"><span>선택된 카테고리</span><b>아직 선택하지 않았어요</b></div><select id="excelCategory" hidden><option value="">카테고리 선택</option></select></div><div class="uploadHint">상위·하위 카테고리를 한눈에 확인할 수 있어요. 선택한 카테고리에 상품이 등록됩니다.</div>
-  <div class="actions"><button type="button" class="secondary" id="excelTemplateBtn">열 이름 예시 다운로드</button><button type="button" id="excelPreviewBtn">파일 읽기 및 미리보기</button></div>
+  <div class="actions"><button type="button" id="excelPreviewBtn">파일 미리보기</button></div>
   <div id="excelStatus" class="msg" style="display:none"></div>
   <div id="excelPreviewArea" style="margin-top:14px"></div>
-  <div class="actions"><button type="button" id="excelRegisterBtn" class="excelApplyBtn" disabled>반영하기 · 실제 상품 등록</button><button type="button" class="secondary" id="excelClearBtn">초기화</button></div><p class="note">각 상품의 ‘고객 화면 미리보기’에서 실제 고객 화면 형태로 확인한 뒤, 아래 ‘반영하기’를 눌러야 사이트에 등록됩니다.</p>
+  <div class="actions"><button type="button" id="excelRegisterBtn" class="excelApplyBtn" disabled>반영하기</button><button type="button" class="secondary" id="excelClearBtn">초기화</button></div>
  </div>
 </div>
 <div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품관리</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div><div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
@@ -925,13 +923,12 @@ async function pinProduct(id){
 
     if(isPinned){
       const normalOrders=numericOrders.filter(n=>n>=0);
-      const maxOrder=Math.max(...normalOrders,0);
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
+      const maxOrder=Math.max(0,...normalOrders);
+      await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
     }else{
-      // 음수 sort_order만 고정 상태로 사용합니다. 여러 카테고리의 순서는 건드리지 않습니다.
-      const normalOrders=numericOrders.filter(n=>n>=0);
-      const minOrder=Math.min(...normalOrders,0);
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=minimal'}});
+      // 이미 고정된 상품보다 더 앞선 음수 순번을 사용해 고정 순서가 겹치지 않게 합니다.
+      const minOrder=Math.min(0,...numericOrders);
+      await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=minimal'}});
     }
     await loadProducts();
   }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
@@ -944,7 +941,7 @@ document.addEventListener('change',e=>{
 async function loadProducts(){
   try{
     const data=await api('/rest/v1/products?select=*&order=created_at.desc,id.desc');
-    data.sort((a,b)=>{const at=Date.parse(a.created_at||'')||0,bt=Date.parse(b.created_at||'')||0;return bt-at||(Number(b.id)||0)-(Number(a.id)||0)});
+    data.sort((a,b)=>{const ap=Number(a.sort_order)<0,bp=Number(b.sort_order)<0;if(ap!==bp)return ap?-1:1;if(ap&&bp)return Number(a.sort_order)-Number(b.sort_order);const at=Date.parse(a.created_at||'')||0,bt=Date.parse(b.created_at||'')||0;return bt-at||(Number(b.id)||0)-(Number(a.id)||0)});
     renderAdminFilters(data);
     window.__allAdminProducts=data;
     const categoryFiltered=filteredAdminProducts(data);
@@ -1320,13 +1317,15 @@ if(location.hash==='#members'||new URLSearchParams(location.search).get('section
  function populateCats(){
   const sel=$e('excelCategory'),list=$e('excelCategoryList'),search=$e('excelCategorySearch');if(!sel||!list)return;const old=sel.value;
   const cats=(typeof categories!=='undefined'?categories:[]).filter(c=>!c.is_hidden);
-  sel.innerHTML='<option value="">카테고리 선택</option>'+cats.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');if(old&&cats.some(c=>String(c.id)===String(old)))sel.value=old;
+  sel.innerHTML='<option value="">카테고리 선택</option>'+cats.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');
+  const lockedId=typeof categoryLocked!=='undefined'&&categoryLocked&&categoryLockedIds.length===1?String(categoryLockedIds[0]):'';
+  if(lockedId&&cats.some(c=>String(c.id)===lockedId))sel.value=lockedId;else if(old&&cats.some(c=>String(c.id)===String(old)))sel.value=old;
   const byParent=new Map();cats.forEach(c=>{const key=c.parent_id==null?'root':String(c.parent_id);if(!byParent.has(key))byParent.set(key,[]);byParent.get(key).push(c)});
   const rows=[];const walk=(parent,depth,path,seen=new Set())=>{(byParent.get(parent)||[]).sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko')).forEach(c=>{if(seen.has(String(c.id)))return;const next=new Set(seen);next.add(String(c.id));const here=path?path+' › '+c.name:c.name;rows.push({c,depth,path:here});walk(String(c.id),depth+1,here,next)})};walk('root',0,'');
   const q=norm(search?.value||'');const visible=rows.filter(r=>!q||norm(r.path).includes(q)||norm(r.c.name).includes(q));
   list.innerHTML=visible.map(({c,depth,path})=>'<button type="button" class="excelCategoryChoice '+(String(c.id)===String(sel.value)?'selected':'')+'" data-excel-cat="'+esc(c.id)+'"><span class="treeDepth">'+(depth?'↳'.repeat(Math.min(depth,3)):'●')+'</span><span>'+esc(c.name)+'</span><span class="treePath">'+esc(path)+'</span></button>').join('')||'<div class="note" style="padding:10px">검색 결과가 없어요.</div>';
   const chosen=cats.find(c=>String(c.id)===String(sel.value));const selected=$e('excelCategorySelected');if(selected)selected.innerHTML='<span>선택된 카테고리</span><b>'+(chosen?esc(rows.find(r=>String(r.c.id)===String(chosen.id))?.path||chosen.name):'아직 선택하지 않았어요')+'</b>';
-  list.querySelectorAll('[data-excel-cat]').forEach(btn=>btn.addEventListener('click',()=>{sel.value=btn.dataset.excelCat;list.classList.remove('open');if(search)search.value='';populateCats();}));
+  list.querySelectorAll('[data-excel-cat]').forEach(btn=>btn.addEventListener('click',()=>{const locked=typeof categoryLocked!=='undefined'&&categoryLocked&&categoryLockedIds.length===1?String(categoryLockedIds[0]):'';if(locked&&String(btn.dataset.excelCat)!==locked){msg('카테고리가 고정되어 있어요. 다른 카테고리를 선택하려면 상품관리에서 카테고리 고정을 해제해주세요.',true);return;}sel.value=btn.dataset.excelCat;list.classList.remove('open');if(search)search.value='';populateCats();}));
  }
  function ext(path){return (path.split('.').pop()||'').toLowerCase()}
  function isImage(path){return ['jpg','jpeg','png','webp','gif','bmp','avif'].includes(ext(path))}
@@ -1417,12 +1416,12 @@ if(location.hash==='#members'||new URLSearchParams(location.search).get('section
  $e('excelPreviewBtn')?.addEventListener('click',async()=>{
   try{
    if(!window.XLSX)throw Error('엑셀 처리 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
-   const xf=$e('excelFile').files[0],zf=$e('excelZipFile').files[0];if(!xf&&!zf)throw Error('엑셀 파일 또는 업체 ZIP 파일을 선택해주세요.');
+   const zf=$e('excelZipFile').files[0];if(!zf)throw Error('상품 ZIP 파일을 선택해주세요.');
+   if(!window.JSZip)throw Error('ZIP 처리 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
    excelRows=[];zipEntries=[];zipRoot=null;
-   if(zf){if(!window.JSZip)throw Error('ZIP 처리 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');msg('ZIP 파일과 사진 폴더를 분석하고 있습니다. 파일 크기에 따라 시간이 걸릴 수 있어요.');await readZip(zf)}
+   msg('ZIP 파일과 사진을 분석하고 있습니다…');await readZip(zf);
    let raw=[],sheetLabel='';
-   if(xf){const data=await xf.arrayBuffer();if(ext(xf.name)==='csv'){const wb=XLSX.read(await xf.text(),{type:'string'});raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false})}else{const wb=XLSX.read(data,{type:'array'});raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false})}sheetLabel=xf.name}
-   else {const parsed=await extractSheetFromZip();if(!parsed)throw Error('ZIP 안에서 엑셀/CSV 파일을 찾지 못했습니다. .alz 대신 .zip 파일인지 확인해주세요.');raw=parsed.raw;sheetLabel=parsed.file}
+   const parsed=await extractSheetFromZip();if(!parsed)throw Error('ZIP 안에서 엑셀/CSV 파일을 찾지 못했습니다. .alz 대신 .zip 파일인지 확인해주세요.');raw=parsed.raw;sheetLabel=parsed.file;
    if(!raw.length)throw Error('엑셀에 읽을 상품 데이터가 없습니다.');excelRows=mapRows(raw);if(!excelRows.length)throw Error('상품 데이터가 없습니다. 첫 번째 시트의 열 이름을 확인해주세요.');
    populateCats();if(zipRoot){msg('엑셀 '+sheetLabel+' 확인 완료. 상품별 사진을 연결하고 있습니다…');await attachPhotos()}
    renderPreview();msg('미리보기가 준비됐습니다. 실제 상품은 아직 등록되지 않았습니다. 사진 연결과 가격을 확인한 뒤 등록해주세요.');
@@ -1440,23 +1439,22 @@ if(location.hash==='#members'||new URLSearchParams(location.search).get('section
   for(let idx=0;idx<excelRows.length;idx++){
    const r=excelRows[idx];try{
     msg('반영 중 '+(idx+1)+' / '+excelRows.length+' : '+r.name);
-    const urls=[];for(const item of (r.photoItems||[])){if(item.type==='url')urls.push(item.url);else if(item.type==='file')urls.push(await uploadZipPhoto(item.file));}if(!urls.length){for(const url of (r.images||[]))urls.push(url);for(const file of (r.photoFiles||[]))urls.push(await uploadZipPhoto(file));}
-    const payload={name:r.name.trim(),brand:r.brand||null,normal_price:r.normal_price,member_price:r.member_price==null?Math.round(r.normal_price*.75):r.member_price,colors:r.colors,sizes:r.sizes,is_size_chart:false,description:'',images:urls,category:cat.name,category_id:cat.id};
+    const photoItems=r.photoItems||[];let urls=await Promise.all(photoItems.map(item=>item.type==='url'?Promise.resolve(item.url):item.type==='file'?uploadZipPhoto(item.file):Promise.resolve(null)));urls=urls.filter(Boolean);if(!urls.length){const fallbackUrls=await Promise.all([...(r.images||[]),...(r.photoFiles||[])].map(item=>typeof item==='string'?Promise.resolve(item):uploadZipPhoto(item)));urls.push(...fallbackUrls)}
+    const payload={name:r.name.trim(),brand:r.brand||null,normal_price:r.normal_price,member_price:r.member_price==null?Math.round(r.normal_price*.75):r.member_price,colors:r.colors,sizes:r.sizes,is_size_chart:false,is_sold_out:false,description:'',images:urls,category:cat.name,category_id:cat.id};
     const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');const nextOrder=(Number(current?.[0]?.sort_order)||0)+1;
     const inserted=await api('/rest/v1/products',{method:'POST',body:JSON.stringify({...payload,sort_order:nextOrder}),headers:{'Prefer':'return=representation'}});
     const id=inserted?.[0]?.id;if(id!=null&&r.wholesale!=null){try{await savePrivateWholesalePrice(id,r.wholesale)}catch(priceErr){console.error('도매가 별도 저장 실패',r.name,priceErr);r.warnings.push('상품은 등록됐지만 도매가 별도 저장 실패')}}
     done++;
    }catch(e){errors.push(r.name+': '+e.message);remaining.push(r)}
   }
-  msg('반영 완료: '+done+'개'+(errors.length?' / 실패 '+errors.length+'개\n'+errors.slice(0,8).join('\n'):'') ,errors.length>0);
+  msg('반영 완료: '+done+'개 상품을 저장했어요. 고객페이지에 표시되는지 카테고리에서 확인해주세요.'+(errors.length?' / 실패 '+errors.length+'개\n'+errors.slice(0,8).join('\n'):''),errors.length>0);
   excelRows=remaining;renderPreview();try{if(typeof loadProducts==='function')await loadProducts()}catch(e){console.warn(e)}btn.disabled=!excelRows.length;
  }
  $e('excelRegisterBtn')?.addEventListener('click',applyExcelProducts);
  $e('excelCategorySearch')?.addEventListener('focus',()=>{$e('excelCategoryList')?.classList.add('open');populateCats()});
  $e('excelCategorySearch')?.addEventListener('input',()=>{$e('excelCategoryList')?.classList.add('open');populateCats()});
  document.addEventListener('click',e=>{const picker=document.querySelector('.excelCategoryPicker');if(picker&&!picker.contains(e.target))$e('excelCategoryList')?.classList.remove('open')});
- $e('excelClearBtn')?.addEventListener('click',()=>{$e('excelFile').value='';$e('excelZipFile').value='';$e('excelCategory').value='';if($e('excelCategorySearch'))$e('excelCategorySearch').value='';populateCats();excelRows=[];zipEntries=[];zipRoot=null;$e('excelPreviewArea').innerHTML='';$e('excelStatus').style.display='none';$e('excelRegisterBtn').disabled=true});
- $e('excelTemplateBtn')?.addEventListener('click',()=>{const csv='\uFEFF상품명,브랜드,상품가,회원가,도매가,색상,사이즈,이미지 URL\n예시 상품,브랜드명,25000,18750,10000,"BLACK/PINK","S/M/L",https://example.com/image.jpg\n';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='상품_엑셀_양식.csv';a.click();URL.revokeObjectURL(a.href)});
+ $e('excelClearBtn')?.addEventListener('click',()=>{$e('excelZipFile').value='';$e('excelCategory').value='';if($e('excelCategorySearch'))$e('excelCategorySearch').value='';populateCats();excelRows=[];zipEntries=[];zipRoot=null;$e('excelPreviewArea').innerHTML='';$e('excelStatus').style.display='none';$e('excelRegisterBtn').disabled=true});
  const oldLoadCategories=window.loadCategories;if(typeof oldLoadCategories==='function'){window.loadCategories=async function(){const r=await oldLoadCategories.apply(this,arguments);populateCats();return r}}
  document.querySelectorAll('[data-admin-section]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.adminSection==='excel')populateCats()}));setTimeout(populateCats,1000);
 })();
