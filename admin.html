@@ -1525,3 +1525,55 @@ if(location.hash==='#members'||new URLSearchParams(location.search).get('section
 </script>
 
 </body></html>
+<style id="excel-product-card-layout">
+/* Excel 상품 미리보기: 왼쪽 사진 관리 + 오른쪽 상품 정보 편집 */
+@media(min-width:700px){
+#adminSection-excel #excelPreviewArea>div[style*="overflow:auto"]{max-height:none!important;overflow:visible!important;border:0!important;box-shadow:none!important;background:transparent!important}
+#adminSection-excel #excelPreviewArea table{display:block;min-width:0!important;width:100%;border-collapse:separate!important;border-spacing:0 14px!important;background:transparent!important}
+#adminSection-excel #excelPreviewArea thead{display:none}
+#adminSection-excel #excelPreviewArea tbody{display:block;width:100%}
+#adminSection-excel #excelPreviewArea tr{display:grid;grid-template-columns:250px minmax(0,1fr);grid-template-rows:auto;gap:0 18px;padding:16px;background:#fffdf9;border:1px solid #e7ded4;border-radius:15px;box-shadow:0 2px 8px rgba(81,70,61,.035);align-items:start}
+#adminSection-excel #excelPreviewArea td{display:block;min-width:0!important;width:auto!important;padding:7px 9px!important;border:0!important;border-bottom:1px solid #eee6dd!important;grid-column:2;overflow-wrap:anywhere}
+#adminSection-excel #excelPreviewArea td:first-child{grid-column:1;grid-row:1 / span 8;border:1px solid #e7ded4!important;border-radius:11px;background:#faf7f2;padding:10px!important;align-self:stretch}
+#adminSection-excel #excelPreviewArea td:nth-child(2){grid-row:1}
+#adminSection-excel #excelPreviewArea td:nth-child(3){grid-row:2}
+#adminSection-excel #excelPreviewArea td:nth-child(4){grid-row:3}
+#adminSection-excel #excelPreviewArea td:nth-child(5){grid-row:4}
+#adminSection-excel #excelPreviewArea td:nth-child(6){grid-row:5}
+#adminSection-excel #excelPreviewArea td:nth-child(7){grid-row:6}
+#adminSection-excel #excelPreviewArea td:nth-child(8){grid-row:7}
+#adminSection-excel #excelPreviewArea td:nth-child(9){grid-row:8}
+#adminSection-excel #excelPreviewArea td:nth-child(10){grid-row:9;border-bottom:0!important;padding-top:12px!important}
+#adminSection-excel #excelPreviewArea td:nth-child(2):before{content:'상품명';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel #excelPreviewArea td:nth-child(3):before{content:'브랜드';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel #excelPreviewArea td:nth-child(4):before{content:'정상가';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel #excelPreviewArea td:nth-child(5):before{content:'회원가';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel #excelPreviewArea td:nth-child(6):before{content:'도매가 (관리자 전용)';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel #excelPreviewArea td:nth-child(7){padding-top:12px!important}
+#adminSection-excel #excelPreviewArea td:nth-child(8):before{content:'확인 사항';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel #excelPreviewArea td:nth-child(9):before{content:'고객 화면 확인';display:block;font-size:11px;color:#9b8f84;margin-bottom:6px}
+#adminSection-excel .excelPhotoDropzone{min-width:0!important;width:auto!important}
+#adminSection-excel .excelPhotoStrip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:none;gap:7px;padding:7px}
+#adminSection-excel .excelPhotoItem{width:100%;min-width:0}
+#adminSection-excel .excelPhotoItem img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+#adminSection-excel .excelPhotoTools{flex-wrap:wrap}
+#adminSection-excel #excelPreviewArea td:nth-child(4),#adminSection-excel #excelPreviewArea td:nth-child(5),#adminSection-excel #excelPreviewArea td:nth-child(6){display:inline-block;vertical-align:top}
+#adminSection-excel #excelPreviewArea td:nth-child(4),#adminSection-excel #excelPreviewArea td:nth-child(5){width:calc(30% - 6px)!important}
+#adminSection-excel #excelPreviewArea td:nth-child(6){width:40%!important}
+#adminSection-excel #excelPreviewArea td:nth-child(7){width:100%!important}
+#adminSection-excel #excelPreviewArea td:nth-child(7) textarea{min-width:0!important;width:100%!important;max-width:100%}
+}
+@media(max-width:699px){
+#adminSection-excel #excelPreviewArea>div[style*="overflow:auto"]{max-height:none!important;overflow:visible!important;border:0!important}
+#adminSection-excel #excelPreviewArea table{display:block;min-width:0!important;width:100%;border-spacing:0 12px!important;background:transparent!important}
+#adminSection-excel #excelPreviewArea thead{display:none}
+#adminSection-excel #excelPreviewArea tbody{display:block}
+#adminSection-excel #excelPreviewArea tr{display:flex;flex-direction:column;gap:0;padding:10px;background:#fffdf9;border:1px solid #e7ded4;border-radius:13px;margin-bottom:12px}
+#adminSection-excel #excelPreviewArea td{display:block!important;width:100%!important;min-width:0!important;padding:9px 4px!important;border:0!important;border-bottom:1px solid #eee6dd!important}
+#adminSection-excel #excelPreviewArea td:first-child{background:#faf7f2;border:1px solid #e7ded4!important;border-radius:10px;padding:10px!important;margin-bottom:8px}
+#adminSection-excel #excelPreviewArea td:nth-child(7) textarea{min-width:0!important;width:100%!important}
+#adminSection-excel .excelPhotoStrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:none}
+#adminSection-excel .excelPhotoItem{width:100%;min-width:0}
+#adminSection-excel .excelPhotoItem img{width:100%;height:auto;aspect-ratio:1/1}
+}
+</style>
