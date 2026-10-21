@@ -915,21 +915,19 @@ async function pinProduct(id){
     // 사이즈표 상품은 같은 카테고리의 상품 순서에만 영향을 줍니다.
     // 일반 상품의 기존 고정 기능은 전체 상품 범위를 유지합니다.
     const targetCategoryId=resolveProductCategoryId(target);
+    if(isSizeChartProduct(target)&&!targetCategoryId){
+      throw new Error('사이즈표의 카테고리 ID를 확인할 수 없어 고정하지 못했어요. 상품 수정에서 카테고리를 다시 선택해 저장해주세요.');
+    }
     const scope=isSizeChartProduct(target)
-      ? (targetCategoryId ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId) : data.filter(x=>String(x.id)===String(target.id)))
+      ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId)
       : data;
     const numericOrders=scope.map(x=>Number(x.sort_order)).filter(Number.isFinite);
     const isPinned=Number(target.sort_order)<0;
-
-    if(isPinned){
-      const normalOrders=numericOrders.filter(n=>n>=0);
-      const maxOrder=Math.max(0,...normalOrders);
-      await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=minimal'}});
-    }else{
-      // 이미 고정된 상품보다 더 앞선 음수 순번을 사용해 고정 순서가 겹치지 않게 합니다.
-      const minOrder=Math.min(0,...numericOrders);
-      await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=minimal'}});
-    }
+    const nextOrder=isPinned
+      ? Math.max(0,...numericOrders.filter(n=>n>=0))+1
+      : Math.min(0,...numericOrders)-1;
+    const updated=await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:nextOrder}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(updated)||!updated.length)throw new Error('저장 결과가 확인되지 않았어요. Supabase 상품 수정 권한을 확인해주세요.');
     await loadProducts();
   }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
 }
