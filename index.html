@@ -294,11 +294,7 @@ function render(){
   if(overallView){
     // 전체 상품(ALL)일 때 새로 등록된 상품(created_at)이 무조건 가장 먼저 오도록 최신순 정렬
     a.sort((x,y)=>stamp(y.created_at)-stamp(x.created_at)||updateStamp(y)-updateStamp(x)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
- 
-  }else{
-    a.sort((x,y)=>stamp(y.created_at)-stamp(x.created_at)||updateStamp(y)-updateStamp(x)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
-  }
-}else if(category!=='BRAND'){
+  }else if(category!=='BRAND'){
     const selectedRow=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
     const exactCategoryId=selectedRow?String(selectedRow.id):null;
     const legacyCanResolve=selectedRow&&siteCategories.filter(c=>String(c.name)===String(selectedRow.name)).length===1;
@@ -312,10 +308,13 @@ function render(){
     };
     a.sort((x,y)=>{
       const xp=isPinnedHere(x),yp=isPinnedHere(y);
-      if(xp!==yp)return xp?-1:1; // 핀 고정된 상품(-값)을 무조건 맨 앞으로
-      if(xp&&yp)return Number(x.sort_order)-Number(y.sort_order); // 둘 다 핀 고정이면 음수 오름차순(-2가 -1보다 위)
+      if(xp!==yp)return xp?-1:1;
       return stamp(y.created_at)-stamp(x.created_at)||scopedOrder(x)-scopedOrder(y);
     });
+  }else{
+    a.sort((x,y)=>stamp(y.created_at)-stamp(x.created_at)||updateStamp(y)-updateStamp(x)||(Number(x.sort_order)||0)-(Number(y.sort_order)||0));
+  }
+
   if(quickView==='new'){
     a.sort((x,y)=>(Date.parse(y.created_at||'')||0)-(Date.parse(x.created_at||'')||0)||(Date.parse(y.updated_at||'')||0)-(Date.parse(x.updated_at||'')||0));
   }else if(quickView==='favorites'){
