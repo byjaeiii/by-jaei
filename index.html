@@ -212,8 +212,9 @@ function normalizedCustomerProductName(v){
   return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').trim().toLocaleLowerCase('ko-KR');
 }
 function customerVisibleProducts(){
-  // 숨김 카테고리에 같은 이름의 상품이 있더라도 공개 카테고리 상품은 숨기지 않습니다.
-  return products.filter(p=>!productBelongsToHiddenCategory(p));
+  const hiddenNames=new Set();
+  products.forEach(p=>{if(productBelongsToHiddenCategory(p)){const key=normalizedCustomerProductName(p.name);if(key)hiddenNames.add(key)}});
+  return products.filter(p=>!productBelongsToHiddenCategory(p)&&(!normalizedCustomerProductName(p.name)||!hiddenNames.has(normalizedCustomerProductName(p.name))));
 }
 function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
