@@ -879,31 +879,35 @@ async function pinProduct(id){
   try{
     const data=await api('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
     const target=data.find(x=>String(x.id)===String(id));
-    if(!target)return;
+    if(!target)throw new Error('고정할 상품을 목록에서 찾지 못했어요. 상품 목록을 새로고침해주세요.');
 
-    // 사이즈표 상품은 같은 카테고리의 상품 순서에만 영향을 줍니다.
-    // 일반 상품의 기존 고정 기능은 전체 상품 범위를 유지합니다.
+    // 사이즈표는 같은 카테고리 안에서만 고정하고, 일반 상품의 기존 고정 범위는 유지합니다.
     const targetCategoryId=resolveProductCategoryId(target);
     const scope=isSizeChartProduct(target)
-      ? (targetCategoryId ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId) : data.filter(x=>String(x.id)===String(target.id)))
+      ? (targetCategoryId ? data.filter(x=>resolveProductCategoryId(x)===targetCategoryId) : [target])
       : data;
     const numericOrders=scope.map(x=>Number(x.sort_order)).filter(Number.isFinite);
     const isPinned=Number(target.sort_order)<0;
-
+    let nextOrder;
     if(isPinned){
-      // 고정 해제 시 일반 상품 뒤로 보냅니다. 기존 음수 고정 순번은 유지됩니다.
-      const normalOrders=numericOrders.filter(n=>n>=0);
-      const maxOrder=Math.max(...normalOrders,0);
-      const result=await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:maxOrder+1}),headers:{'Prefer':'return=representation'}});
-      if(!Array.isArray(result)||!result.length)throw new Error('고정 해제 결과가 저장되지 않았어요. 관리자 권한과 상품 데이터를 확인해주세요.');
+      nextOrder=Math.max(...numericOrders.filter(n=>n>=0),0)+1;
     }else{
-      // 카테고리 안에서 이미 고정된 상품보다 앞/뒤 순번이 겹치지 않도록 음수 순번을 누적합니다.
-      const minOrder=Math.min(...numericOrders,0);
-      const result=await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{method:'PATCH',body:JSON.stringify({sort_order:minOrder-1}),headers:{'Prefer':'return=representation'}});
-      if(!Array.isArray(result)||!result.length)throw new Error('카테고리 고정 결과가 저장되지 않았어요. 관리자 권한과 상품 데이터를 확인해주세요.');
+      nextOrder=Math.min(...numericOrders,0)-1;
+    }
+
+    // return=minimal은 정상적인 PATCH 응답에 결과 배열이 없어도 성공으로 처리합니다.
+    await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(id)),{
+      method:'PATCH',body:JSON.stringify({sort_order:nextOrder}),
+      headers:{'Prefer':'return=minimal'}
+    });
+
+    // 실제 저장값을 다시 읽어 확인해, 성공 표시만 되고 저장되지 않는 상황을 방지합니다.
+    const check=await api('/rest/v1/products?select=id,sort_order&id=eq.'+encodeURIComponent(String(id)));
+    if(!Array.isArray(check)||!check.length||Number(check[0].sort_order)!==nextOrder){
+      throw new Error('Supabase에 고정 순서가 저장되지 않았어요. 관리자 권한 또는 데이터베이스 정책을 확인해주세요.');
     }
     await loadProducts();
-  }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+e.message)}
+  }catch(e){alert('상품 고정 변경에 실패했어요.\n\n'+(e.message||String(e)))}
 }
 
 document.addEventListener('change',e=>{
