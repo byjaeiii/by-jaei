@@ -318,6 +318,7 @@ let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage
 const savedAdminEmail=localStorage.getItem('byjaei_admin_saved_email')||'';$('email').value=savedAdminEmail;$('saveEmail').checked=!!savedAdminEmail;
 function status(t){$('loginStatus').textContent=t}
 function headers(json=true){const h={'apikey':CFG.supabaseKey,'Authorization':'Bearer '+token};if(json)h['Content-Type']='application/json';return h}
+async function apiAll(path){const size=1000;let all=[];for(let off=0;;off+=size){const part=await api(path+(path.includes('?')?'&':'?')+'limit='+size+'&offset='+off);all=all.concat(Array.isArray(part)?part:[]);if(!Array.isArray(part)||part.length<size)break}return all}
 async function api(path,opt={}){const r=await fetch(CFG.supabaseUrl+path,{...opt,headers:{...headers(opt.body!==undefined),...(opt.headers||{})}});let data=null;try{data=await r.json()}catch{}if(!r.ok){const e=new Error((data&&(data.message||data.error_description||data.error))||('HTTP '+r.status));e.status=r.status;e.code=data?.code||'';e.details=data?.details||'';e.hint=data?.hint||'';throw e}return data}
 async function getPrivateWholesalePrice(productId){
   const rows=await api('/rest/v1/product_private_costs?select=product_id,wholesale_price&product_id=eq.'+encodeURIComponent(String(productId)));
@@ -928,7 +929,7 @@ function isSizeChartProduct(p){return p?.is_size_chart===true||/사이즈\s*표|
 
 async function pinProduct(id){
   try{
-    const data=await api('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&order=sort_order.asc,created_at.asc');
+    const data=await apiAll('/rest/v1/products?select=id,name,category,category_id,is_size_chart,sort_order&order=sort_order.asc,created_at.asc,id.asc');
     const target=data.find(x=>String(x.id)===String(id));
     if(!target)return;
 
@@ -958,7 +959,7 @@ document.addEventListener('change',e=>{
 });
 async function loadProducts(){
   try{
-    const data=await api('/rest/v1/products?select=*&order=created_at.desc,id.desc');
+    const data=await apiAll('/rest/v1/products?select=*&order=created_at.desc,id.desc');
     data.sort((a,b)=>{const at=Date.parse(a.created_at||'')||0,bt=Date.parse(b.created_at||'')||0;return bt-at||(Number(b.id)||0)-(Number(a.id)||0)});
     renderAdminFilters(data);
     window.__allAdminProducts=data;
@@ -998,7 +999,7 @@ async function setAllProductsSoldOut(soldOut){
 
 async function moveProduct(id,direction){
   try{
-    const data=await api('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc');
+    const data=await apiAll('/rest/v1/products?select=id,sort_order&order=sort_order.asc,created_at.asc,id.asc');
     const idx=data.findIndex(x=>String(x.id)===String(id)),ni=idx+direction;
     if(idx<0||ni<0||ni>=data.length)return;
     const numericOrders=data.map(x=>Number(x.sort_order)).filter(Number.isFinite);const minOrder=Math.min(...numericOrders,0);const a=data[idx],b=data[ni],av=Number(a.sort_order)||0,bv=Number(b.sort_order)||0;if(av===minOrder-1||bv===minOrder-1)return;
@@ -1268,7 +1269,7 @@ async function loadOrders(){
     let emailByUserId={};
     try{const profiles=await api('/rest/v1/profiles?select=id,email');emailByUserId=Object.fromEntries((profiles||[]).map(p=>[String(p.id),p.email||'']))}catch(profileError){console.warn('주문 고객 이메일을 불러오지 못했어요.',profileError)}
     let brandByProductId={};
-    try{const productBrands=await api('/rest/v1/products?select=id,brand');brandByProductId=Object.fromEntries((productBrands||[]).map(p=>[String(p.id),String(p.brand||'').trim()]))}catch(brandError){console.warn('주문 상품의 브랜드명을 불러오지 못했어요.',brandError)}
+    try{const productBrands=await apiAll('/rest/v1/products?select=id,brand&order=id.asc');brandByProductId=Object.fromEntries((productBrands||[]).map(p=>[String(p.id),String(p.brand||'').trim()]))}catch(brandError){console.warn('주문 상품의 브랜드명을 불러오지 못했어요.',brandError)}
     let wholesaleByProductId={},wholesaleLoadError=false;
     try{const costRows=await api('/rest/v1/product_private_costs?select=product_id,wholesale_price');wholesaleByProductId=Object.fromEntries((costRows||[]).map(row=>[String(row.product_id),row.wholesale_price]))}catch(costError){wholesaleLoadError=true;console.warn('도매가를 불러오지 못했어요. BYJAEI_private_wholesale_setup.sql 설정을 확인해주세요.',costError)}
     const q=filterValue('orderNameSearch').toLowerCase(),phoneQ=filterValue('orderPhoneSearch').toLowerCase(),from=filterValue('orderFrom'),to=filterValue('orderTo');

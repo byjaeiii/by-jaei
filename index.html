@@ -128,9 +128,10 @@ function loadCart(){
 function save(){localStorage.setItem(cartKey(),JSON.stringify(cart))}
 const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';const getPrice=p=>approved&&user?(p.member_price??p.normal_price):p.normal_price;
 function parseSize(v){let m=String(v).match(/^(.+?)(?:\s*\(\+\s*([\d,]+)\s*\))?$/);return {name:(m?.[1]||v).trim(),add:Number((m?.[2]||'0').replace(/,/g,''))}}
+async function fetchAllProducts(){const size=1000;let from=0,all=[];while(true){const {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false}).order('id',{ascending:false}).range(from,from+size-1);if(error)return {data:null,error};all=all.concat(data||[]);if(!data||data.length<size)break;from+=size}return {data:all,error:null}}
 async function load(){
   const [{data:productData,error:productError},{data:categoryData,error:categoryError}]=await Promise.all([
-    sb.from('products').select('*').order('created_at',{ascending:false}),
+    fetchAllProducts(),
     sb.from('categories').select('id,name,parent_id,sort_order,created_at,is_hidden').order('sort_order',{ascending:true}).order('created_at',{ascending:true})
   ]);
   if(productError){console.error(productError);grid.innerHTML='<div class="empty">상품을 불러오지 못했어요. Supabase 연결을 확인해주세요.</div>';return}
