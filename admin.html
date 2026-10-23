@@ -512,7 +512,7 @@ async function readBulkZip(zipFile){
   }
   if(!rows)throw new Error('엑셀에서 "상품명" 열이 있는 시트를 찾지 못했어요. (시트: '+wb.SheetNames.join(', ')+')');
   const wholesaleH=h=>h.includes('도매')||h.includes('공급가')||h.includes('매입');
-  const retailH=h=>!wholesaleH(h)&&(h.includes('소매')||h.includes('소비자')||h.includes('판매가')||h.includes('상품가')||h.includes('권장')||h==='가격'||h==='price');
+  const retailH=h=>!wholesaleH(h)&&(h.includes('소매')||h.includes('소비자')||h.includes('판매')||h.includes('판가')||h.includes('상품가')||h.includes('권장')||h==='가격'||h==='price');
   const sizeH=h=>h.includes('사이즈')||h==='size';
   const find=(pred,from=0,to=rows.header.length)=>{for(let i=from;i<to;i++){const h=rows.header[i];if(h&&pred(h))return i}return -1};
   // "사이즈/도매가/소매가" 열이 여러 번 반복되면 첫 묶음이 기본, 나머지는 도매가 차액을 옵션가(+금액)로 변환
