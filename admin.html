@@ -507,7 +507,7 @@ function parseBulkExcel(buffer){
     if(hi>=0){rows={sheet:sn,headerRaw:arr[hi].map(c=>String(c??'').trim()),header:arr[hi].map(bulkNorm),data:arr.slice(hi+1)};break}
   }
   if(!rows)throw new Error('엑셀에서 "상품명" 열이 있는 시트를 찾지 못했어요. (시트: '+wb.SheetNames.join(', ')+')');
-  const wholesaleH=h=>h.includes('도매')||h.includes('공급가')||h.includes('매입');
+  const wholesaleH=h=>h.includes('도매')||h.includes('도가')||h.includes('공급가')||h.includes('매입');
   const retailH=h=>!wholesaleH(h)&&(h.includes('소매')||h.includes('소비자')||h.includes('판매')||h.includes('판가')||h.includes('상품가')||h.includes('권장')||h==='가격'||h==='price');
   const sizeH=h=>h.includes('사이즈')||h==='size';
   const find=(pred,from=0,to=rows.header.length)=>{for(let i=from;i<to;i++){const h=rows.header[i];if(h&&pred(h))return i}return -1};
@@ -548,7 +548,9 @@ async function readBulkZip(zipFiles){
   const list=Array.isArray(zipFiles)?zipFiles:[zipFiles];
   const entries=[];
   for(const zf of list){
-    const zip=await JSZip.loadAsync(zf);
+    let zip;
+    try{zip=await JSZip.loadAsync(zf&&zf.buf?zf.buf:zf)}
+    catch(err){throw new Error('"'+(zf&&zf.name||'ZIP')+'"을(를) ZIP으로 열 수 없어요. 압축 파일이 손상됐거나 ZIP 형식이 아닐 수 있어요. ('+(err.message||err)+')')}
     Object.values(zip.files).filter(f=>!f.dir&&!/(^|\/)(__MACOSX|\.DS_Store|~\$)/.test(f.name)&&!/\/\._/.test('/'+f.name)).forEach(f=>entries.push(f));
   }
   const xlsxEntries=entries.filter(f=>/\.xlsx?$/i.test(f.name));
@@ -558,15 +560,24 @@ async function readBulkZip(zipFiles){
     try{products=products.concat(parseBulkExcel(await xe.async('arraybuffer')));excelNames.push(fname)}
     catch(err){throw new Error((xlsxEntries.length>1?'['+fname+'] ':'')+(err.message||err))}
   }
-  const folders=new Map();
+  const folders=new Map(),folderKeys=[],rawByKey=new Map(),aliasOfKey=new Map();
   entries.filter(f=>/\.(jpe?g|png|webp|gif)$/i.test(f.name)).forEach(f=>{
     const parts=f.name.split('/');if(parts.length<2)return;
-    const key=bulkNorm(parts[parts.length-2]);
-    if(!folders.has(key))folders.set(key,[]);
+    const raw=parts[parts.length-2];
+    const key=bulkNorm(raw);
+    if(!folders.has(key)){folders.set(key,[]);folderKeys.push(key);rawByKey.set(key,raw)}
     folders.get(key).push({path:f.name,base:parts[parts.length-1],entry:f});
   });
+  // 폴더 이름이 "1.상품명", "02_상품명", "3 상품명"처럼 번호가 앞에 붙어 있으면 번호를 뺀 이름으로도 찾아요 (같은 이름의 폴더가 따로 있으면 그쪽이 우선)
+  folderKeys.forEach(k=>{
+    const raw=rawByKey.get(k);
+    let s=raw.replace(/^\s*\d+\s*[.\-_)\]]\s*/,'');
+    if(s===raw)s=raw.replace(/^\s*\d+\s+/,'');
+    const ak=bulkNorm(s);
+    if(ak&&ak!==k){aliasOfKey.set(k,ak);if(!folders.has(ak))folders.set(ak,folders.get(k))}
+  });
   folders.forEach(list=>list.sort((a,b)=>bulkNaturalCompare(a.base,b.base)));
-  return {products,folders,hasExcel:xlsxEntries.length>0,excelNames};
+  return {products,folders,folderKeys,aliasOfKey,hasExcel:xlsxEntries.length>0,excelNames};
 }
 
 async function uploadBulkImage(blob,baseName){
@@ -724,8 +735,17 @@ async function analyzeBulkZip(){
   try{
     say('라이브러리 준비 중...');
     await ensureZipLibs();
+    say(`ZIP ${zipFiles.length}개를 읽는 중...`);
+    const snapshots=[];
+    for(const f of zipFiles){
+      try{snapshots.push({name:f.name,buf:await f.arrayBuffer()})}
+      catch(err){
+        $('singleZipFile').value='';
+        throw new Error('"'+f.name+'" 파일을 읽지 못했어요.\n파일을 선택한 뒤에 이동·삭제·수정됐거나, OneDrive·구글드라이브처럼 클라우드에만 있는 파일일 수 있어요.\n파일을 내 컴퓨터 폴더에 내려받아 두고, "파일 선택"을 눌러 다시 선택한 다음 분석해주세요.');
+      }
+    }
     say(`ZIP ${zipFiles.length}개를 분석하는 중...`);
-    const {products,folders,hasExcel,excelNames}=await readBulkZip(zipFiles);
+    const {products,folders,folderKeys,aliasOfKey,hasExcel,excelNames}=await readBulkZip(snapshots);
     const readFiles=async list=>{const files=[];for(const im of list){const blob=await im.entry.async('blob');files.push(new File([blob],im.base,{type:bulkMime(im.base)}))}return files};
     if(!hasExcel){
       // 엑셀이 없는 ZIP만 고른 경우: 이미 대기 목록에 있는 상품 중 이미지가 비어 있는 상품에 폴더 이름으로 이미지를 채워요
@@ -741,7 +761,7 @@ async function analyzeBulkZip(){
       await refreshStagedExisting();
       refreshStagedStatuses();
       renderStaged();
-      const leftover=[...folders.keys()].filter(k=>!used.has(k)).length;
+      const leftover=folderKeys.filter(k=>!used.has(k)&&!used.has(aliasOfKey.get(k)||'')).length;
       say(`이미지 채우기 완료 🤍 대기 목록의 상품 ${filledOnly}개에 이미지를 채웠어요.`+(leftover?`\n대기 목록에 없는 이미지 폴더 ${leftover}개는 건너뛰었어요.`:''));
       $('singleZipFile').value='';
       document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -775,7 +795,7 @@ async function analyzeBulkZip(){
     renderStaged();
     const noImg=stagedProducts.filter(p=>!p.files.length).length;
     const knownNames=new Set([...products.map(p=>bulkNorm(p.name)),...stagedProducts.map(p=>bulkNorm(p.name))]);
-    const orphanFolders=[...folders.keys()].filter(k=>!knownNames.has(k));
+    const orphanFolders=folderKeys.filter(k=>!knownNames.has(k)&&!knownNames.has(aliasOfKey.get(k)||''));
     const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length;
     say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
     $('singleZipFile').value='';
