@@ -512,18 +512,40 @@ async function readBulkZip(zipFile){
   }
   if(!rows)throw new Error('엑셀에서 "상품명" 열이 있는 시트를 찾지 못했어요. (시트: '+wb.SheetNames.join(', ')+')');
   const wholesaleH=h=>h.includes('도매')||h.includes('공급가')||h.includes('매입');
-  const find=pred=>rows.header.findIndex((h,i)=>h&&pred(h,i));
+  const retailH=h=>!wholesaleH(h)&&(h.includes('소매')||h.includes('소비자')||h.includes('판매가')||h.includes('상품가')||h.includes('권장')||h==='가격'||h==='price');
+  const sizeH=h=>h.includes('사이즈')||h==='size';
+  const find=(pred,from=0,to=rows.header.length)=>{for(let i=from;i<to;i++){const h=rows.header[i];if(h&&pred(h))return i}return -1};
+  // "사이즈/도매가/소매가" 열이 여러 번 반복되면 첫 묶음이 기본, 나머지는 도매가 차액을 옵션가(+금액)로 변환
+  const sizeCols=rows.header.map((h,i)=>h&&sizeH(h)?i:-1).filter(i=>i>=0);
+  const groups=sizeCols.map((si,gi)=>{const end=gi+1<sizeCols.length?sizeCols[gi+1]:rows.header.length;return {size:si,wholesale:find(wholesaleH,si+1,end),retail:find(retailH,si+1,end)}});
+  const g0=groups[0]||null;
   const ix={
-    brand:find(h=>h==='브랜드명'||h==='브랜드'||h.includes('브랜드')),
+    brand:find(h=>h.includes('브랜드')),
     name:find(isName),
     color:find(h=>h.includes('색상')||h.includes('컬러')||h.includes('칼라')||h==='color'),
-    size:find(h=>h.includes('사이즈')||h==='size'),
-    wholesale:find(wholesaleH),
-    retail:find(h=>!wholesaleH(h)&&(h.includes('소매')||h.includes('소비자')||h.includes('판매가')||h.includes('상품가')||h.includes('권장')||h==='가격'||h==='price')),
+    size:g0?g0.size:-1,
+    wholesale:g0&&g0.wholesale>=0?g0.wholesale:find(wholesaleH),
+    retail:g0&&g0.retail>=0?g0.retail:find(retailH),
     member:find(h=>h.includes('회원가'))
   };
   if(ix.name<0||ix.retail<0)throw new Error('엑셀에 "상품명"과 "소매가"(소비자가·판매가·상품가도 가능) 열이 필요해요.\n찾은 열 이름 ['+rows.sheet+' 시트]: '+(rows.headerRaw.filter(Boolean).join(', ')||'없음')+'\n열 이름을 위 이름 중 하나로 바꿔서 다시 올려주세요.');
-  const products=rows.data.map((r,i)=>({row:i+2,brand:String(ix.brand>=0?r[ix.brand]:'').trim(),name:String(r[ix.name]??'').trim(),colors:ix.color>=0?parseOptionList(r[ix.color]):[],sizes:ix.size>=0?parseOptionList(r[ix.size]):[],wholesale:ix.wholesale>=0&&r[ix.wholesale]!==''?bulkNum(r[ix.wholesale]):null,retail:bulkNum(r[ix.retail]),member:ix.member>=0&&r[ix.member]!==''?bulkNum(r[ix.member]):null})).filter(p=>p.name);
+  const buildSizes=(r,baseRetail)=>{
+    if(!groups.length)return [];
+    const out=parseOptionList(r[groups[0].size]);
+    const baseWholesale=groups[0].wholesale>=0?bulkNum(r[groups[0].wholesale]):NaN;
+    groups.slice(1).forEach(g=>{
+      const raw=r[g.size];if(raw===''||raw==null)return;
+      // 옵션가 = 해당 사이즈 묶음의 도매가 − 기본(첫 번째) 묶음의 도매가. 도매가가 없으면 소매가 차액으로 대신해요.
+      const gw=g.wholesale>=0?bulkNum(r[g.wholesale]):NaN;
+      const gr=g.retail>=0?bulkNum(r[g.retail]):NaN;
+      let diff=0;
+      if(Number.isFinite(gw)&&Number.isFinite(baseWholesale))diff=Math.round(gw-baseWholesale);
+      else if(Number.isFinite(gr)&&Number.isFinite(baseRetail))diff=Math.round(gr-baseRetail);
+      parseOptionList(raw).forEach(sz=>out.push(diff>0?`${sz}(+${diff})`:sz));
+    });
+    return out;
+  };
+  const products=rows.data.map((r,i)=>{const retail=bulkNum(r[ix.retail]);return {row:i+2,brand:String(ix.brand>=0?r[ix.brand]:'').trim(),name:String(r[ix.name]??'').trim(),colors:ix.color>=0?parseOptionList(r[ix.color]):[],sizes:buildSizes(r,retail),wholesale:ix.wholesale>=0&&r[ix.wholesale]!==''?bulkNum(r[ix.wholesale]):null,retail,member:ix.member>=0&&r[ix.member]!==''?bulkNum(r[ix.member]):null}}).filter(p=>p.name);
   const folders=new Map();
   entries.filter(f=>/\.(jpe?g|png|webp|gif)$/i.test(f.name)).forEach(f=>{
     const parts=f.name.split('/');if(parts.length<2)return;
@@ -693,24 +715,34 @@ async function analyzeBulkZip(){
     const {products,folders}=await readBulkZip(zipFile);
     if(!products.length)throw new Error('엑셀에서 등록할 상품을 찾지 못했어요.');
     const added=[];
+    let filled=0,sameSkipped=0;
+    const stagedByKey=new Map(stagedProducts.map(p=>[bulkNorm(p.brand)+'|'+bulkNorm(p.name),p]));
+    const readFiles=async list=>{const files=[];for(const im of list){const blob=await im.entry.async('blob');files.push(new File([blob],im.base,{type:bulkMime(im.base)}))}return files};
     for(let i=0;i<products.length;i++){
       const p=products[i];
       say(`이미지 읽는 중... ${i+1}/${products.length}\n${p.name}`);
-      const files=[];
-      for(const im of (folders.get(bulkNorm(p.name))||[])){
-        const blob=await im.entry.async('blob');
-        files.push(new File([blob],im.base,{type:bulkMime(im.base)}));
+      const key=bulkNorm(p.brand)+'|'+bulkNorm(p.name);
+      const imgs=folders.get(bulkNorm(p.name))||[];
+      const old=stagedByKey.get(key);
+      if(old){
+        // 같은 상품이 이미 대기 목록에 있으면: 이미지가 비어 있을 때만 이번 ZIP의 이미지로 채우고, 아니면 건너뜀
+        if(!old.files.length&&imgs.length){old.files=await readFiles(imgs);old.lastError='';old.uploadedUrls=null;filled++}
+        else sameSkipped++;
+        continue;
       }
+      const files=await readFiles(imgs);
       const normal=Number.isFinite(p.retail)?p.retail:0;
       const member=(p.member!==null&&Number.isFinite(p.member))?p.member:(normal>0?Math.round(normal*0.75):null);
-      added.push({sid:++stagedSeq,row:p.row,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,description:'',categoryIds:[String(cat.id)],files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null});
+      const item={sid:++stagedSeq,row:p.row,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,description:'',categoryIds:[String(cat.id)],files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null};
+      added.push(item);stagedByKey.set(key,item);
     }
     await refreshStagedExisting();
     stagedProducts=stagedProducts.concat(added);
     refreshStagedStatuses();
     renderStaged();
+    const noImg=stagedProducts.filter(p=>!p.files.length).length;
     const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length;
-    say(`분석 완료 🤍 상품 ${added.length}개를 아래 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
+    say(`분석 완료 🤍 새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
     $('singleZipFile').value='';
     document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
