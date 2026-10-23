@@ -503,16 +503,26 @@ async function readBulkZip(zipFile){
   const xlsxEntry=entries.find(f=>/\.xlsx?$/i.test(f.name));
   if(!xlsxEntry)throw new Error('ZIP 안에서 엑셀 파일(.xlsx)을 찾지 못했어요.');
   const wb=XLSX.read(await xlsxEntry.async('arraybuffer'),{type:'array'});
+  const isName=h=>h==='상품명'||h==='제품명'||h==='품명'||h==='상품이름'||h.includes('상품명')||h.includes('제품명');
   let rows=null;
   for(const sn of wb.SheetNames){
     const arr=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
-    const hi=arr.findIndex(r=>r.some(c=>bulkNorm(c)==='상품명'));
-    if(hi>=0){rows={header:arr[hi].map(bulkNorm),data:arr.slice(hi+1)};break}
+    const hi=arr.slice(0,40).findIndex(r=>r.some(c=>isName(bulkNorm(c))));
+    if(hi>=0){rows={sheet:sn,headerRaw:arr[hi].map(c=>String(c??'').trim()),header:arr[hi].map(bulkNorm),data:arr.slice(hi+1)};break}
   }
-  if(!rows)throw new Error('엑셀에서 "상품명" 열이 있는 시트를 찾지 못했어요.');
-  const col=(...names)=>rows.header.findIndex(h=>names.map(bulkNorm).includes(h));
-  const ix={brand:col('브랜드명','브랜드'),name:col('상품명'),color:col('색상','컬러'),size:col('사이즈'),wholesale:col('도매가'),retail:col('소매가','상품가','판매가'),member:col('회원가')};
-  if(ix.name<0||ix.retail<0)throw new Error('엑셀에 "상품명", "소매가" 열이 필요해요.');
+  if(!rows)throw new Error('엑셀에서 "상품명" 열이 있는 시트를 찾지 못했어요. (시트: '+wb.SheetNames.join(', ')+')');
+  const wholesaleH=h=>h.includes('도매')||h.includes('공급가')||h.includes('매입');
+  const find=pred=>rows.header.findIndex((h,i)=>h&&pred(h,i));
+  const ix={
+    brand:find(h=>h==='브랜드명'||h==='브랜드'||h.includes('브랜드')),
+    name:find(isName),
+    color:find(h=>h.includes('색상')||h.includes('컬러')||h.includes('칼라')||h==='color'),
+    size:find(h=>h.includes('사이즈')||h==='size'),
+    wholesale:find(wholesaleH),
+    retail:find(h=>!wholesaleH(h)&&(h.includes('소매')||h.includes('소비자')||h.includes('판매가')||h.includes('상품가')||h.includes('권장')||h==='가격'||h==='price')),
+    member:find(h=>h.includes('회원가'))
+  };
+  if(ix.name<0||ix.retail<0)throw new Error('엑셀에 "상품명"과 "소매가"(소비자가·판매가·상품가도 가능) 열이 필요해요.\n찾은 열 이름 ['+rows.sheet+' 시트]: '+(rows.headerRaw.filter(Boolean).join(', ')||'없음')+'\n열 이름을 위 이름 중 하나로 바꿔서 다시 올려주세요.');
   const products=rows.data.map((r,i)=>({row:i+2,brand:String(ix.brand>=0?r[ix.brand]:'').trim(),name:String(r[ix.name]??'').trim(),colors:ix.color>=0?parseOptionList(r[ix.color]):[],sizes:ix.size>=0?parseOptionList(r[ix.size]):[],wholesale:ix.wholesale>=0&&r[ix.wholesale]!==''?bulkNum(r[ix.wholesale]):null,retail:bulkNum(r[ix.retail]),member:ix.member>=0&&r[ix.member]!==''?bulkNum(r[ix.member]):null})).filter(p=>p.name);
   const folders=new Map();
   entries.filter(f=>/\.(jpe?g|png|webp|gif)$/i.test(f.name)).forEach(f=>{
@@ -1509,7 +1519,7 @@ function buildOrderConfirmationMessage(order,items,brandByProductId={}){
 ${lines.length?lines.join('\n'):'주문 상품 정보를 확인해주세요.'}
 
 상품 금액 합계: ${itemsTotal.toLocaleString('ko-KR')}원
-배송비: ${shipping.toLocaleString('ko-KR')}원 (총합 ${itemsTotal}+${shipping})
+배송비: ${shipping.toLocaleString('ko-KR')}원 (총합 ${(itemsTotal+shipping).toLocaleString('ko-KR')}원)
 적립금 사용: ${pointsUsed>0?pointsUsed.toLocaleString('ko-KR')+'원 사용':'미사용 (0원)'}
 입금하실 금액: ${(payableTotal+shipping).toLocaleString('ko-KR')}원
 
