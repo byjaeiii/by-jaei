@@ -304,11 +304,11 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="loadProducts()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-excel"><h2 class="adminSectionTitle">엑셀등록</h2>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
-  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.</p>
+  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
   <div class="row">
     <div>
-      <label>통합 압축 파일 (.zip)</label>
-      <input type="file" id="singleZipFile" accept=".zip">
+      <label>통합 압축 파일 (.zip · 여러 개 한 번에 선택 가능)</label>
+      <input type="file" id="singleZipFile" accept=".zip" multiple>
     </div>
     <div>
       <label>기본 카테고리 (수정에서 바꿀 수 있어요)</label>
@@ -497,12 +497,8 @@ function bulkNorm(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+
 function bulkNum(v){if(typeof v==='number')return v;const n=Number(String(v??'').replace(/[^\d.\-]/g,''));return Number.isFinite(n)?n:NaN}
 function bulkNaturalCompare(a,b){return a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'})}
 function bulkMime(name){const e=String(name).split('.').pop().toLowerCase();return {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif'}[e]||'application/octet-stream'}
-async function readBulkZip(zipFile){
-  const zip=await JSZip.loadAsync(zipFile);
-  const entries=Object.values(zip.files).filter(f=>!f.dir&&!/(^|\/)(__MACOSX|\.DS_Store|~\$)/.test(f.name)&&!/\/\._/.test('/'+f.name));
-  const xlsxEntry=entries.find(f=>/\.xlsx?$/i.test(f.name));
-  if(!xlsxEntry)throw new Error('ZIP 안에서 엑셀 파일(.xlsx)을 찾지 못했어요.');
-  const wb=XLSX.read(await xlsxEntry.async('arraybuffer'),{type:'array'});
+function parseBulkExcel(buffer){
+  const wb=XLSX.read(buffer,{type:'array'});
   const isName=h=>h==='상품명'||h==='제품명'||h==='품명'||h==='상품이름'||h.includes('상품명')||h.includes('제품명');
   let rows=null;
   for(const sn of wb.SheetNames){
@@ -546,6 +542,22 @@ async function readBulkZip(zipFile){
     return out;
   };
   const products=rows.data.map((r,i)=>{const retail=bulkNum(r[ix.retail]);return {row:i+2,brand:String(ix.brand>=0?r[ix.brand]:'').trim(),name:String(r[ix.name]??'').trim(),colors:ix.color>=0?parseOptionList(r[ix.color]):[],sizes:buildSizes(r,retail),wholesale:ix.wholesale>=0&&r[ix.wholesale]!==''?bulkNum(r[ix.wholesale]):null,retail,member:ix.member>=0&&r[ix.member]!==''?bulkNum(r[ix.member]):null}}).filter(p=>p.name);
+  return products;
+}
+async function readBulkZip(zipFiles){
+  const list=Array.isArray(zipFiles)?zipFiles:[zipFiles];
+  const entries=[];
+  for(const zf of list){
+    const zip=await JSZip.loadAsync(zf);
+    Object.values(zip.files).filter(f=>!f.dir&&!/(^|\/)(__MACOSX|\.DS_Store|~\$)/.test(f.name)&&!/\/\._/.test('/'+f.name)).forEach(f=>entries.push(f));
+  }
+  const xlsxEntries=entries.filter(f=>/\.xlsx?$/i.test(f.name));
+  let products=[];const excelNames=[];
+  for(const xe of xlsxEntries){
+    const fname=xe.name.split('/').pop();
+    try{products=products.concat(parseBulkExcel(await xe.async('arraybuffer')));excelNames.push(fname)}
+    catch(err){throw new Error((xlsxEntries.length>1?'['+fname+'] ':'')+(err.message||err))}
+  }
   const folders=new Map();
   entries.filter(f=>/\.(jpe?g|png|webp|gif)$/i.test(f.name)).forEach(f=>{
     const parts=f.name.split('/');if(parts.length<2)return;
@@ -554,8 +566,9 @@ async function readBulkZip(zipFile){
     folders.get(key).push({path:f.name,base:parts[parts.length-1],entry:f});
   });
   folders.forEach(list=>list.sort((a,b)=>bulkNaturalCompare(a.base,b.base)));
-  return {products,folders};
+  return {products,folders,hasExcel:xlsxEntries.length>0,excelNames};
 }
+
 async function uploadBulkImage(blob,baseName){
   const safe=baseName.replace(/[^a-zA-Z0-9._-]/g,'_');
   const path=Date.now()+'-'+crypto.randomUUID()+'-'+safe;
@@ -700,24 +713,44 @@ function saveStagedFromForm(){
   document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function analyzeBulkZip(){
-  const zipFile=$('singleZipFile').files[0];
+  const zipFiles=[...($('singleZipFile').files||[])];
   const statusBox=$('bulkUploadStatus');
   const btn=$('zipBulkBtn');
   const cat=categories.find(c=>String(c.id)===String($('zipCategory').value));
-  if(!zipFile)return alert('상품 정보와 이미지가 포함된 ZIP 파일을 첨부해 주세요.');
+  if(!zipFiles.length)return alert('상품 정보와 이미지가 포함된 ZIP 파일을 첨부해 주세요.');
   if(!cat)return alert('기본 카테고리를 선택해주세요.');
   const say=t=>{statusBox.style.display='block';statusBox.textContent=t};
   btn.disabled=true;
   try{
     say('라이브러리 준비 중...');
     await ensureZipLibs();
-    say('ZIP 파일을 분석하는 중...');
-    const {products,folders}=await readBulkZip(zipFile);
+    say(`ZIP ${zipFiles.length}개를 분석하는 중...`);
+    const {products,folders,hasExcel,excelNames}=await readBulkZip(zipFiles);
+    const readFiles=async list=>{const files=[];for(const im of list){const blob=await im.entry.async('blob');files.push(new File([blob],im.base,{type:bulkMime(im.base)}))}return files};
+    if(!hasExcel){
+      // 엑셀이 없는 ZIP만 고른 경우: 이미 대기 목록에 있는 상품 중 이미지가 비어 있는 상품에 폴더 이름으로 이미지를 채워요
+      let filledOnly=0;const used=new Set();
+      for(const sp of stagedProducts){
+        if(sp.files.length)continue;
+        const imgs=folders.get(bulkNorm(sp.name));
+        if(!imgs||!imgs.length)continue;
+        say(`이미지 채우는 중... ${sp.name}`);
+        sp.files=await readFiles(imgs);sp.lastError='';sp.uploadedUrls=null;used.add(bulkNorm(sp.name));filledOnly++;
+      }
+      if(!filledOnly)throw new Error('선택한 ZIP에서 엑셀 파일을 찾지 못했고, 이미지를 채울 수 있는 대기 상품도 없어요.\n엑셀이 들어 있는 ZIP을 함께 선택해주세요.');
+      await refreshStagedExisting();
+      refreshStagedStatuses();
+      renderStaged();
+      const leftover=[...folders.keys()].filter(k=>!used.has(k)).length;
+      say(`이미지 채우기 완료 🤍 대기 목록의 상품 ${filledOnly}개에 이미지를 채웠어요.`+(leftover?`\n대기 목록에 없는 이미지 폴더 ${leftover}개는 건너뛰었어요.`:''));
+      $('singleZipFile').value='';
+      document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
+      return;
+    }
     if(!products.length)throw new Error('엑셀에서 등록할 상품을 찾지 못했어요.');
     const added=[];
     let filled=0,sameSkipped=0;
     const stagedByKey=new Map(stagedProducts.map(p=>[bulkNorm(p.brand)+'|'+bulkNorm(p.name),p]));
-    const readFiles=async list=>{const files=[];for(const im of list){const blob=await im.entry.async('blob');files.push(new File([blob],im.base,{type:bulkMime(im.base)}))}return files};
     for(let i=0;i<products.length;i++){
       const p=products[i];
       say(`이미지 읽는 중... ${i+1}/${products.length}\n${p.name}`);
@@ -741,8 +774,10 @@ async function analyzeBulkZip(){
     refreshStagedStatuses();
     renderStaged();
     const noImg=stagedProducts.filter(p=>!p.files.length).length;
+    const knownNames=new Set([...products.map(p=>bulkNorm(p.name)),...stagedProducts.map(p=>bulkNorm(p.name))]);
+    const orphanFolders=[...folders.keys()].filter(k=>!knownNames.has(k));
     const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length;
-    say(`분석 완료 🤍 새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
+    say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
     $('singleZipFile').value='';
     document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
