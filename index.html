@@ -99,9 +99,21 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 #backToTop{display:none}
 @media(max-width:620px){#backToTop{position:fixed;right:16px;bottom:22px;z-index:20;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:#fffdf9ee;color:var(--ink);font-size:23px;line-height:1;box-shadow:0 3px 12px rgba(81,70,61,.14);cursor:pointer;align-items:center;justify-content:center}#backToTop.is-visible{display:flex}}
 
+/* BRAND list: same 3-column grid as sub categories (no clipping) */
+.brandCats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;justify-content:stretch;overflow:visible;padding:0 28px 18px}
+.brandCats[hidden]{display:none}
+.brandCats button{white-space:normal;text-align:center;word-break:keep-all;overflow-wrap:anywhere;line-height:1.35;padding:6px 2px;min-width:0}
+.brandCats button.active:after{display:none}
+/* sub-category grid: labels wrap instead of overlapping on narrow screens */
+.cats .catSubRow button{white-space:normal;word-break:keep-all;overflow-wrap:anywhere;line-height:1.35;padding:6px 2px;min-width:0}
+/* search box with clear button */
+.search{display:flex;align-items:center}
+.search input{flex:1;min-width:0}
+.searchClear{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font-size:15px;line-height:1;padding:8px 6px;cursor:pointer}
+.searchClear[hidden]{display:none}
 </style></head>
 <body><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
-<section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" oninput="render()"></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
+<section class="notice"><b>NOTICE</b><p><strong>주문 전, 오픈톡방 내 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.<br><br><strong>로그인을 하셔야 회원가 적용된 화면 보여집니다♡</strong></p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" enterkeyhint="search" autocomplete="off" oninput="onSearchInput()" onkeydown="onSearchKey(event)"><button type="button" id="searchClear" class="searchClear" aria-label="검색어 지우기" onclick="clearSearch()" hidden>✕</button></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
 const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[],detailReturnToCart=false,quickView='all',checkoutDraft=null;
@@ -114,7 +126,7 @@ function favoriteIds(){return readIdList(favoriteKey)}
 function recentIds(){return readIdList(recentKey)}
 function isFavorite(id){return favoriteIds().includes(String(id))}
 function toggleFavorite(id){let ids=favoriteIds();if(ids.includes(String(id)))ids=ids.filter(x=>x!==String(id));else ids=[String(id),...ids.filter(x=>x!==String(id))];writeIdList(favoriteKey,ids);render()}
-function setQuickView(view){quickView=view||'all';category='ALL';categoryId=null;brandFilter='ALL';render();window.scrollTo({top:0,behavior:'smooth'})}
+function setQuickView(view){resetSearchBox();quickView=view||'all';category='ALL';categoryId=null;brandFilter='ALL';render();window.scrollTo({top:0,behavior:'smooth'})}
 function renderQuickLinks(){const el=document.getElementById('quickLinks');if(!el)return;el.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===quickView))}
 function rememberRecent(id){const ids=recentIds().filter(x=>x!==String(id));ids.unshift(String(id));writeIdList(recentKey,ids.slice(0,30))}
 function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
@@ -140,8 +152,20 @@ async function load(){
   if(categoryError)console.error(categoryError);
   render();
 }
-function goHome(){category='ALL';categoryId=null;brandFilter='ALL';quickView='all';window.scrollTo({top:0,behavior:'smooth'});render()}
+function updateSearchClear(){const el=document.getElementById('search'),b=document.getElementById('searchClear');if(b)b.hidden=!(el&&el.value)}
+function resetSearchBox(){const el=document.getElementById('search');if(el&&el.value){el.value='';updateSearchClear()}}
+function onSearchInput(){updateSearchClear();render()}
+function clearSearch(){const el=document.getElementById('search');if(!el)return;el.value='';updateSearchClear();render()}
+function onSearchKey(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  e.target.blur();
+  const bar=document.querySelector('.search'),header=document.querySelector('header');
+  if(bar)window.scrollTo({top:Math.max(0,window.scrollY+bar.getBoundingClientRect().top-(header?header.getBoundingClientRect().height:0)-8),behavior:'auto'});
+}
+function goHome(){resetSearchBox();category='ALL';categoryId=null;brandFilter='ALL';quickView='all';window.scrollTo({top:0,behavior:'smooth'});render()}
 function setCategory(x,id=null){
+  resetSearchBox();
   category=x;
   categoryId=id?String(id):null;
   brandFilter='ALL';
@@ -215,6 +239,7 @@ function cats(){
   const clean=v=>String(v||'').replace(/\s+/g,'').toUpperCase();
   const rows=categoryTreeRows().filter(({c})=>clean(c.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(c.id));
   const catEl=document.getElementById('cats');
+  const prevCatScroll=catEl.querySelector('.catScroll')?.scrollLeft||0;
   const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
   const escape=v=>String(v).replaceAll('"','&quot;');
   const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(x.id))
@@ -237,6 +262,7 @@ function cats(){
     return `<button type="button" class="${isActive?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`;
   }).join('');
   catEl.innerHTML=`<div class="catScroll"><div class="catTopRow">${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catSubScroll"><div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${selectedCategory&&String(selectedCategory.id)===String(c.id)?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`).join('')}</div></div>`:''}`;
+  const newCatScroll=catEl.querySelector('.catScroll');if(newCatScroll&&prevCatScroll)newCatScroll.scrollLeft=prevCatScroll;
   const brandEl=document.getElementById('brandCats');
   if(category!=='BRAND'){
     brandEl.hidden=true; brandEl.innerHTML=''; return;
@@ -367,33 +393,21 @@ function renderPagination(totalItems){
   parts.push(`<button type="button" aria-label="다음 페이지" ${currentProductPage>=pages?'disabled':''} onclick="goToProductPage(${currentProductPage+1})">›</button>`);
   nav.innerHTML=parts.join('');
 }
-let productPageChangeTimer=null;
 function goToProductPage(page){
   const nav=document.getElementById('pagination');
   const totalPages=Number(nav?.dataset.totalPages)||Math.max(1,Math.ceil(products.length/PRODUCTS_PER_PAGE));
   const nextPage=Math.max(1,Math.min(totalPages,Math.floor(Number(page)||1)));
   if(nextPage===currentProductPage)return;
-  const grid=document.getElementById('grid');
-  if(window.matchMedia('(max-width: 620px)').matches&&grid){
-    if(productPageChangeTimer)clearTimeout(productPageChangeTimer);
-    const header=document.querySelector('header');
-    const headerHeight=header?header.getBoundingClientRect().height:0;
-    const targetTop=window.scrollY+grid.getBoundingClientRect().top-headerHeight-12;
-    window.scrollTo({top:Math.max(0,targetTop),behavior:'smooth'});
-    grid.classList.remove('page-fade-in');
-    grid.classList.add('page-fade-out');
-    productPageChangeTimer=setTimeout(()=>{
-      currentProductPage=nextPage;
-      render();
-      grid.classList.remove('page-fade-out');
-      grid.classList.add('page-fade-in');
-      requestAnimationFrame(()=>requestAnimationFrame(()=>grid.classList.remove('page-fade-in')));
-      productPageChangeTimer=null;
-    },150);
-    return;
-  }
   currentProductPage=nextPage;
   render();
+  // 애니메이션 없이 바로 새 페이지의 첫 상품 위치로 이동
+  const grid=document.getElementById('grid');
+  if(grid){
+    const header=document.querySelector('header');
+    const headerHeight=header?header.getBoundingClientRect().height:0;
+    const top=grid.getBoundingClientRect().top;
+    if(top<headerHeight)window.scrollTo({top:Math.max(0,window.scrollY+top-headerHeight-12),behavior:'auto'});
+  }
 }
 function scrollPageToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 function updateBackToTop(){
