@@ -274,7 +274,36 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 .stagedCard.dup,.stagedCard.error{opacity:.88}
 .stagedEditBanner{margin:10px 0 14px;padding:12px 14px;border:1px solid #e6c9a8;background:#fff6ea;border-radius:12px;font-size:13px}
 </style>
-</head><body><div class="wrap"><div class="logo">BY JAEI · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
+<style>
+/* 1) 카테고리 관리 – 여러 칸 카드 배열 */
+.categoryToolbar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.categoryToolbar button{padding:8px 13px;font-size:11px}
+#categoryManagerList{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+#categoryManagerList>.categoryTreeNode{border:1px solid var(--line);border-radius:14px;background:#fff;padding:2px 12px 8px}
+#categoryManagerList .categoryManagerRow{flex-wrap:wrap;gap:6px;padding:10px 0;align-items:center}
+#categoryManagerList .categoryManagerRow .grow{flex:1 1 calc(100% - 44px);min-width:0;overflow-wrap:anywhere}
+#categoryManagerList .categoryManagerRow>button:not(.categoryExpandBtn){flex:1 1 0;min-width:0;width:auto;padding:9px 4px;font-size:11px}
+#categoryManagerList .categoryManagerRow .categoryVisibilityBtn{flex:1.4 1 0;width:auto;white-space:nowrap}
+#categoryManagerList>.categoryTreeNode:has(>.categoryTreeChildren){grid-column:1/-1}
+#categoryManagerList .categoryTreeChildren{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:8px 12px;align-items:start;margin:2px 0 6px;padding-top:10px;border-top:1px dashed var(--line)}
+#categoryManagerList .categoryTreeChildren>.categoryTreeNode{border:1px solid var(--line);border-radius:10px;background:#fcfaf6;padding:0 10px 8px}
+#categoryManagerList .categoryTreeChildren>.categoryTreeNode:has(>.categoryTreeChildren){grid-column:1/-1}
+#categoryManagerList .categoryTreeChildren .categoryManagerRow{padding:8px 0}
+/* 4) 상품 선택칸 – 크고 누르기 쉽게 */
+.productSelectWrap{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ink);margin:2px 0 10px;padding:12px 14px;min-height:48px;border:1px solid var(--line);border-radius:12px;background:#f7f3ed;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.productSelectWrap input{width:24px;height:24px;margin:0;flex:0 0 24px;cursor:pointer;accent-color:#594537}
+.productSelectWrap:has(input:checked){background:#efe3d3;border-color:#c9a98a}
+/* 6) 주문 상태 탭 */
+.orderStatusTabs{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 12px}
+.orderStatusTab{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;font-size:12px;border-radius:999px;background:#fffdf9;color:var(--ink);border:1px solid var(--line);cursor:pointer;font-weight:700}
+.orderStatusTab b{display:inline-block;min-width:20px;padding:1px 6px;border-radius:999px;background:#efe6da;color:#6a5646;font-size:11px;text-align:center}
+.orderStatusTab.active{background:#594537;color:#fff;border-color:#594537}
+.orderStatusTab.active b{background:rgba(255,255,255,.22);color:#fff}
+.statusBadge.status-ready{background:#efe6f5;color:#6f4f8a}
+.statusBadge.status-shipping{background:#e3eef8;color:#3d6a92}
+.statusBadge.status-combine{background:#fff0c9;color:#8a6410;margin-left:6px}
+</style>
+</head><body><div class="wrap"><div class="logo"><a href="/" title="쇼핑몰 홈으로 이동" style="color:inherit;text-decoration:none">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
 <div id="adminNotificationArea" class="adminNotificationArea">
@@ -296,12 +325,12 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
   <button type="button" data-admin-section="orders">주문관리</button>
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
-<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품등록</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div id="categoryManagerList" style="margin-top:14px"></div></div>
+<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품등록</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div class="categoryToolbar"><button type="button" class="secondary" onclick="expandAllCategories(true)">전체 펼치기</button><button type="button" class="secondary" onclick="expandAllCategories(false)">전체 접기</button></div><div id="categoryManagerList" style="margin-top:10px"></div></div>
 
 
 
 <div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><div id="stagedEditBanner" class="stagedEditBanner" hidden><b>엑셀 등록 대기 상품 수정 중</b> · <span id="stagedEditName"></span><div class="uploadHint">저장하면 엑셀등록 탭의 대기 목록에 반영돼요. 아직 쇼핑몰에 등록된 상태는 아니에요.</div><button type="button" class="secondary" onclick="cancelStagedEdit()" style="margin-top:8px">수정 취소하고 대기 목록으로</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
-사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="loadProducts()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-excel"><h2 class="adminSectionTitle">엑셀등록</h2>
+사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="renderAdminProductList()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-excel"><h2 class="adminSectionTitle">엑셀등록</h2>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
   <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
@@ -328,7 +357,7 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
   <div id="stagedGrid" class="productAdminGrid"></div>
   <div id="stagedApplyStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
-</div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
+</div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="loadOrders()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderStatusTabs" class="orderStatusTabs"></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="loadMembers()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
 <div class="box" id="adminPushBox" style="margin:14px 0;background:#f7f3ed">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:200px"><b style="font-size:14px">휴대폰 승인요청 · 주문 알림</b><div id="adminPushStatus" class="note" style="margin-top:6px">알림을 켜면 새 회원 승인요청과 새 주문이 들어올 때 휴대폰으로 알려드려요. 관리자 계정마다 기기에서 한 번씩 설정해주세요.</div></div>
@@ -1019,6 +1048,11 @@ function renderBulkCategoryOptions(){
 function categoryManagerChildren(id){
   return categories.filter(c=>String(c.parent_id??'')===String(id??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
 }
+function expandAllCategories(open){
+  categoryOpenIds=new Set();
+  if(open)categories.forEach(c=>{if(categories.some(x=>String(x.parent_id??'')===String(c.id)))categoryOpenIds.add(String(c.id))});
+  renderCategoryManager();
+}
 function toggleCategoryOpen(id){
   const key=String(id);
   categoryOpenIds.has(key)?categoryOpenIds.delete(key):categoryOpenIds.add(key);
@@ -1070,7 +1104,7 @@ async function toggleCategoryVisibility(id){
   }
 }
 function categoryDescendantIds(id,out=new Set()){
-  categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(id,out)});return out;
+  categories.filter(c=>String(c.parent_id??'')===String(id??'')).forEach(c=>{if(out.has(c.id))return;out.add(c.id);categoryDescendantIds(c.id,out)});return out;
 }
 function categoryBranchIds(id){
   const out=new Set();
@@ -1321,12 +1355,9 @@ document.addEventListener('change',e=>{
   if(e.target?.id==='selectAllProducts')toggleAllVisibleProducts(e.target.checked,window.__adminVisibleProducts||[]);
   if(e.target?.classList?.contains('productSelect'))toggleProductSelection(e.target.dataset.id,e.target.checked);
 });
-async function loadProducts(){
+function renderAdminProductList(){
+  const data=window.__allAdminProducts||[];
   try{
-    const data=await apiAll('/rest/v1/products?select=*&order=created_at.desc,id.desc');
-    data.sort((a,b)=>{const at=Date.parse(a.created_at||'')||0,bt=Date.parse(b.created_at||'')||0;return bt-at||(Number(b.id)||0)-(Number(a.id)||0)});
-    renderAdminFilters(data);
-    window.__allAdminProducts=data;
     const categoryFiltered=filteredAdminProducts(data);
     const searchText=String(document.getElementById('adminProductSearch')?.value||'').trim().toLocaleLowerCase('ko-KR');
     const filtered=searchText?categoryFiltered.filter(p=>[p.name,p.brand,p.category,...(p.colors||[]),...(p.sizes||[])].join(' ').toLocaleLowerCase('ko-KR').includes(searchText)):categoryFiltered;
@@ -1336,6 +1367,15 @@ async function loadProducts(){
       const pinned=Number(p.sort_order)<0;
       return `<div class="productCard" onclick="previewProduct(${p.id})"><div class="productCardImgWrap"><img class="productCardImg" src="${p.images?.[0]||''}" style="${p.is_sold_out?'filter:blur(1.5px) brightness(.78)':''}">${p.is_sold_out?'<div class="soldOutOverlay"><span>SOLD OUT</span></div>':''}</div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">COLOR · ${(p.colors||[]).join(', ')||'-'}</span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();toggleSoldOut(${p.id},${p.is_sold_out?'true':'false'})">${p.is_sold_out?'품절 해제':'SOLD OUT'}</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();deleteProduct(${p.id})">삭제</button></div></div></div>`;
     }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
+  }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
+}
+async function loadProducts(){
+  try{
+    const data=await apiAll('/rest/v1/products?select=*&order=created_at.desc,id.desc');
+    data.sort((a,b)=>{const at=Date.parse(a.created_at||'')||0,bt=Date.parse(b.created_at||'')||0;return bt-at||(Number(b.id)||0)-(Number(a.id)||0)});
+    renderAdminFilters(data);
+    window.__allAdminProducts=data;
+    renderAdminProductList();
   }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
 }
 
@@ -1625,20 +1665,25 @@ async function copyOrderMessage(id){
     alert('주문 확인 문구를 복사했어요.');
   }catch(e){field.focus();field.select();alert('문구를 선택해 복사해주세요.\n\n'+(e.message||''));}
 }
-async function loadOrders(){
+const ORDER_STATUSES=['주문접수','입금확인','상품준비중','배송준비','배송중','배송완료','취소'];
+const ORDER_STATUS_TABS=[['주문접수','주문'],['입금확인','입금확인'],['상품준비중','상품준비중'],['배송준비','배송준비'],['배송중','배송중'],['배송완료','배송완료'],['취소','취소']];
+let orderStatusFilter='ALL';
+function setOrderStatusFilter(s){orderStatusFilter=s;renderOrders()}
+function renderOrders(){
   const el=$('orders');
+  const {data,emailByUserId,brandByProductId,wholesaleByProductId,wholesaleLoadError}=window.__orderCtx||{data:[],emailByUserId:{},brandByProductId:{},wholesaleByProductId:{},wholesaleLoadError:false};
   try{
-    const data=await api('/rest/v1/orders?select=*&order=created_at.desc');
-    let emailByUserId={};
-    try{const profiles=await api('/rest/v1/profiles?select=id,email');emailByUserId=Object.fromEntries((profiles||[]).map(p=>[String(p.id),p.email||'']))}catch(profileError){console.warn('주문 고객 이메일을 불러오지 못했어요.',profileError)}
-    let brandByProductId={};
-    try{const productBrands=await apiAll('/rest/v1/products?select=id,brand&order=id.asc');brandByProductId=Object.fromEntries((productBrands||[]).map(p=>[String(p.id),String(p.brand||'').trim()]))}catch(brandError){console.warn('주문 상품의 브랜드명을 불러오지 못했어요.',brandError)}
-    let wholesaleByProductId={},wholesaleLoadError=false;
-    try{const costRows=await api('/rest/v1/product_private_costs?select=product_id,wholesale_price');wholesaleByProductId=Object.fromEntries((costRows||[]).map(row=>[String(row.product_id),row.wholesale_price]))}catch(costError){wholesaleLoadError=true;console.warn('도매가를 불러오지 못했어요. BYJAEI_private_wholesale_setup.sql 설정을 확인해주세요.',costError)}
     const q=filterValue('orderNameSearch').toLowerCase(),phoneQ=filterValue('orderPhoneSearch').toLowerCase(),from=filterValue('orderFrom'),to=filterValue('orderTo');
-    const filtered=(data||[]).filter(o=>(!q||String(o.customer_name||'').toLowerCase().includes(q))&&(!phoneQ||String(o.phone||'').toLowerCase().includes(phoneQ))&&matchesDate(o.created_at,from,to));
-    $('orderFilterCount').textContent=(q||phoneQ||from||to)?`검색 결과 ${filtered.length}건 / 전체 ${data?.length||0}건`:'';
-    if(!filtered.length){el.innerHTML='<p class="note">검색 결과가 없어요.</p>';return}
+    const searchFiltered=(data||[]).filter(o=>(!q||String(o.customer_name||'').toLowerCase().includes(q))&&(!phoneQ||String(o.phone||'').toLowerCase().includes(phoneQ))&&matchesDate(o.created_at,from,to));
+    const statusOf=o=>o.status||'주문접수';
+    const tabsEl=$('orderStatusTabs');
+    if(tabsEl){
+      const countBy=s=>searchFiltered.filter(o=>statusOf(o)===s).length;
+      tabsEl.innerHTML=[['ALL','전체',searchFiltered.length],...ORDER_STATUS_TABS.map(([s,l])=>[s,l,countBy(s)])].map(([s,l,n])=>`<button type="button" class="orderStatusTab ${orderStatusFilter===s?'active':''}" onclick="setOrderStatusFilter('${s}')">${l}<b>${n}</b></button>`).join('');
+    }
+    const filtered=orderStatusFilter==='ALL'?searchFiltered:searchFiltered.filter(o=>statusOf(o)===orderStatusFilter);
+    $('orderFilterCount').textContent=(q||phoneQ||from||to||orderStatusFilter!=='ALL')?`표시 ${filtered.length}건 / 전체 ${data?.length||0}건`:'';
+    if(!filtered.length){el.innerHTML='<p class="note">'+(orderStatusFilter==='ALL'?'검색 결과가 없어요.':'해당 상태의 주문이 없어요.')+'</p>';return}
     el.innerHTML=filtered.map(o=>{
       const items=Array.isArray(o.items)?o.items:[];
       const txt=items.map(i=>{
@@ -1655,23 +1700,44 @@ async function loadOrders(){
         const costText=wholesaleLoadError?'도매가 확인 필요 (SQL 설정 확인)':hasCost?`도매가 ${cost.toLocaleString('ko-KR')}원/개 · 도매가 합계 ${(cost*qty).toLocaleString('ko-KR')}원`:'도매가 미입력';
         return `<div class="orderItemLine"><div>${brandLabel}<button type="button" class="orderProductLink" data-order-product-link data-product-id="${id}" data-product-name="${nm}">${nm}</button> · ${option||'옵션 없음'} · ${qty}개</div><div class="orderItemMoney">${escapeOrderText(costText)} · 주문금액 ${lineAmount.toLocaleString('ko-KR')}원</div></div>`;
       }).join('');
-      const cls={'주문접수':'status-received','입금확인':'status-paid','배송준비':'status-prep','배송완료':'status-done','취소':'status-cancel'}[o.status]||'status-received';
+      const cls={'주문접수':'status-received','입금확인':'status-paid','상품준비중':'status-ready','배송준비':'status-prep','배송중':'status-shipping','배송완료':'status-done','취소':'status-cancel'}[o.status]||'status-received';
       const memo=o.memo||'';
       const customerEmail=o.email||(o.user_id?emailByUserId[String(o.user_id)]:'')||(o.user_id?'회원 이메일을 찾을 수 없어요':'로그인 계정 연결 없음');
       const safeCustomerEmail=escapeOrderText(customerEmail);
       const customerMessage=escapeOrderText(buildOrderConfirmationMessage(o,items,brandByProductId));
-      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span><div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select onchange="updateOrderStatus(${Number(o.id)},this.value)"><option ${o.status==='주문접수'?'selected':''}>주문접수</option><option ${o.status==='입금확인'?'selected':''}>입금확인</option><option ${o.status==='배송준비'?'selected':''}>배송준비</option><option ${o.status==='배송완료'?'selected':''}>배송완료</option><option ${o.status==='취소'?'selected':''}>취소</option></select><button class="danger" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button></div></div>`;
+      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select onchange="updateOrderStatus(${Number(o.id)},this.value)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select><button class="danger" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button></div></div>`;
     }).join('');
     el.onclick=function(event){const button=event.target.closest('[data-order-product-link]');if(!button||!el.contains(button))return;openOrderedProduct(button.dataset.productId,button.dataset.productName)};
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
 }
+async function loadOrders(){
+  const el=$('orders');
+  try{
+    const data=await api('/rest/v1/orders?select=*&order=created_at.desc');
+    let emailByUserId={};
+    try{const profiles=await api('/rest/v1/profiles?select=id,email');emailByUserId=Object.fromEntries((profiles||[]).map(p=>[String(p.id),p.email||'']))}catch(profileError){console.warn('주문 고객 이메일을 불러오지 못했어요.',profileError)}
+    let brandByProductId={};
+    try{const productBrands=await apiAll('/rest/v1/products?select=id,brand&order=id.asc');brandByProductId=Object.fromEntries((productBrands||[]).map(p=>[String(p.id),String(p.brand||'').trim()]))}catch(brandError){console.warn('주문 상품의 브랜드명을 불러오지 못했어요.',brandError)}
+    let wholesaleByProductId={},wholesaleLoadError=false;
+    try{const costRows=await api('/rest/v1/product_private_costs?select=product_id,wholesale_price');wholesaleByProductId=Object.fromEntries((costRows||[]).map(row=>[String(row.product_id),row.wholesale_price]))}catch(costError){wholesaleLoadError=true;console.warn('도매가를 불러오지 못했어요. BYJAEI_private_wholesale_setup.sql 설정을 확인해주세요.',costError)}
+    window.__orderCtx={data,emailByUserId,brandByProductId,wholesaleByProductId,wholesaleLoadError};
+    renderOrders();
+  }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
+}
 async function saveOrderMemo(id){const value=$('memo_'+id)?.value.trim()||'';try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:value}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 저장됐어요.')}catch(e){alert('메모 저장 실패\n\n'+e.message)}}
 async function deleteOrderMemo(id){if(!confirm('이 주문의 관리자 메모를 삭제할까요?'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:null}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 삭제됐어요.');loadOrders()}catch(e){alert('메모 삭제 실패\n\n'+e.message)}}
-async function updateOrderStatus(id,statusValue){try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:statusValue}),headers:{'Prefer':'return=minimal'}});loadOrders()}catch(e){alert(e.message)}}
+async function updateOrderStatus(id,statusValue){try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:statusValue}),headers:{'Prefer':'return=minimal'}});loadOrders()}catch(e){const m=String(e.message||e);alert(/check constraint|violates/i.test(m)?'주문 상태를 저장하지 못했어요.\n\nSupabase 주문 테이블의 상태 허용 값에 "'+statusValue+'"이(가) 없는 것 같아요. BYJAEI_order_status_update.sql을 SQL Editor에서 실행한 뒤 다시 시도해주세요.\n\n'+m:m);loadOrders()}}
 async function deleteOrder(id){if(!confirm('이 주문을 삭제할까요?\n\n삭제하면 주문관리에서 다시 복구할 수 없어요.'))return;try{const deleted=await api('/rest/v1/orders?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{'Prefer':'return=representation'}});if(Array.isArray(deleted)&&deleted.length>0){alert('주문을 삭제했어요.');await loadOrders();return}const remaining=await api('/rest/v1/orders?select=id&id=eq.'+encodeURIComponent(id));if(Array.isArray(remaining)&&remaining.some(row=>String(row.id)===String(id))){const e=new Error('주문이 남아 있어요. 관리자 계정의 orders DELETE 권한 또는 RLS 정책이 없거나 관리자 정책에서 이 계정을 허용하지 않고 있어요. 함께 제공된 BYJAEI_orders_delete_policy.sql 내용을 Supabase SQL Editor에서 실행해주세요.');e.code='RLS_NO_ROWS';throw e}alert('주문 삭제를 확인했어요.');await loadOrders()}catch(e){let message=e.message||String(e);if(e.code==='42501'||e.status===401||e.status===403||/row-level security|permission denied/i.test(message)){message='Supabase에서 주문 삭제 권한이 차단됐어요. 관리자용 DELETE 권한과 RLS 정책이 필요합니다. 함께 제공된 BYJAEI_orders_delete_policy.sql을 Supabase SQL Editor에서 실행한 뒤 다시 시도해주세요.\n\n세부 오류: '+message}else if(e.code==='23503'){message='다른 테이블이 이 주문을 참조하고 있어 삭제할 수 없어요. 연결된 주문 상세 테이블/외래 키 설정을 확인해야 합니다.\n\n세부 오류: '+message}else if(e.code==='RLS_NO_ROWS'){message=e.message}alert('주문 삭제 실패\n\n'+message)}}
 async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까요?\n\n탈퇴 처리하면 해당 계정이 완전히 삭제되어 같은 이메일로 다시 가입할 수 있어요.'))return;try{await api('/rest/v1/rpc/admin_delete_user',{method:'POST',body:JSON.stringify({target_user_id:id}),headers:{'Prefer':'return=minimal'}});alert('탈퇴 처리했어요.\n\n이제 같은 이메일로 다시 가입할 수 있어요.');loadMembers()}catch(e){alert('탈퇴 처리 실패\n\n'+e.message)}}
 </script>
 <script>
+(function(){
+  const el=document.getElementById('adminProductSearch');if(!el)return;
+  let timer;
+  el.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(renderAdminProductList,120)});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);renderAdminProductList()}});
+  el.addEventListener('search',()=>renderAdminProductList());
+})();
 document.querySelectorAll('[data-admin-section]').forEach(btn=>{btn.addEventListener('click',()=>switchAdminSection(btn.dataset.adminSection));});
 if(location.hash==='#members'||new URLSearchParams(location.search).get('section')==='members')switchAdminSection('members');
 </script>
