@@ -303,7 +303,17 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 .statusBadge.status-shipping{background:#e3eef8;color:#3d6a92}
 .statusBadge.status-combine{background:#fff0c9;color:#8a6410;margin-left:6px}
 </style>
-</head><body><div class="wrap"><div class="logo"><a href="/" title="쇼핑몰 홈으로 이동" style="color:inherit;text-decoration:none">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
+<style>
+.stagedDraftBanner{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:14px 16px;border:1px solid #d9c9a8;background:#fff8e8;border-radius:14px;font-size:13px}
+.stagedDraftBanner[hidden]{display:none}
+.stagedDraftBanner .draftBtns{display:flex;gap:7px;flex-wrap:wrap}
+.pointGrantDialog textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;resize:vertical}
+.cancelChips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+.cancelChip{padding:6px 10px;font-size:11px;border-radius:999px}
+.cancelRefundRow{display:flex!important;align-items:center;gap:9px;margin-top:14px!important;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#f7f3ed;font-size:13px;cursor:pointer}
+.cancelRefundRow input{width:20px!important;height:20px;flex:0 0 20px;margin:0;padding:0}
+</style>
+</head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
 <div id="adminNotificationArea" class="adminNotificationArea">
@@ -331,6 +341,7 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 
 <div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><div id="stagedEditBanner" class="stagedEditBanner" hidden><b>엑셀 등록 대기 상품 수정 중</b> · <span id="stagedEditName"></span><div class="uploadHint">저장하면 엑셀등록 탭의 대기 목록에 반영돼요. 아직 쇼핑몰에 등록된 상태는 아니에요.</div><button type="button" class="secondary" onclick="cancelStagedEdit()" style="margin-top:8px">수정 취소하고 대기 목록으로</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
 사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="renderAdminProductList()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-excel"><h2 class="adminSectionTitle">엑셀등록</h2>
+<div id="stagedDraftBanner" class="stagedDraftBanner" hidden></div>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
   <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
@@ -350,7 +361,7 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
   <div id="bulkUploadStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
 <div class="box" id="stagedBox" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">등록 대기 상품</h2><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" class="secondary" onclick="toggleAllStaged()">선택 가능한 상품 전체 선택/해제</button><button type="button" class="secondary" onclick="clearStaged()">대기 목록 비우기</button></div></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">등록 대기 상품</h2><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" class="secondary" onclick="toggleAllStaged()">선택 가능한 상품 전체 선택/해제</button><button type="button" id="stagedDraftSaveBtn" onclick="saveStagedDraft()">임시저장</button><button type="button" class="secondary" onclick="clearStaged()">대기 목록 비우기</button></div></div>
   <p class="note">카드를 누르면 미리보기, <b>수정</b>을 누르면 상품등록 탭의 입력 화면에서 수기로 등록할 때처럼 수정할 수 있어요. 아직 쇼핑몰에는 등록되지 않은 상태예요.</p>
   <div id="stagedSummary" class="filterCount"></div>
   <div class="actions" style="margin:10px 0 14px"><button type="button" id="stagedApplyBtn" onclick="applyStagedProducts()">상품 반영하기</button></div>
@@ -889,6 +900,59 @@ async function applyStagedProducts(){
   }finally{btn.disabled=false}
 }
 window.addEventListener('beforeunload',e=>{if(stagedProducts.length){e.preventDefault();e.returnValue=''}});
+
+// ---- 엑셀등록 임시저장 (이 브라우저의 IndexedDB에 저장 · 이미지 포함)
+function draftDb(){return new Promise((res,rej)=>{const r=indexedDB.open('byjaei_admin_drafts',1);r.onupgradeneeded=()=>r.result.createObjectStore('drafts');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function draftGet(){const db=await draftDb();return new Promise((res,rej)=>{const q=db.transaction('drafts','readonly').objectStore('drafts').get('excelStaged');q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})}
+async function draftPut(v){const db=await draftDb();return new Promise((res,rej)=>{const tx=db.transaction('drafts','readwrite');tx.objectStore('drafts').put(v,'excelStaged');tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error||new Error('저장 공간이 부족할 수 있어요'))})}
+async function draftDelete(){const db=await draftDb();return new Promise((res,rej)=>{const tx=db.transaction('drafts','readwrite');tx.objectStore('drafts').delete('excelStaged');tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})}
+async function saveStagedDraft(){
+  if(!stagedProducts.length)return alert('임시저장할 대기 상품이 없어요.');
+  const btn=$('stagedDraftSaveBtn');if(btn){btn.disabled=true;btn.textContent='임시저장 중...'}
+  try{
+    const items=stagedProducts.map(p=>({sid:p.sid,row:p.row,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal:p.normal,member:p.member,isSizeChart:!!p.isSizeChart,description:p.description||'',categoryIds:p.categoryIds,files:p.files,selected:!!p.selected}));
+    await draftPut({savedAt:Date.now(),seq:stagedSeq,items});
+    const imgs=items.reduce((n,p)=>n+p.files.length,0);
+    await refreshDraftBanner();
+    alert(`임시저장했어요 🤍\n상품 ${items.length}개 · 이미지 ${imgs}장\n\n이 브라우저에서 엑셀등록 탭을 열면 언제든 불러올 수 있어요.`);
+  }catch(e){alert('임시저장에 실패했어요.\n\n'+(e.message||e)+'\n\n브라우저 저장 공간이 부족하거나 시크릿 모드일 수 있어요.')}
+  finally{if(btn){btn.disabled=false;btn.textContent='임시저장'}}
+}
+async function refreshDraftBanner(){
+  const el=$('stagedDraftBanner');if(!el)return;
+  try{
+    const d=await draftGet();
+    if(!d||!Array.isArray(d.items)||!d.items.length){el.hidden=true;el.innerHTML='';return}
+    const imgs=d.items.reduce((n,p)=>n+((p.files&&p.files.length)||0),0);
+    el.hidden=false;
+    el.innerHTML=`<div><b>임시저장된 대기 목록이 있어요</b><div class="note" style="margin:4px 0 0">상품 ${d.items.length}개 · 이미지 ${imgs}장 · ${new Date(d.savedAt).toLocaleString('ko-KR')} 저장</div></div><div class="draftBtns"><button type="button" onclick="loadStagedDraft()">불러오기</button><button type="button" class="secondary" onclick="deleteStagedDraft()">임시저장 삭제</button></div>`;
+  }catch(e){el.hidden=true}
+}
+async function loadStagedDraft(){
+  try{
+    const d=await draftGet();
+    if(!d||!d.items||!d.items.length)return alert('임시저장된 내용이 없어요.');
+    if(stagedProducts.length&&!confirm(`현재 대기 목록 ${stagedProducts.length}개를 임시저장 내용(${d.items.length}개)으로 바꿀까요?\n(현재 대기 목록은 사라져요. 필요하면 먼저 임시저장해주세요)`))return;
+    stagedSeq=Math.max(stagedSeq,Number(d.seq)||0,...d.items.map(p=>Number(p.sid)||0));
+    stagedProducts=d.items.map(p=>({...p,files:p.files||[],status:'ok',message:'',lastError:'',uploadedUrls:null}));
+    try{await refreshStagedExisting()}catch(e){console.warn('등록된 상품 비교 실패',e)}
+    refreshStagedStatuses();
+    renderStaged();
+    document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){alert('임시저장을 불러오지 못했어요.\n\n'+(e.message||e))}
+}
+async function deleteStagedDraft(){
+  if(!confirm('임시저장한 대기 목록을 삭제할까요?\n(현재 화면의 대기 목록과 쇼핑몰에 등록된 상품은 그대로예요)'))return;
+  try{await draftDelete()}catch(e){alert('삭제하지 못했어요.\n\n'+(e.message||e))}
+  refreshDraftBanner();
+}
+function adminGoHome(e){
+  if(e)e.preventDefault();
+  if(typeof switchAdminSection==='function')switchAdminSection('products');
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}
+  window.scrollTo({top:0,behavior:'auto'});
+}
+
 
 async function saveProduct(){
   if(stagedEditingId!=null)return saveStagedFromForm();
@@ -1705,7 +1769,7 @@ function renderOrders(){
       const customerEmail=o.email||(o.user_id?emailByUserId[String(o.user_id)]:'')||(o.user_id?'회원 이메일을 찾을 수 없어요':'로그인 계정 연결 없음');
       const safeCustomerEmail=escapeOrderText(customerEmail);
       const customerMessage=escapeOrderText(buildOrderConfirmationMessage(o,items,brandByProductId));
-      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select onchange="updateOrderStatus(${Number(o.id)},this.value)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select><button class="danger" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button></div></div>`;
+      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}</div></div>`;
     }).join('');
     el.onclick=function(event){const button=event.target.closest('[data-order-product-link]');if(!button||!el.contains(button))return;openOrderedProduct(button.dataset.productId,button.dataset.productName)};
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
@@ -1726,6 +1790,70 @@ async function loadOrders(){
 }
 async function saveOrderMemo(id){const value=$('memo_'+id)?.value.trim()||'';try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:value}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 저장됐어요.')}catch(e){alert('메모 저장 실패\n\n'+e.message)}}
 async function deleteOrderMemo(id){if(!confirm('이 주문의 관리자 메모를 삭제할까요?'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:null}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 삭제됐어요.');loadOrders()}catch(e){alert('메모 삭제 실패\n\n'+e.message)}}
+
+function onOrderStatusChange(id,sel){
+  if(sel.value==='취소'){sel.value=sel.dataset.prev||'주문접수';openOrderCancelModal(id);return}
+  updateOrderStatus(id,sel.value);
+}
+async function computeOrderRefund(o){
+  const used=Math.max(0,Math.floor(Number(o.points_used)||0));
+  if(!used||!o.user_id)return 0;
+  try{
+    const rows=await api('/rest/v1/loyalty_point_transactions?select=amount,reason&order_id=eq.'+encodeURIComponent(String(o.id))+'&user_id=eq.'+encodeURIComponent(String(o.user_id)));
+    const refunded=(rows||[]).filter(r=>Number(r.amount)>0&&/환불/.test(String(r.reason||''))).reduce((n,r)=>n+Number(r.amount),0);
+    return Math.max(0,used-refunded);
+  }catch(e){console.warn('적립금 환불 내역 확인 실패',e);return used}
+}
+async function openOrderCancelModal(id){
+  const o=((window.__orderCtx||{}).data||[]).find(x=>String(x.id)===String(id));
+  if(!o)return alert('주문 정보를 찾지 못했어요. 새로고침 후 다시 시도해주세요.');
+  if((o.status||'주문접수')==='취소')return alert('이미 취소된 주문이에요.');
+  document.getElementById('orderCancelModal')?.remove();
+  const refund=await computeOrderRefund(o);
+  const chips=['재고 부족으로 취소','고객 요청으로 취소','입금 기한 경과','주문 정보 확인 불가'].map(x=>`<button type="button" class="secondary cancelChip" data-chip="${x}">${x}</button>`).join('');
+  document.body.insertAdjacentHTML('beforeend',`<div class="pointGrantBackdrop" id="orderCancelModal"><section class="pointGrantDialog" role="dialog" aria-modal="true" aria-labelledby="orderCancelTitle"><h3 id="orderCancelTitle">주문 취소</h3><p class="note">${escapeOrderText(o.customer_name||'')} 고객님 · 주문번호 #${Number(o.id)} · ${Number(o.total_price||0).toLocaleString('ko-KR')}원</p><label for="orderCancelReason">취소 사유 <span style="font-weight:400;color:var(--muted)">(고객 마이페이지 주문 내역에 표시돼요)</span></label><textarea id="orderCancelReason" rows="3" maxlength="300" placeholder="예: 재고 부족으로 주문이 취소되었어요. 죄송합니다."></textarea><div class="cancelChips">${chips}</div>${refund>0?`<label class="cancelRefundRow"><input type="checkbox" id="orderCancelRefund" checked> 사용한 적립금 ${refund.toLocaleString('ko-KR')}원 고객에게 돌려주기</label>`:''}<div class="actions"><button type="button" class="secondary" id="orderCancelClose">닫기</button><button type="button" class="danger" id="orderCancelSubmit">주문 취소하기</button></div></section></div>`);
+  const modal=document.getElementById('orderCancelModal');
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
+  modal.querySelectorAll('[data-chip]').forEach(b=>b.addEventListener('click',()=>{document.getElementById('orderCancelReason').value=b.dataset.chip}));
+  document.getElementById('orderCancelClose').addEventListener('click',()=>modal.remove());
+  document.getElementById('orderCancelSubmit').addEventListener('click',()=>submitOrderCancel(o.id,refund));
+  document.getElementById('orderCancelReason').focus();
+}
+async function submitOrderCancel(id,refundAmount){
+  const modal=document.getElementById('orderCancelModal');if(!modal)return;
+  const o=((window.__orderCtx||{}).data||[]).find(x=>String(x.id)===String(id));if(!o)return;
+  const reason=document.getElementById('orderCancelReason').value.trim();
+  const wantRefund=!!document.getElementById('orderCancelRefund')?.checked&&refundAmount>0;
+  if(!confirm(`주문번호 #${id} 주문을 취소할까요?\n\n취소 사유: ${reason||'(입력 안 함)'}${wantRefund?`\n적립금 ${refundAmount.toLocaleString('ko-KR')}원을 고객에게 돌려줘요.`:''}`))return;
+  const btn=document.getElementById('orderCancelSubmit');btn.disabled=true;btn.textContent='취소 처리 중...';
+  const endpoint='/rest/v1/orders?id=eq.'+encodeURIComponent(String(id));
+  const tryPatch=async body=>{const r=await api(endpoint,{method:'PATCH',body:JSON.stringify(body),headers:{'Prefer':'return=representation'}});if(!Array.isArray(r)||!r.length)throw new Error('주문을 변경할 권한이 없거나 결과를 확인하지 못했어요.');return r};
+  let reasonSaved=true;
+  try{
+    try{await tryPatch({status:'취소',cancel_reason:reason||null,cancelled_at:new Date().toISOString()})}
+    catch(e1){
+      if(!/cancel_reason|cancelled_at|column|schema cache/i.test(String(e1.message||e1)))throw e1;
+      try{await tryPatch({status:'취소',cancel_reason:reason||null})}
+      catch(e2){
+        if(!/cancel_reason|column|schema cache/i.test(String(e2.message||e2)))throw e2;
+        reasonSaved=false;await tryPatch({status:'취소'});
+      }
+    }
+    let refundMsg='';
+    if(wantRefund){
+      try{
+        await api('/rest/v1/loyalty_point_transactions',{method:'POST',body:JSON.stringify({user_id:o.user_id,amount:refundAmount,reason:`주문 취소 적립금 환불 · 주문번호 #${id}`,order_id:o.id,created_by:userId}),headers:{'Prefer':'return=minimal'}});
+        refundMsg=`\n적립금 ${refundAmount.toLocaleString('ko-KR')}원을 돌려줬어요.`;
+      }catch(re){refundMsg='\n\n⚠ 주문은 취소됐지만 적립금 환불은 실패했어요. 회원관리에서 적립금을 직접 지급해주세요.\n'+(re.message||re)}
+    }
+    modal.remove();
+    alert('주문을 취소했어요.'+(reasonSaved?'':'\n\n⚠ 취소 사유를 저장할 칸이 없어 사유는 저장되지 않았어요. BYJAEI_cancel_order.sql을 SQL Editor에서 실행한 뒤 다시 입력해주세요.')+refundMsg);
+    await loadOrders();
+  }catch(e){
+    btn.disabled=false;btn.textContent='주문 취소하기';
+    alert('주문 취소에 실패했어요.\n\n'+(e.message||e));
+  }
+}
 async function updateOrderStatus(id,statusValue){try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:statusValue}),headers:{'Prefer':'return=minimal'}});loadOrders()}catch(e){const m=String(e.message||e);alert(/check constraint|violates/i.test(m)?'주문 상태를 저장하지 못했어요.\n\nSupabase 주문 테이블의 상태 허용 값에 "'+statusValue+'"이(가) 없는 것 같아요. BYJAEI_order_status_update.sql을 SQL Editor에서 실행한 뒤 다시 시도해주세요.\n\n'+m:m);loadOrders()}}
 async function deleteOrder(id){if(!confirm('이 주문을 삭제할까요?\n\n삭제하면 주문관리에서 다시 복구할 수 없어요.'))return;try{const deleted=await api('/rest/v1/orders?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{'Prefer':'return=representation'}});if(Array.isArray(deleted)&&deleted.length>0){alert('주문을 삭제했어요.');await loadOrders();return}const remaining=await api('/rest/v1/orders?select=id&id=eq.'+encodeURIComponent(id));if(Array.isArray(remaining)&&remaining.some(row=>String(row.id)===String(id))){const e=new Error('주문이 남아 있어요. 관리자 계정의 orders DELETE 권한 또는 RLS 정책이 없거나 관리자 정책에서 이 계정을 허용하지 않고 있어요. 함께 제공된 BYJAEI_orders_delete_policy.sql 내용을 Supabase SQL Editor에서 실행해주세요.');e.code='RLS_NO_ROWS';throw e}alert('주문 삭제를 확인했어요.');await loadOrders()}catch(e){let message=e.message||String(e);if(e.code==='42501'||e.status===401||e.status===403||/row-level security|permission denied/i.test(message)){message='Supabase에서 주문 삭제 권한이 차단됐어요. 관리자용 DELETE 권한과 RLS 정책이 필요합니다. 함께 제공된 BYJAEI_orders_delete_policy.sql을 Supabase SQL Editor에서 실행한 뒤 다시 시도해주세요.\n\n세부 오류: '+message}else if(e.code==='23503'){message='다른 테이블이 이 주문을 참조하고 있어 삭제할 수 없어요. 연결된 주문 상세 테이블/외래 키 설정을 확인해야 합니다.\n\n세부 오류: '+message}else if(e.code==='RLS_NO_ROWS'){message=e.message}alert('주문 삭제 실패\n\n'+message)}}
 async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까요?\n\n탈퇴 처리하면 해당 계정이 완전히 삭제되어 같은 이메일로 다시 가입할 수 있어요.'))return;try{await api('/rest/v1/rpc/admin_delete_user',{method:'POST',body:JSON.stringify({target_user_id:id}),headers:{'Prefer':'return=minimal'}});alert('탈퇴 처리했어요.\n\n이제 같은 이메일로 다시 가입할 수 있어요.');loadMembers()}catch(e){alert('탈퇴 처리 실패\n\n'+e.message)}}
@@ -1738,6 +1866,8 @@ async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까
   el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);renderAdminProductList()}});
   el.addEventListener('search',()=>renderAdminProductList());
 })();
+refreshDraftBanner();
+document.querySelector('[data-admin-section="excel"]')?.addEventListener('click',refreshDraftBanner);
 document.querySelectorAll('[data-admin-section]').forEach(btn=>{btn.addEventListener('click',()=>switchAdminSection(btn.dataset.adminSection));});
 if(location.hash==='#members'||new URLSearchParams(location.search).get('section')==='members')switchAdminSection('members');
 </script>
