@@ -627,11 +627,14 @@ async function cancelMyOrder(id){
   if(!confirm('이 주문을 취소할까요?\n\n입금 확인 전 주문만 취소할 수 있고, 사용한 적립금이 있으면 취소 후 돌려드려요.'))return;
   const {error}=await sb.rpc('cancel_my_order',{p_order_id:id});
   if(error){
-    const m=String(error.message||'');
+    console.error('cancel_my_order 실패',error);
+    const m=String(error.message||''),code=String(error.code||'');
+    const detail='\n\n(관리자 확인용: '+(code?code+' · ':'')+m+')';
     if(m.includes('NOT_CANCELLABLE'))alert('이미 입금 확인이 진행된 주문은 직접 취소할 수 없어요.\n채팅으로 문의해주세요.');
     else if(m.includes('AUTH_REQUIRED'))alert('로그인이 만료되었어요. 다시 로그인해주세요.');
-    else if(/could not find the function|does not exist|schema cache/i.test(m))alert('주문 취소 설정이 아직 적용되지 않았어요.\n채팅으로 취소를 요청해주세요.');
-    else alert('주문 취소 중 문제가 생겼어요. '+m);
+    else if(m.includes('ORDER_NOT_FOUND'))alert('주문 정보를 찾지 못했어요. 새로고침 후 다시 시도해주세요.'+detail);
+    else if(code==='PGRST202'||/could not find the function/i.test(m))alert('주문 취소 기능이 아직 켜지지 않았어요.\n채팅으로 취소를 요청해주세요.'+detail);
+    else alert('주문 취소 중 문제가 생겼어요.\n채팅으로 취소를 요청해주세요.'+detail);
     return;
   }
   alert('주문이 취소되었어요.');
