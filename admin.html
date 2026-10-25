@@ -313,6 +313,28 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 .cancelRefundRow{display:flex!important;align-items:center;gap:9px;margin-top:14px!important;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#f7f3ed;font-size:13px;cursor:pointer}
 .cancelRefundRow input{width:20px!important;height:20px;flex:0 0 20px;margin:0;padding:0}
 </style>
+<style>
+/* 관리자 알림창 축소 */
+.adminNotificationArea{margin:0 0 10px}
+.adminNotificationPanel{max-height:min(44vh,300px);overflow-y:auto;padding:6px 10px 8px;margin-top:8px}
+.adminNotificationPanelHead{position:sticky;top:-6px;z-index:1;background:var(--card);padding:6px 0;margin-bottom:2px}
+.adminNotificationItem{padding:8px 2px;gap:8px}
+.adminNotificationBody{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.adminNotificationMore{width:100%;margin-top:6px;padding:9px;font-size:11px}
+#adminPushBox{padding:12px 14px!important;margin:10px 0!important}
+#adminPushStatus{font-size:11px;line-height:1.5;margin-top:3px!important}
+/* 주문 버튼 */
+.orderDeleteBtn{background:#fff;color:#a0453a;border:1px solid #d9b0a8;border-radius:10px;cursor:pointer}
+.orderPointSummary{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 10px;padding:10px 12px;background:#f7f3ed;border-radius:10px;font-size:12px}
+.orderPointList{max-height:min(46vh,340px);overflow-y:auto}
+.orderPointList .memberPointHistoryRow.mine{background:#fff6e6;border-radius:8px}
+.orderPointTag{display:inline-block;padding:1px 7px;border-radius:999px;background:#b34f43;color:#fff;font-size:10px;margin-left:4px}
+/* 상품 드래그 선택 */
+.dragSelectHint{margin:0 0 8px;font-size:11px}
+.dragSelectBand{position:fixed;z-index:9998;border:1.5px solid #8a6a4f;background:rgba(138,106,79,.14);border-radius:6px;pointer-events:none}
+body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
+.productCard:has(.productSelect:checked){outline:2px solid #c9a98a;outline-offset:-2px}
+</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -1537,7 +1559,7 @@ async function enableAdminPushNotifications(){
   }catch(e){console.error('푸시 알림 설정 실패',e);pushStatus('설정에 실패했어요: '+(e.message||'알 수 없는 오류')+' · SQL 설정과 사이트 배포 여부를 확인해주세요.');alert('푸시 알림 설정 실패\n\n'+(e.message||e)+'\n\n안내 파일의 SQL과 서비스 워커를 먼저 적용했는지 확인해주세요.');if(btn)btn.textContent='다시 설정하기'}finally{if(btn)btn.disabled=false}
 }
 
-let adminNotificationRows=[];
+let adminNotificationRows=[],adminNotificationShowAll=false;
 let adminNotificationTimer=null;
 let adminNotificationPollingReady=false;
 let adminNotificationKnownIds=new Set();
@@ -1552,13 +1574,14 @@ function renderAdminNotifications(){
   const unread=adminNotificationRows.filter(n=>Date.parse(n.created_at||'')>lastSeen).length;
   badge.textContent=unread>99?'99+':String(unread);badge.hidden=unread===0;
   if(!adminNotificationRows.length){list.innerHTML='<p class="note">아직 알림이 없어요. 새 주문이나 신규 회원 요청이 들어오면 여기에 표시돼요.</p>';return}
-  list.innerHTML=adminNotificationRows.map(n=>{
+  const notiLimit=adminNotificationShowAll?adminNotificationRows.length:10;
+  list.innerHTML=adminNotificationRows.slice(0,notiLimit).map(n=>{
     const isUnread=Date.parse(n.created_at||'')>lastSeen;
     const title=escapeOrderText(n.title||adminNotificationKindLabel(n.event_type));
     const body=escapeOrderText(n.body||'');
     const date=escapeOrderText(formatAdminNotificationDate(n.created_at));
     return `<button type="button" class="adminNotificationItem ${isUnread?'unread':''}" data-admin-notification-id="${escapeOrderText(n.id)}" data-admin-notification-kind="${escapeOrderText(n.event_type||'')}"><span class="adminNotificationDot ${isUnread?'':'read'}"></span><span class="adminNotificationContent"><span class="adminNotificationTitle">${title}</span><span class="adminNotificationBody">${body}</span></span><span class="adminNotificationDate">${date}</span></button>`;
-  }).join('');
+  }).join('')+(adminNotificationRows.length>notiLimit?`<button type="button" class="secondary adminNotificationMore" onclick="adminNotificationShowAll=true;renderAdminNotifications()">이전 알림 ${adminNotificationRows.length-notiLimit}개 더 보기</button>`:'');
 }
 async function refreshAdminNotifications(silent=true){
   if(!$('app')||$('app').hidden||!token||!userId)return;
@@ -1769,7 +1792,7 @@ function renderOrders(){
       const customerEmail=o.email||(o.user_id?emailByUserId[String(o.user_id)]:'')||(o.user_id?'회원 이메일을 찾을 수 없어요':'로그인 계정 연결 없음');
       const safeCustomerEmail=escapeOrderText(customerEmail);
       const customerMessage=escapeOrderText(buildOrderConfirmationMessage(o,items,brandByProductId));
-      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}</div></div>`;
+      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}<button type="button" class="orderDeleteBtn" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button><button type="button" class="secondary" style="padding:8px 10px;font-size:11px" onclick="openOrderPointHistory(${Number(o.id)})">적립내역</button></div></div>`;
     }).join('');
     el.onclick=function(event){const button=event.target.closest('[data-order-product-link]');if(!button||!el.contains(button))return;openOrderedProduct(button.dataset.productId,button.dataset.productName)};
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
@@ -1791,6 +1814,35 @@ async function loadOrders(){
 async function saveOrderMemo(id){const value=$('memo_'+id)?.value.trim()||'';try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:value}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 저장됐어요.')}catch(e){alert('메모 저장 실패\n\n'+e.message)}}
 async function deleteOrderMemo(id){if(!confirm('이 주문의 관리자 메모를 삭제할까요?'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:null}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 삭제됐어요.');loadOrders()}catch(e){alert('메모 삭제 실패\n\n'+e.message)}}
 
+
+async function openOrderPointHistory(id){
+  const o=((window.__orderCtx||{}).data||[]).find(x=>String(x.id)===String(id));
+  if(!o)return alert('주문 정보를 찾지 못했어요. 새로고침 후 다시 시도해주세요.');
+  if(!o.user_id)return alert('회원 주문이 아니라서 적립금 내역이 없어요.');
+  document.getElementById('orderPointModal')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div class="pointGrantBackdrop" id="orderPointModal"><section class="pointGrantDialog" role="dialog" aria-modal="true"><h3>적립금 내역</h3><p class="note">${escapeOrderText(o.customer_name||'')} 고객님 · 주문번호 #${Number(o.id)}</p><div id="orderPointBody"><p class="note">내역을 불러오는 중...</p></div><div class="actions"><button type="button" class="secondary" id="orderPointClose">닫기</button></div></section></div>`);
+  const modal=document.getElementById('orderPointModal');
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
+  document.getElementById('orderPointClose').addEventListener('click',()=>modal.remove());
+  const body=document.getElementById('orderPointBody');
+  try{
+    const rows=await api('/rest/v1/loyalty_point_transactions?select=id,amount,reason,order_id,created_at&user_id=eq.'+encodeURIComponent(String(o.user_id))+'&order=created_at.desc&limit=100');
+    if(!Array.isArray(rows)||!rows.length){body.innerHTML='<p class="note">아직 적립금 내역이 없어요.</p>';return}
+    const mine=rows.filter(r=>String(r.order_id)===String(o.id));
+    const used=mine.filter(r=>Number(r.amount)<0).reduce((n,r)=>n+Math.abs(Number(r.amount)),0);
+    const back=mine.filter(r=>Number(r.amount)>0).reduce((n,r)=>n+Number(r.amount),0);
+    const balance=rows.reduce((n,r)=>n+(Number(r.amount)||0),0);
+    const sum=`<div class="orderPointSummary"><div>이 주문 사용 <b>${used.toLocaleString('ko-KR')}원</b>${back?` · 지급/환불 <b>+${back.toLocaleString('ko-KR')}원</b>`:''}</div><div>${rows.length>=100?'최근 100건 합계':'현재 보유'} <b>${balance.toLocaleString('ko-KR')}원</b></div></div>`;
+    body.innerHTML=sum+'<div class="orderPointList">'+rows.map(r=>{
+      const amount=Number(r.amount)||0;
+      const date=r.created_at?new Date(r.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'날짜 정보 없음';
+      const isMine=String(r.order_id)===String(o.id);
+      const kind=amount>0?'지급':'사용';
+      const orderText=r.order_id?`<br>주문번호 · ${escapeOrderText(r.order_id)}${isMine?' <span class="orderPointTag">이 주문</span>':''}`:'';
+      return `<div class="memberPointHistoryRow ${isMine?'mine':''}"><div class="details"><b>${kind} · ${escapeOrderText(date)}</b>${escapeOrderText(r.reason||'적립금 내역')}${orderText}</div><div class="amount">${amount>0?'+':''}${Math.abs(amount).toLocaleString('ko-KR')}원</div></div>`;
+    }).join('')+'</div>';
+  }catch(e){body.innerHTML='<p class="note">내역을 불러오지 못했어요: '+escapeOrderText(e.message||e)+'</p>'}
+}
 function onOrderStatusChange(id,sel){
   if(sel.value==='취소'){sel.value=sel.dataset.prev||'주문접수';openOrderCancelModal(id);return}
   updateOrderStatus(id,sel.value);
@@ -1865,6 +1917,70 @@ async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까
   el.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(renderAdminProductList,120)});
   el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);renderAdminProductList()}});
   el.addEventListener('search',()=>renderAdminProductList());
+})();
+
+// 등록된 상품: PC에서 마우스로 드래그해 여러 상품 한 번에 선택
+(function(){
+  const host=document.getElementById('list');if(!host)return;
+  host.insertAdjacentHTML('beforebegin','<div class="note dragSelectHint">PC에서는 상품 카드 위를 마우스로 <b>드래그</b>하면 여러 상품이 한 번에 선택돼요. (드래그 중 화면 위·아래 끝으로 가면 자동으로 스크롤돼요)</div>');
+  let drag=null,band=null,suppressUntil=0,raf=0,lastX=0,lastY=0;
+  function cardId(card){return card.querySelector('.productSelect')?.dataset.id}
+  function apply(){
+    if(!drag||!drag.active)return;
+    const x1=Math.min(drag.px-scrollX,lastX),y1=Math.min(drag.py-scrollY,lastY),x2=Math.max(drag.px-scrollX,lastX),y2=Math.max(drag.py-scrollY,lastY);
+    band.style.cssText=`left:${x1}px;top:${y1}px;width:${x2-x1}px;height:${y2-y1}px`;
+    host.querySelectorAll('.productCard').forEach(card=>{
+      const id=cardId(card);if(!id)return;
+      const r=card.getBoundingClientRect();
+      const hit=r.left<x2&&r.right>x1&&r.top<y2&&r.bottom>y1;
+      const want=hit||drag.base.has(id);
+      const cb=card.querySelector('.productSelect');
+      if(cb&&cb.checked!==want)cb.checked=want;
+      if(want)selectedProductIds.add(id);else selectedProductIds.delete(id);
+    });
+    updateBulkUI(window.__adminVisibleProducts||[]);
+  }
+  function loop(){
+    if(!drag||!drag.active){raf=0;return}
+    const edge=70;
+    if(lastY<edge)window.scrollBy(0,-Math.ceil((edge-lastY)/4)-2);
+    else if(lastY>innerHeight-edge)window.scrollBy(0,Math.ceil((lastY-(innerHeight-edge))/4)+2);
+    apply();
+    raf=requestAnimationFrame(loop);
+  }
+  function finish(){
+    if(!drag)return;
+    const was=drag.active;
+    drag=null;
+    if(band){band.remove();band=null}
+    document.body.classList.remove('dragSelecting');
+    if(was)suppressUntil=Date.now()+350;
+  }
+  host.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='mouse'||e.button!==0)return;
+    if(e.target.closest('button,a,input,select,textarea,label,.productCardActions'))return;
+    drag={px:e.clientX+scrollX,py:e.clientY+scrollY,active:false,base:new Set(selectedProductIds)};
+    lastX=e.clientX;lastY=e.clientY;
+  });
+  window.addEventListener('pointermove',e=>{
+    if(!drag)return;
+    lastX=e.clientX;lastY=e.clientY;
+    if(!drag.active){
+      if(Math.hypot(e.clientX-(drag.px-scrollX),e.clientY-(drag.py-scrollY))<8)return;
+      drag.active=true;
+      band=document.createElement('div');band.className='dragSelectBand';document.body.appendChild(band);
+      document.body.classList.add('dragSelecting');
+      try{getSelection().removeAllRanges()}catch(_){}
+      if(!raf)raf=requestAnimationFrame(loop);
+    }
+    apply();
+  });
+  window.addEventListener('pointerup',finish);
+  window.addEventListener('pointercancel',finish);
+  window.addEventListener('blur',finish);
+  // 드래그가 끝난 직후 발생하는 클릭(상품 미리보기 열림)은 막아요
+  host.addEventListener('click',e=>{if(Date.now()<suppressUntil){e.stopPropagation();e.preventDefault()}},true);
+  host.addEventListener('dragstart',e=>e.preventDefault());
 })();
 refreshDraftBanner();
 document.querySelector('[data-admin-section="excel"]')?.addEventListener('click',refreshDraftBanner);
