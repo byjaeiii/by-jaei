@@ -428,9 +428,9 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
     <button type="button" id="adminPushEnableBtn" onclick="enableAdminPushNotifications()" style="white-space:nowrap">푸시 알림 켜기</button>
   </div>
 </div><details class="chatMatchBox" id="chatMatchBox"><summary>오픈채팅방 닉네임 ↔ 회원 대조</summary>
-  <p class="note">오픈채팅방 참여자 닉네임을 <b>한 줄에 하나씩</b> 붙여넣고 <b>대조하기</b>를 누르세요. 닉네임에 <b>이름이나 전화번호(뒤 4자리 포함)</b>가 들어 있으면 가입한 회원과 자동으로 맞춰봐요. 이름·연락처가 적힌 텍스트/CSV/엑셀 파일, 카카오톡 <b>대화 내보내기(.txt)</b> 파일도 올릴 수 있어요.</p>
-  <textarea id="chatMatchInput" rows="6" placeholder="예)&#10;길동맘 1234&#10;홍길동&#10;하나엄마 010-1111-2222"></textarea>
-  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile" accept=".txt,.csv,.xlsx,.xls"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div>
+  <p class="note">오픈채팅 참여자 목록 캡처 사진도 올릴 수 있어요. 사진에서 닉네임을 글자로 추출한 뒤 홈페이지 회원 이름과 비교해 후보를 보여줘요. 닉네임만으로는 휴대폰번호를 확인할 수 없으므로 이름이 비슷한 회원은 자동 확정하지 않고 <b>확인 필요</b>로 표시해요. 전화번호가 포함된 명단은 전체 번호가 정확히 일치할 때만 회원으로 연결해요.</p>
+  <textarea id="chatMatchInput" rows="6" placeholder="예)&#10;길동맘 010-1111-2222&#10;하나엄마 010-2222-3333&#10;토끼맘, 010 3333 4444"></textarea>
+  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile" accept=".txt,.csv,.xlsx,.xls,image/*"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div><div id="chatOcrStatus" class="note" style="margin-top:8px"></div>
   <div id="chatMatchSummary" class="filterCount"></div>
   <div id="chatMatchTabs" class="orderStatusTabs"></div>
   <div id="chatMatchResult"></div>
@@ -2115,22 +2115,20 @@ function parseKakaoExport(text){
   return hits>=3?[...nick].filter(Boolean):null;
 }
 function matchChatLine(line,list){
-  const norm=chatNorm(line);
-  const phoneLike=(String(line).match(/0\d{1,2}[\s.\-]?\d{3,4}[\s.\-]?\d{4}/g)||[]).map(chatDigits);
-  const groups=String(line).match(/\d+/g)||[];
+  // 휴대폰번호 전체가 정확히 일치하면 우선 사용합니다. 번호가 없으면 닉네임/이름 유사도는 확인 후보로만 보여줍니다.
+  const found=(String(line).match(/(?:01[016789][\s.\-]?\d{3,4}[\s.\-]?\d{4})/g)||[]).map(chatDigits).filter(p=>p.length===10||p.length===11);
+  const phones=[...new Set(found)];
   const out=[];
-  for(const m of list){
-    let score=0,why='';
-    const fullHit=m.phone.length>=10&&phoneLike.some(p=>p===m.phone||(p.length>=8&&m.phone.endsWith(p.slice(-8))));
-    const last4Hit=m.last4&&groups.some(g=>g===m.last4||(g.length>4&&g.endsWith(m.last4)));
-    const nameHit=m.name.length>=2&&norm.includes(m.name);
-    if(fullHit){score=100;why='전화번호 일치'}
-    else if(nameHit&&last4Hit){score=90;why='이름 + 뒤 4자리 일치'}
-    else if(nameHit){score=norm===m.name?70:50;why=norm===m.name?'이름 정확히 일치':'이름 포함'}
-    else if(last4Hit){score=30;why='뒤 4자리만 일치'}
-    if(score)out.push({m,score,why});
+  if(phones.length){
+    for(const m of list){if(m.phone.length>=10&&phones.includes(m.phone))out.push({m,score:100,why:'휴대폰번호 전체 일치'});}
+    return out;
   }
-  out.sort((a,b)=>b.score-a.score);
+  const nick=chatNorm(line);
+  if(nick.length<2)return [];
+  for(const m of list){
+    const nm=chatNorm(m.raw?.name||'');
+    if(nm.length>=2&&(nick===nm||nick.includes(nm)||nm.includes(nick)))out.push({m,score:nick===nm?80:60,why:nick===nm?'닉네임과 회원 이름 동일 (수동 확인 필요)':'닉네임에 회원 이름 포함/유사 (수동 확인 필요)'});
+  }
   return out;
 }
 async function runChatMatch(silent){
@@ -2148,9 +2146,9 @@ async function runChatMatch(silent){
       const res=matchChatLine(line,members);
       if(!res.length){unknown.push({line});return}
       const best=res[0].score,top=res.filter(r=>r.score===best);
-      if(best>=50&&top.length===1){matched.push({line,m:top[0].m.raw,why:top[0].why,score:best});hitIds.add(String(top[0].m.id))}
-      else if(best>=50){review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:`같은 근거로 맞는 회원이 ${top.length}명이에요 (동명이인 확인)`});top.forEach(r=>hitIds.add(String(r.m.id)))}
-      else review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:top.length>1?`뒤 4자리만 같은 회원이 ${top.length}명이에요`:'뒤 4자리만 같아요 (다른 사람일 수 있어요)'});
+      if(best===100&&top.length===1){matched.push({line,m:top[0].m.raw,why:top[0].why,score:best});hitIds.add(String(top[0].m.id))}
+      else if(best>=50){review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:top.length>1?`이름이 비슷한 회원이 ${top.length}명이에요. 직접 확인해주세요.`:'닉네임만으로는 동일인 확인이 불가능해요. 회원 이름과 대조 후보이므로 직접 확인해주세요.'})}
+      else review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:top.length>1?`뒤 4자리만 같은 회원이 ${top.length}명이에요`:'휴대폰번호가 정확히 일치하지 않아요'});
     });
     const notInChat=members.filter(m=>!hitIds.has(String(m.id))).map(m=>m.raw);
     chatMatchState={tab:chatMatchState.tab||'matched',matched,review,unknown,notInChat,total:lines.length};
@@ -2173,12 +2171,12 @@ function renderChatMatch(){
   let html='';
   if(s.tab==='matched')html=s.matched.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}<span class="chatWhy ${r.score>=90?'strong':''}">${escapeOrderText(r.why)}</span></div><div class="chatMember">${chatMemberInfo(r.m)}</div>${chatActions(r.m)}</div>`).join('');
   else if(s.tab==='review')html=s.review.map(r=>`<div class="chatRow review"><div class="chatNick">${escapeOrderText(r.line)}<span class="chatWhy">${escapeOrderText(r.reason)}</span></div><div class="chatMember">${r.cands.map(c=>`<div class="chatCand">${chatMemberInfo(c.m)}<span class="chatWhy">${escapeOrderText(c.why)}</span>${chatActions(c.m)}</div>`).join('')}</div></div>`).join('');
-  else if(s.tab==='unknown')html=s.unknown.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}</div><div class="chatMember smallText">일치하는 회원이 없어요 (아직 가입 전이거나 닉네임에 이름·번호가 없어요)</div></div>`).join('');
+  else if(s.tab==='unknown')html=s.unknown.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}</div><div class="chatMember smallText">일치하는 회원이 없어요 (휴대폰번호가 없거나 회원 연락처와 정확히 일치하지 않아요)</div></div>`).join('');
   else html=s.notInChat.map(m=>`<div class="chatRow"><div class="chatNick smallText">닉네임에서 못 찾음</div><div class="chatMember">${chatMemberInfo(m)}</div>${chatActions(m)}</div>`).join('');
   box.innerHTML=html||'<p class="note">해당하는 항목이 없어요.</p>';
 }
 function setChatMatchTab(k){chatMatchState.tab=k;renderChatMatch()}
-function clearChatMatch(){$('chatMatchInput').value='';$('chatMatchFile').value='';chatMatchState={tab:'matched',matched:[],review:[],unknown:[],notInChat:[],total:0};$('chatMatchSummary').textContent='';$('chatMatchTabs').innerHTML='';$('chatMatchResult').innerHTML=''}
+function clearChatMatch(){$('chatMatchInput').value='';$('chatMatchFile').value='';if($('chatOcrStatus'))$('chatOcrStatus').textContent='';chatMatchState={tab:'matched',matched:[],review:[],unknown:[],notInChat:[],total:0};$('chatMatchSummary').textContent='';$('chatMatchTabs').innerHTML='';$('chatMatchResult').innerHTML=''}
 function chatShowMember(id){
   const m=((window.__memberCtx||{}).data||[]).find(x=>String(x.id).replace(/[^a-zA-Z0-9-]/g,'')===id);
   if(!m)return;
@@ -2211,6 +2209,17 @@ function downloadChatMatchCsv(){
 }
 async function readChatMatchFile(file){
   const name=String(file.name||'').toLowerCase();
+  if(file.type&&file.type.startsWith('image/')||/\.(png|jpe?g|webp|bmp|gif)$/i.test(name)){
+    const status=$('chatOcrStatus');if(status)status.textContent='사진에서 닉네임을 읽는 중이에요. 사진이 길거나 글씨가 작으면 시간이 걸릴 수 있어요.';
+    if(typeof Tesseract==='undefined')await loadExternalScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const result=await Tesseract.recognize(file,'kor+eng',{logger:m=>{if(status&&m.status==='recognizing text')status.textContent=`사진 글자 읽는 중... ${Math.round((m.progress||0)*100)}%`;}});
+    const raw=String(result?.data?.text||'');
+    const lines=raw.split(/\r?\n/).map(x=>x.replace(/[|_]+/g,' ').replace(/^\s*[-•·]+\s*/, '').trim()).filter(x=>x.length>=2);
+    const unique=[...new Set(lines)];
+    if(!unique.length)throw new Error('사진에서 닉네임을 읽지 못했어요. 더 선명한 캡처 사진으로 다시 시도해주세요.');
+    if(status)status.textContent=`사진에서 글자 ${unique.length}줄을 읽었어요. 대조 전에 아래 입력란에서 닉네임이 정확한지 확인해주세요.`;
+    return unique.join('\n');
+  }
   if(/\.xlsx?$/.test(name)){
     if(typeof XLSX==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
     const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
@@ -2229,6 +2238,7 @@ document.getElementById('chatMatchFile')?.addEventListener('change',async e=>{
     const kakao=parseKakaoExport(text);
     if(kakao){text=kakao.join('\n');alert(`카카오톡 대화 내보내기 파일로 인식했어요.\n대화에 나온 닉네임 ${kakao.length}개를 뽑았어요.\n(대화에 한 번도 나오지 않은 참여자는 포함되지 않아요)`)}
     $('chatMatchInput').value=text;
+    if(file.type&&file.type.startsWith('image/')){alert('사진에서 닉네임을 추출했어요. 인식 결과가 정확한지 입력란에서 확인한 뒤 대조하기를 눌러주세요.');return}
     runChatMatch();
   }catch(err){alert('파일을 읽지 못했어요.\n\n'+(err.message||err))}
 });
