@@ -335,6 +335,37 @@ html, body { width:100%; max-width:100%; overflow-x:hidden; }
 body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .productCard:has(.productSelect:checked){outline:2px solid #c9a98a;outline-offset:-2px}
 </style>
+<style>
+.dragSelectBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 8px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fffdf9;font-size:12px}
+.dragToggle{display:inline-flex;align-items:center;gap:7px;font-weight:700;cursor:pointer;white-space:nowrap}
+.dragToggle input{width:18px;height:18px;margin:0}
+.dragSelectInfo{flex:1;min-width:200px;color:var(--muted);font-size:11px;line-height:1.5}
+.dragSelectBar button{padding:8px 12px;font-size:11px}
+.dragSelectBar button:disabled{opacity:.45;cursor:default}
+</style>
+<style>
+.chatMatchBox{margin:14px 0;padding:0;border:1px solid var(--line);border-radius:14px;background:#fffdf9}
+.chatMatchBox>summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:14px;list-style:none}
+.chatMatchBox>summary::-webkit-details-marker{display:none}
+.chatMatchBox>summary::after{content:'펼치기';float:right;font-size:11px;font-weight:400;color:var(--muted)}
+.chatMatchBox[open]>summary::after{content:'접기'}
+.chatMatchBox>*:not(summary){margin-left:16px;margin-right:16px}
+.chatMatchBox textarea{width:calc(100% - 32px);box-sizing:border-box;padding:11px;border:1px solid var(--line);border-radius:10px;font:inherit;resize:vertical}
+.chatMatchActions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.chatMatchActions input[type=file]{max-width:260px;font-size:12px}
+#chatMatchResult{margin-bottom:14px;max-height:620px;overflow-y:auto}
+.chatRow{display:grid;grid-template-columns:minmax(150px,1fr) minmax(220px,1.6fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.chatRow.review{background:#fffaf0}
+.chatNick{font-weight:700;overflow-wrap:anywhere}
+.chatWhy{display:inline-block;margin:0 0 0 6px;padding:2px 8px;border-radius:999px;background:#efe6da;color:#6a5646;font-size:10px;font-weight:700;vertical-align:middle}
+.chatWhy.strong{background:#e3efe0;color:#4d7a3a}
+.chatBadge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700}
+.chatBadge.ok{background:#e3efe0;color:#4d7a3a}.chatBadge.wait{background:#fff0c9;color:#8a6410}
+.chatCand{padding:6px 0;border-bottom:1px dashed var(--line)}.chatCand:last-child{border-bottom:0}
+.chatRowBtns{display:flex;gap:6px;flex-wrap:wrap}
+.chatRowBtns button{padding:7px 10px;font-size:11px}
+@media(max-width:760px){.chatRow{grid-template-columns:1fr}}
+</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -396,7 +427,15 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
     <div style="flex:1;min-width:200px"><b style="font-size:14px">휴대폰 승인요청 · 주문 알림</b><div id="adminPushStatus" class="note" style="margin-top:6px">알림을 켜면 새 회원 승인요청과 새 주문이 들어올 때 휴대폰으로 알려드려요. 관리자 계정마다 기기에서 한 번씩 설정해주세요.</div></div>
     <button type="button" id="adminPushEnableBtn" onclick="enableAdminPushNotifications()" style="white-space:nowrap">푸시 알림 켜기</button>
   </div>
-</div><div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="loadMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
+</div><details class="chatMatchBox" id="chatMatchBox"><summary>오픈채팅방 닉네임 ↔ 회원 대조</summary>
+  <p class="note">오픈채팅 참여자 목록 캡처 사진을 올리면 닉네임을 추출해요. 추출된 각 줄에 회원의 휴대폰번호 끝 4자리를 입력해 주세요. 닉네임과 끝 4자리는 <b>닉네임 | 5678</b> 형식으로 적으면 돼요. 끝 4자리만 비교하며, 같은 번호 끝자리를 가진 회원이 여러 명이면 확인 필요로 표시해요.</p>
+  <textarea id="chatMatchInput" rows="8" placeholder="사진에서 추출된 닉네임을 확인한 뒤 끝 4자리를 입력하세요.&#10;길동맘 | 5678&#10;하나엄마 | 1234&#10;토끼맘 | 9012"></textarea>
+  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile" accept=".txt,.csv,.xlsx,.xls,image/*"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div><div id="chatOcrStatus" class="note" style="margin-top:8px"></div>
+  <div id="chatMatchSummary" class="filterCount"></div>
+  <div id="chatMatchTabs" class="orderStatusTabs"></div>
+  <div id="chatMatchResult"></div>
+</details>
+<div class="filterBar"><input id="memberNameSearch" placeholder="고객 이름 검색"><input id="memberPhoneSearch" placeholder="폰번호 검색"><input id="memberFrom" type="date" title="가입일 시작"><input id="memberTo" type="date" title="가입일 종료"><button type="button" onclick="renderMembers()">검색</button></div><div id="memberFilterCount" class="filterCount"></div><div id="members"><p class="note">불러오는 중...</p></div></div></div></div></div>
 <script>
 const CFG={supabaseUrl:'https://wquupamwhjwqyhtxctdl.supabase.co',supabaseKey:'sb_publishable_1MJJqt80Nqj4agK3g2YGPA_8CEZRpOh'};
 let token=localStorage.getItem('byjaei_admin_token')||'';let userId=localStorage.getItem('byjaei_admin_user')||'';let editingId=null,editingImages=[],photoItems=[],draggedPhotoId='';let brandLockedValue=sessionStorage.getItem('byjaei_admin_locked_brand')||'';let brandLocked=!!brandLockedValue;let sizeLockedValue=sessionStorage.getItem('byjaei_admin_locked_sizes')||'';let sizeLocked=!!sizeLockedValue;let categoryLockedIds=[];try{categoryLockedIds=JSON.parse(sessionStorage.getItem('byjaei_admin_locked_categories')||'[]').map(String)}catch(e){categoryLockedIds=[]}let categoryLocked=categoryLockedIds.length>0;const $=id=>document.getElementById(id);
@@ -1343,6 +1382,7 @@ function updateBulkUI(visibleData=[]){
   count.textContent=`선택 ${selectedProductIds.size}개`;
   all.checked=visibleIds.length>0 && selectedVisible===visibleIds.length;
   all.indeterminate=selectedVisible>0 && selectedVisible<visibleIds.length;
+  if(typeof updateDragBar==='function')updateDragBar();
 }
 function toggleAllVisibleProducts(checked,visibleData=[]){
   visibleData.forEach(p=>{const id=String(p.id);if(checked)selectedProductIds.add(id);else selectedProductIds.delete(id)});
@@ -1663,15 +1703,12 @@ document.addEventListener('click',e=>{
 
 function switchAdminSection(key){document.querySelectorAll('[data-admin-section]').forEach(x=>x.classList.toggle('active',x.dataset.adminSection===key));document.querySelectorAll('.adminSection').forEach(x=>x.classList.toggle('active',x.id==='adminSection-'+key))}
 
-async function loadMembers(){
+function renderMembers(){
   const el=$('members');
+  const ctx=window.__memberCtx;
+  if(!ctx){el.innerHTML='<p class="note">불러오는 중...</p>';return}
+  const {data,pointBalanceByUser,pointsSetupError}=ctx;
   try{
-    const data=await api('/rest/v1/profiles?select=id,name,email,phone,referral_source,approved,withdrawn,is_admin,created_at&order=created_at.desc');
-    let pointBalanceByUser={},pointsSetupError=false;
-    try{
-      const rows=await api('/rest/v1/rpc/get_admin_loyalty_points_balances',{method:'POST',body:JSON.stringify({})});
-      pointBalanceByUser=Object.fromEntries((rows||[]).map(row=>[String(row.user_id),Math.max(0,Number(row.balance)||0)]));
-    }catch(pointsError){pointsSetupError=true;console.warn('회원 적립금 잔액을 불러오지 못했어요. BYJAEI_loyalty_points_setup.sql 적용 여부를 확인해주세요.',pointsError)}
     const q=filterValue('memberNameSearch').toLowerCase(),phoneQ=filterValue('memberPhoneSearch').toLowerCase(),from=filterValue('memberFrom'),to=filterValue('memberTo');
     const filtered=(data||[]).filter(m=>(!q||String(m.name||'').toLowerCase().includes(q))&&(!phoneQ||String(m.phone||'').toLowerCase().includes(phoneQ))&&matchesDate(m.created_at,from,to));
     $('memberFilterCount').textContent=(q||phoneQ||from||to)?`검색 결과 ${filtered.length}명 / 전체 ${data?.length||0}명`:'';
@@ -1686,6 +1723,19 @@ async function loadMembers(){
       const statusButtons=m.is_admin?'<span class="smallText">관리자</span>':m.withdrawn?'<span class="smallText">탈퇴처리</span>':`${m.approved?`<button class="secondary" onclick="setApproval('${safeId}',false)">승인취소</button>`:`<button onclick="setApproval('${safeId}',true)">승인</button>`}<button class="secondary" onclick="withdrawMember('${safeId}')">탈퇴처리</button>`;
       return `<div class="memberRow"><div><b>${escapeOrderText(m.name||'이름 없음')}</b><div class="smallText">${escapeOrderText(m.email||'')}${m.phone?'<br>연락처 · '+escapeOrderText(m.phone):''}${m.referral_source?'<br>가입경로 · '+escapeOrderText(m.referral_source):''}<br>${status}</div><div class="memberPointsInline"><span>${pointLabel}</span>${grantButton}${historyButton}</div><div class="memberPointHistory" id="memberPointHistory_${safeId}" hidden></div></div><div class="memberActions">${statusButtons}</div></div>`;
     }).join('');
+  }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
+}
+async function loadMembers(){
+  const el=$('members');
+  try{
+    const data=await api('/rest/v1/profiles?select=id,name,email,phone,referral_source,approved,withdrawn,is_admin,created_at&order=created_at.desc');
+    let pointBalanceByUser={},pointsSetupError=false;
+    try{
+      const rows=await api('/rest/v1/rpc/get_admin_loyalty_points_balances',{method:'POST',body:JSON.stringify({})});
+      pointBalanceByUser=Object.fromEntries((rows||[]).map(row=>[String(row.user_id),Math.max(0,Number(row.balance)||0)]));
+    }catch(pointsError){pointsSetupError=true;console.warn('회원 적립금 잔액을 불러오지 못했어요. BYJAEI_loyalty_points_setup.sql 적용 여부를 확인해주세요.',pointsError)}
+    window.__memberCtx={data,pointBalanceByUser,pointsSetupError};
+    renderMembers();
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
 }
 function grantMemberPoints(memberId){
@@ -1944,8 +1994,30 @@ async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까
 // 등록된 상품: PC에서 마우스로 드래그해 여러 상품 한 번에 선택
 (function(){
   const host=document.getElementById('list');if(!host)return;
-  host.insertAdjacentHTML('beforebegin','<div class="note dragSelectHint">PC에서는 상품 카드 위를 마우스로 <b>드래그</b>하면 여러 상품이 한 번에 선택돼요. (드래그 중 화면 위·아래 끝으로 가면 자동으로 스크롤돼요)</div>');
+  let dragEnabled=localStorage.getItem('byjaei_admin_drag_select')!=='0';
+  host.insertAdjacentHTML('beforebegin','<div class="dragSelectBar" id="dragSelectBar"><label class="dragToggle"><input type="checkbox" id="dragSelectToggle"> 드래그로 선택</label><span class="dragSelectInfo" id="dragSelectInfo"></span><button type="button" class="secondary" id="dragSelectClear">선택 해제</button></div>');
   let drag=null,band=null,suppressUntil=0,raf=0,lastX=0,lastY=0;
+  window.updateDragBar=function(){
+    const tg=document.getElementById('dragSelectToggle'),info=document.getElementById('dragSelectInfo'),clr=document.getElementById('dragSelectClear');
+    if(!tg||!info||!clr)return;
+    tg.checked=dragEnabled;
+    info.textContent=dragEnabled?'PC에서 상품 카드 위를 마우스로 드래그하면 여러 상품이 선택돼요. 끄려면 왼쪽 체크를 풀거나 Esc를 누르세요.':'드래그 선택이 꺼져 있어요. 각 상품의 선택칸을 눌러 하나씩 선택하세요.';
+    clr.textContent='선택 해제'+(selectedProductIds.size?` (${selectedProductIds.size}개)`:'');
+    clr.disabled=!selectedProductIds.size;
+  };
+  window.clearProductSelection=function(){
+    selectedProductIds.clear();
+    document.querySelectorAll('#list .productSelect').forEach(cb=>{cb.checked=false});
+    updateBulkUI(window.__adminVisibleProducts||[]);
+    updateDragBar();
+  };
+  document.getElementById('dragSelectToggle').addEventListener('change',e=>{
+    dragEnabled=e.target.checked;
+    localStorage.setItem('byjaei_admin_drag_select',dragEnabled?'1':'0');
+    cancelDrag();updateDragBar();
+  });
+  document.getElementById('dragSelectClear').addEventListener('click',()=>clearProductSelection());
+  updateDragBar();
   function cardId(card){return card.querySelector('.productSelect')?.dataset.id}
   function apply(){
     if(!drag||!drag.active)return;
@@ -1978,8 +2050,28 @@ async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까
     document.body.classList.remove('dragSelecting');
     if(was)suppressUntil=Date.now()+350;
   }
+  function cancelDrag(){
+    if(!drag)return;
+    const base=drag.base,was=drag.active;
+    drag=null;
+    if(band){band.remove();band=null}
+    document.body.classList.remove('dragSelecting');
+    if(was){
+      suppressUntil=Date.now()+350;
+      selectedProductIds.clear();base.forEach(id=>selectedProductIds.add(id));
+      host.querySelectorAll('.productCard').forEach(c=>{const cb=c.querySelector('.productSelect');if(cb)cb.checked=selectedProductIds.has(cb.dataset.id)});
+      updateBulkUI(window.__adminVisibleProducts||[]);
+    }
+  }
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    if(drag&&drag.active){cancelDrag();return}
+    if(document.querySelector('.pointGrantBackdrop,#pv'))return;
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||''))return;
+    if(document.getElementById('adminSection-products')?.classList.contains('active')&&selectedProductIds.size)clearProductSelection();
+  });
   host.addEventListener('pointerdown',e=>{
-    if(e.pointerType!=='mouse'||e.button!==0)return;
+    if(!dragEnabled||e.pointerType!=='mouse'||e.button!==0)return;
     if(e.target.closest('button,a,input,select,textarea,label,.productCardActions'))return;
     drag={px:e.clientX+scrollX,py:e.clientY+scrollY,active:false,base:new Set(selectedProductIds)};
     lastX=e.clientX;lastY=e.clientY;
@@ -2004,9 +2096,155 @@ async function withdrawMember(id){if(!confirm('이 회원을 탈퇴 처리할까
   host.addEventListener('click',e=>{if(Date.now()<suppressUntil){e.stopPropagation();e.preventDefault()}},true);
   host.addEventListener('dragstart',e=>e.preventDefault());
 })();
+
+// ---- 오픈채팅 닉네임 ↔ 회원 대조
+let chatMatchState={tab:'matched',matched:[],review:[],unknown:[],notInChat:[],total:0};
+function chatNorm(s){return String(s??'').normalize('NFKC').toLowerCase().replace(/[\s\u00a0._\-\/\\|()\[\]{}<>~!@#$%^&*+=:;,'"`?·♡♥❤️☆★]/g,'')}
+function chatDigits(s){return String(s??'').replace(/\D/g,'')}
+function parseKakaoExport(text){
+  const nick=new Set();let hits=0;
+  const reA=/^\d{4}\.\s*\d{1,2}\.\s*\d{1,2}\.\s*(?:오전|오후)\s*\d{1,2}:\d{2},\s*(.+?)\s*:\s/;
+  const reB=/^\[(.+?)\]\s*\[(?:오전|오후)\s*\d{1,2}:\d{2}\]/;
+  const reJoin=/(?:^|[:,]\s*)([^:,\[\]]+?)님이 (?:들어왔습니다|입장했습니다)/;
+  for(const l of String(text).split(/\r?\n/)){
+    let m=reA.exec(l)||reB.exec(l);
+    if(m){nick.add(m[1].trim());hits++;continue}
+    m=reJoin.exec(l);
+    if(m){nick.add(m[1].trim());hits++}
+  }
+  return hits>=3?[...nick].filter(Boolean):null;
+}
+function matchChatLine(line,list){
+  // 사용자가 입력한 닉네임과 휴대폰번호 끝 4자리만 비교합니다. 닉네임/이름 유사도로 자동 매칭하지 않습니다.
+  const m=String(line).match(/(?:\||,|\t)\s*(\d{4})\s*$/);
+  if(!m)return {kind:'missing',last4:'',candidates:[]};
+  const last4=m[1];
+  const candidates=list.filter(member=>member.phone.length>=4&&member.phone.slice(-4)===last4);
+  return {kind:candidates.length===1?'single':candidates.length?'multiple':'none',last4,candidates:candidates.map(member=>({m:member,score:100,why:'휴대폰번호 끝 4자리 일치'}))};
+}
+async function runChatMatch(silent){
+  const text=($('chatMatchInput')?.value||'').trim();
+  if(!text){if(!silent)alert('오픈채팅방 닉네임을 붙여넣거나 파일을 올려주세요.');return}
+  const btn=$('chatMatchRun');if(btn&&!silent){btn.disabled=true;btn.textContent='대조 중...'}
+  try{
+    if(!window.__memberCtx||!window.__memberCtx.data)await loadMembers();
+    const members=((window.__memberCtx||{}).data||[]).filter(m=>!m.is_admin&&!m.withdrawn).map(m=>({raw:m,id:m.id,name:chatNorm(m.name),phone:chatDigits(m.phone),last4:''}));
+    members.forEach(m=>{m.last4=m.phone.length>=4?m.phone.slice(-4):''});
+    const seen=new Set(),lines=[];
+    text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,6000).forEach(s=>{const k=chatNorm(s);if(k&&!seen.has(k)){seen.add(k);lines.push(s)}});
+    const matched=[],review=[],unknown=[];const hitIds=new Set();
+    lines.forEach(line=>{
+      const res=matchChatLine(line,members);
+      if(res.kind==='missing'){unknown.push({line,reason:'끝 4자리를 입력해주세요. 예: 닉네임 | 5678'});return}
+      if(res.kind==='none'){unknown.push({line,reason:`끝 4자리 ${res.last4}와 일치하는 회원이 없어요.`});return}
+      if(res.kind==='single'){const candidate=res.candidates[0];matched.push({line,m:candidate.m.raw,why:candidate.why,score:100});hitIds.add(String(candidate.m.id));return}
+      review.push({line,cands:res.candidates.slice(0,10).map(r=>({m:r.m.raw,why:r.why})),reason:`휴대폰번호 끝 4자리 ${res.last4}가 같은 회원이 ${res.candidates.length}명이에요. 이름과 전체 연락처를 직접 확인해주세요.`});
+    });
+    const notInChat=members.filter(m=>!hitIds.has(String(m.id))).map(m=>m.raw);
+    chatMatchState={tab:chatMatchState.tab||'matched',matched,review,unknown,notInChat,total:lines.length};
+    renderChatMatch();
+  }catch(e){alert('대조 중 문제가 생겼어요.\n\n'+(e.message||e))}
+  finally{if(btn){btn.disabled=false;btn.textContent='대조하기'}}
+}
+function chatMemberStatus(m){return m.is_admin?'관리자':(m.withdrawn?'탈퇴처리':(m.approved?'승인완료':'승인대기'))}
+function chatMemberInfo(m){return `<b>${escapeOrderText(m.name||'이름 없음')}</b> <span class="chatBadge ${m.approved?'ok':'wait'}">${chatMemberStatus(m)}</span><div class="smallText">${escapeOrderText(m.phone||'연락처 없음')} · ${escapeOrderText(m.email||'')}${m.created_at?' · 가입 '+escapeOrderText(String(m.created_at).slice(0,10)):''}</div>`}
+function chatActions(m){
+  const id=String(m.id).replace(/[^a-zA-Z0-9-]/g,'');
+  return `<div class="chatRowBtns">${(!m.approved&&!m.withdrawn&&!m.is_admin)?`<button type="button" onclick="chatApprove('${id}')">승인</button>`:''}<button type="button" class="secondary" onclick="chatShowMember('${id}')">회원목록에서 보기</button></div>`;
+}
+function renderChatMatch(){
+  const s=chatMatchState;
+  $('chatMatchSummary').textContent=`참여자 ${s.total}명 · 끝 4자리 일치 ${s.matched.length}명 · 중복 확인 필요 ${s.review.length}명 · 미입력/불일치 ${s.unknown.length}명 · 대조되지 않은 회원 ${s.notInChat.length}명`;
+  const tabs=[['matched','회원 일치',s.matched.length],['review','확인 필요',s.review.length],['unknown','미입력/불일치',s.unknown.length],['notInChat','채팅방에 없는 회원',s.notInChat.length]];
+  $('chatMatchTabs').innerHTML=tabs.map(([k,l,n])=>`<button type="button" class="orderStatusTab ${s.tab===k?'active':''}" onclick="setChatMatchTab('${k}')">${l}<b>${n}</b></button>`).join('')+`<button type="button" class="secondary orderStatusTab" onclick="downloadChatMatchCsv()">결과 CSV 저장</button>`;
+  const box=$('chatMatchResult');
+  let html='';
+  if(s.tab==='matched')html=s.matched.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}<span class="chatWhy ${r.score>=90?'strong':''}">${escapeOrderText(r.why)}</span></div><div class="chatMember">${chatMemberInfo(r.m)}</div>${chatActions(r.m)}</div>`).join('');
+  else if(s.tab==='review')html=s.review.map(r=>`<div class="chatRow review"><div class="chatNick">${escapeOrderText(r.line)}<span class="chatWhy">${escapeOrderText(r.reason)}</span></div><div class="chatMember">${r.cands.map(c=>`<div class="chatCand">${chatMemberInfo(c.m)}<span class="chatWhy">${escapeOrderText(c.why)}</span>${chatActions(c.m)}</div>`).join('')}</div></div>`).join('');
+  else if(s.tab==='unknown')html=s.unknown.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}</div><div class="chatMember smallText">${escapeOrderText(r.reason||'일치하는 회원이 없어요.')}</div></div>`).join('');
+  else html=s.notInChat.map(m=>`<div class="chatRow"><div class="chatNick smallText">닉네임에서 못 찾음</div><div class="chatMember">${chatMemberInfo(m)}</div>${chatActions(m)}</div>`).join('');
+  box.innerHTML=html||'<p class="note">해당하는 항목이 없어요.</p>';
+}
+function setChatMatchTab(k){chatMatchState.tab=k;renderChatMatch()}
+function clearChatMatch(){$('chatMatchInput').value='';$('chatMatchFile').value='';if($('chatOcrStatus'))$('chatOcrStatus').textContent='';chatMatchState={tab:'matched',matched:[],review:[],unknown:[],notInChat:[],total:0};$('chatMatchSummary').textContent='';$('chatMatchTabs').innerHTML='';$('chatMatchResult').innerHTML=''}
+function chatShowMember(id){
+  const m=((window.__memberCtx||{}).data||[]).find(x=>String(x.id).replace(/[^a-zA-Z0-9-]/g,'')===id);
+  if(!m)return;
+  $('memberNameSearch').value=m.name||'';$('memberPhoneSearch').value='';
+  renderMembers();
+  $('members').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function chatApprove(id){
+  const m=((window.__memberCtx||{}).data||[]).find(x=>String(x.id).replace(/[^a-zA-Z0-9-]/g,'')===id);
+  if(!confirm(`${m?m.name:'이 회원'}님을 승인할까요?\n승인하면 회원가가 적용돼요.`))return;
+  try{
+    await api('/rest/v1/profiles?id=eq.'+encodeURIComponent(String(m?m.id:id)),{method:'PATCH',body:JSON.stringify({approved:true}),headers:{'Prefer':'return=minimal'}});
+    await loadMembers();
+    runChatMatch(true);
+  }catch(e){alert('승인하지 못했어요.\n\n'+(e.message||e))}
+}
+function downloadChatMatchCsv(){
+  const s=chatMatchState;
+  const rows=[['구분','오픈채팅 닉네임 및 끝 4자리','회원 이름','연락처','이메일','승인 상태','근거']];
+  s.matched.forEach(r=>rows.push(['일치',r.line,r.m.name,r.m.phone,r.m.email,chatMemberStatus(r.m),r.why]));
+  s.review.forEach(r=>r.cands.forEach(c=>rows.push(['확인 필요',r.line,c.m.name,c.m.phone,c.m.email,chatMemberStatus(c.m),c.why+' / '+r.reason])));
+  s.unknown.forEach(r=>rows.push(['미입력/불일치',r.line,'','','','',r.reason||'']));
+  s.notInChat.forEach(m=>rows.push(['채팅방에서 못 찾은 회원','',m.name,m.phone,m.email,chatMemberStatus(m),'']));
+  if(rows.length===1)return alert('저장할 결과가 없어요. 먼저 대조하기를 눌러주세요.');
+  const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='오픈채팅_회원대조_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+async function readChatMatchFile(file){
+  const name=String(file.name||'').toLowerCase();
+  if(file.type&&file.type.startsWith('image/')||/\.(png|jpe?g|webp|bmp|gif)$/i.test(name)){
+    const status=$('chatOcrStatus');if(status)status.textContent='사진에서 닉네임을 읽는 중이에요. 사진이 길거나 글씨가 작으면 시간이 걸릴 수 있어요.';
+    if(typeof Tesseract==='undefined')await loadExternalScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const result=await Tesseract.recognize(file,'kor+eng',{logger:m=>{if(status&&m.status==='recognizing text')status.textContent=`사진 글자 읽는 중... ${Math.round((m.progress||0)*100)}%`;}});
+    const raw=String(result?.data?.text||'');
+    const lines=raw.split(/\r?\n/).map(x=>x.replace(/[|_]+/g,' ').replace(/^\s*[-•·]+\s*/, '').trim()).filter(x=>x.length>=2);
+    const unique=[...new Set(lines)];
+    if(!unique.length)throw new Error('사진에서 닉네임을 읽지 못했어요. 더 선명한 캡처 사진으로 다시 시도해주세요.');
+    if(status)status.textContent=`사진에서 글자 ${unique.length}줄을 읽었어요. 대조 전에 아래 입력란에서 닉네임이 정확한지 확인해주세요.`;
+    return unique.join('\n');
+  }
+  if(/\.xlsx?$/.test(name)){
+    if(typeof XLSX==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const arr=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    return arr.map(r=>r.map(c=>String(c??'').trim()).filter(Boolean).join(' ')).filter(Boolean).join('\n');
+  }
+  const buf=await file.arrayBuffer();
+  let text=new TextDecoder('utf-8').decode(buf);
+  if(text.includes('\ufffd')){try{text=new TextDecoder('euc-kr').decode(buf)}catch(_){}}
+  return text.replace(/^\ufeff/,'');
+}
+document.getElementById('chatMatchFile')?.addEventListener('change',async e=>{
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  try{
+    let text=await readChatMatchFile(file);
+    const kakao=parseKakaoExport(text);
+    if(kakao){text=kakao.join('\n');alert(`카카오톡 대화 내보내기 파일로 인식했어요.\n대화에 나온 닉네임 ${kakao.length}개를 뽑았어요.\n(대화에 한 번도 나오지 않은 참여자는 포함되지 않아요)`)}
+    $('chatMatchInput').value=text;
+    if(file.type&&file.type.startsWith('image/')){alert('사진에서 닉네임을 추출했어요. 인식 결과가 정확한지 입력란에서 확인한 뒤 대조하기를 눌러주세요.');return}
+    runChatMatch();
+  }catch(err){alert('파일을 읽지 못했어요.\n\n'+(err.message||err))}
+});
 refreshDraftBanner();
 document.querySelector('[data-admin-section="excel"]')?.addEventListener('click',refreshDraftBanner);
-document.querySelectorAll('[data-admin-section]').forEach(btn=>{btn.addEventListener('click',()=>switchAdminSection(btn.dataset.adminSection));});
+document.querySelectorAll('[data-admin-section]').forEach(btn=>{btn.addEventListener('click',()=>{switchAdminSection(btn.dataset.adminSection);if(btn.dataset.adminSection==='members')loadMembers();});});
+(function(){
+  let timer;
+  const run=()=>{clearTimeout(timer);renderMembers()};
+  ['memberNameSearch','memberPhoneSearch'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();run()}});
+    el.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(renderMembers,150)});
+  });
+  ['memberFrom','memberTo'].forEach(id=>document.getElementById(id)?.addEventListener('change',run));
+})();
 if(location.hash==='#members'||new URLSearchParams(location.search).get('section')==='members')switchAdminSection('members');
 </script>
 </body></html>
