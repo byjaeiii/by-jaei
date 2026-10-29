@@ -366,6 +366,42 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .chatRowBtns button{padding:7px 10px;font-size:11px}
 @media(max-width:760px){.chatRow{grid-template-columns:1fr}}
 </style>
+<style id="order-receive-and-category-picker-style">
+.orderSummaryBar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.orderSummaryBar .pill{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#f1e9df;color:var(--ink)}
+.orderSummaryBar .pill.recv{background:#e5efe3;color:#47663f}
+.orderSummaryBar .pill.recvAll{background:#47663f;color:#fff}
+.orderSummaryBar .pill.cust{background:#eef0f6;color:#4b5678}
+.orderSummaryBar .spacer{flex:1}
+.orderSummaryBar button{padding:5px 10px;font-size:11px}
+.orderItemLine{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.orderItemLine>.itemMain{flex:1;min-width:0}
+.orderItemLine .itemNo{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:700;margin-right:6px;vertical-align:middle}
+.orderItemLine.isReceived{background:#f1f7ef;border-radius:8px}
+.orderItemLine.isReceived .itemNo{background:#47663f}
+.recvBtn{flex:0 0 auto;min-width:74px;padding:9px 10px;font-size:12px;font-weight:700;border-radius:10px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;line-height:1.2}
+.recvBtn.on{background:#47663f;border-color:#47663f;color:#fff}
+.recvBtn:disabled{opacity:.5}
+.recvAt{display:block;font-size:10px;font-weight:400;opacity:.85;margin-top:2px}
+.catPicker{width:100%}
+.catRootTabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.catRootTab{flex:1 1 140px;display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 10px;border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;letter-spacing:.2px;cursor:pointer;min-height:50px}
+.catRootTab.active{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px rgba(81,70,61,.22)}
+.catRootTab .cnt{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#d9534f;color:#fff;font-size:11px;line-height:20px;text-align:center}
+.catRootTab .cnt.show{display:inline-block}
+.catGroup{display:none;flex-wrap:wrap;gap:7px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fbf8f3}
+.catGroup.active{display:flex}
+.catChip{position:relative;display:inline-flex;align-items:center;padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font-size:13px;cursor:pointer;margin:0;line-height:1.2;user-select:none}
+.catChip input{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
+.catChip.d0{font-weight:800;background:#f1e9df}
+.catChip.d1{font-weight:700}
+.catChip.d2,.catChip.d3,.catChip.d4{font-size:12px;color:#6d6055}
+.catChip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.catChip.dis{opacity:.6;cursor:not-allowed}
+.catSelected{margin-top:9px;font-size:12px;color:var(--muted);line-height:1.6}
+.catSelected b{color:var(--ink)}
+.catSelected .selTag{display:inline-block;margin:2px 4px 2px 0;padding:3px 9px;border-radius:999px;background:#eef3ec;color:#47663f;font-weight:700}
+</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -428,9 +464,9 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
     <button type="button" id="adminPushEnableBtn" onclick="enableAdminPushNotifications()" style="white-space:nowrap">푸시 알림 켜기</button>
   </div>
 </div><details class="chatMatchBox" id="chatMatchBox"><summary>오픈채팅방 닉네임 ↔ 회원 대조</summary>
-  <p class="note">오픈채팅 참여자 목록 캡처 사진도 올릴 수 있어요. 사진에서 닉네임을 글자로 추출한 뒤 홈페이지 회원 이름과 비교해 후보를 보여줘요. 닉네임만으로는 휴대폰번호를 확인할 수 없으므로 이름이 비슷한 회원은 자동 확정하지 않고 <b>확인 필요</b>로 표시해요. 전화번호가 포함된 명단은 전체 번호가 정확히 일치할 때만 회원으로 연결해요.</p>
-  <textarea id="chatMatchInput" rows="6" placeholder="예)&#10;길동맘 010-1111-2222&#10;하나엄마 010-2222-3333&#10;토끼맘, 010 3333 4444"></textarea>
-  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile" accept=".txt,.csv,.xlsx,.xls,image/*"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div><div id="chatOcrStatus" class="note" style="margin-top:8px"></div>
+  <p class="note">오픈채팅방 참여자 닉네임을 <b>한 줄에 하나씩</b> 붙여넣고 <b>대조하기</b>를 누르세요. 닉네임에 <b>이름이나 전화번호(뒤 4자리 포함)</b>가 들어 있으면 가입한 회원과 자동으로 맞춰봐요. 이름·연락처가 적힌 텍스트/CSV/엑셀 파일, 카카오톡 <b>대화 내보내기(.txt)</b> 파일도 올릴 수 있어요.</p>
+  <textarea id="chatMatchInput" rows="6" placeholder="예)&#10;길동맘 1234&#10;홍길동&#10;하나엄마 010-1111-2222"></textarea>
+  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile" accept=".txt,.csv,.xlsx,.xls"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div>
   <div id="chatMatchSummary" class="filterCount"></div>
   <div id="chatMatchTabs" class="orderStatusTabs"></div>
   <div id="chatMatchResult"></div>
@@ -466,6 +502,7 @@ function getSelectedCategories(){
 function setSelectedCategories(categoryIds){
   const set=new Set((categoryIds||[]).map(String));
   document.querySelectorAll('input[name="category"]').forEach(x=>x.checked=set.has(String(x.value)));
+  if(typeof refreshCategoryPicker==='function')refreshCategoryPicker(true);
 }
 function categoryLockPath(id){
   let current=categories.find(c=>String(c.id)===String(id));const parts=[];const seen=new Set();
@@ -1173,17 +1210,42 @@ function categoryDescendantNames(name,rootId=null){
   roots.forEach(root=>walk(root.id));
   return [...out];
 }
+let catPickerRoot=null;
 function renderCategoryOptions(selected=null){
   const box=$('categoryOptions');
   if(!box)return;
-  const effectiveSelected=selected===null?(categoryLocked?categoryLockedIds:[]):selected;
+  const effectiveSelected=selected===null?(categoryLocked?categoryLockedIds:getSelectedCategories()):selected;
   const set=new Set((effectiveSelected||[]).map(String));
-  box.innerHTML=categoryTreeRows().map(({c,depth})=>{
-    const top=depth===0;
-    const safeName=String(c.name).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-    return `<label class="${top?'categoryOptionRoot':'categoryOptionChild'}" style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer;padding-left:${top?8:depth*14}px;font-weight:${top?700:400}"><input type="checkbox" name="category" value="${c.id}" data-category-name="${safeName}" style="width:auto" ${set.has(String(c.id))?'checked':''}> ${top?safeName:`↳ ${safeName}`}</label>`;
-  }).join('');
+  const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  const groups=[];
+  categoryTreeRows().forEach(r=>{if(r.depth===0)groups.push({root:r.c,items:[r]});else if(groups.length)groups[groups.length-1].items.push(r)});
+  if(!groups.length){box.innerHTML='<div class="note">카테고리를 먼저 추가해주세요.</div>';return}
+  const selGroup=groups.find(g=>g.items.some(r=>set.has(String(r.c.id))));
+  if(!groups.some(g=>String(g.root.id)===String(catPickerRoot)))catPickerRoot=String((selGroup||groups[0]).root.id);
+  box.style.display='block';
+  box.innerHTML=`<div class="catPicker"><div class="catRootTabs">${groups.map(g=>`<button type="button" class="catRootTab" data-cat-root="${g.root.id}">${esc(g.root.name)}<span class="cnt"></span></button>`).join('')}</div>${groups.map(g=>`<div class="catGroup" data-cat-group="${g.root.id}">${g.items.map(({c,depth})=>`<label class="catChip d${Math.min(depth,4)}"><input type="checkbox" name="category" value="${c.id}" data-category-name="${esc(c.name)}" ${set.has(String(c.id))?'checked':''}>${depth===0?'상위 · ':depth>1?'↳ ':''}${esc(c.name)}</label>`).join('')}</div>`).join('')}<div class="catSelected" id="catSelectedSummary"></div></div>`;
+  if(!box.dataset.pickerBound){
+    box.dataset.pickerBound='1';
+    box.addEventListener('click',e=>{const tab=e.target.closest('[data-cat-root]');if(!tab||!box.contains(tab))return;catPickerRoot=String(tab.dataset.catRoot);refreshCategoryPicker()});
+    box.addEventListener('change',e=>{if(e.target&&e.target.name==='category')refreshCategoryPicker()});
+  }
+  refreshCategoryPicker();
   syncCategoryLockUI();
+}
+function refreshCategoryPicker(jump=false){
+  const box=$('categoryOptions');if(!box||!box.querySelector('.catPicker'))return;
+  const checked=[...box.querySelectorAll('input[name="category"]:checked')];
+  if(jump&&checked.length){const g=checked[0].closest('.catGroup');if(g)catPickerRoot=String(g.dataset.catGroup)}
+  box.querySelectorAll('.catRootTab').forEach(t=>{
+    const rid=String(t.dataset.catRoot);
+    t.classList.toggle('active',rid===String(catPickerRoot));
+    const n=box.querySelectorAll(`.catGroup[data-cat-group="${rid}"] input:checked`).length;
+    const cnt=t.querySelector('.cnt');cnt.textContent=n;cnt.classList.toggle('show',n>0);
+  });
+  box.querySelectorAll('.catGroup').forEach(g=>g.classList.toggle('active',String(g.dataset.catGroup)===String(catPickerRoot)));
+  box.querySelectorAll('.catChip').forEach(l=>{const inp=l.querySelector('input');l.classList.toggle('on',!!inp.checked);l.classList.toggle('dis',!!inp.disabled)});
+  const sum=$('catSelectedSummary');
+  if(sum)sum.innerHTML=checked.length?`<b>선택됨 ${checked.length}개</b><br>${checked.map(x=>`<span class="selTag">${(typeof categoryLockPath==='function'?categoryLockPath(x.value):x.dataset.categoryName).replaceAll('<','&lt;')}</span>`).join('')}`:'위에서 상위 카테고리를 누르고, 등록할 카테고리를 선택해주세요.';
 }
 function renderBulkCategoryOptions(){
   ['bulkCategory','zipCategory'].forEach(id=>{
@@ -1843,9 +1905,12 @@ function renderOrders(){
     const filtered=orderStatusFilter==='ALL'?searchFiltered:searchFiltered.filter(o=>statusOf(o)===orderStatusFilter);
     $('orderFilterCount').textContent=(q||phoneQ||from||to||orderStatusFilter!=='ALL')?`표시 ${filtered.length}건 / 전체 ${data?.length||0}건`:'';
     if(!filtered.length){el.innerHTML='<p class="note">'+(orderStatusFilter==='ALL'?'검색 결과가 없어요.':'해당 상태의 주문이 없어요.')+'</p>';return}
+    const custKey=o=>o.user_id?'u:'+o.user_id:'p:'+(o.phone||o.customer_name||'');
+    const byCust={};(data||[]).forEach(o=>{(byCust[custKey(o)]=byCust[custKey(o)]||[]).push(o)});
+    Object.values(byCust).forEach(l=>l.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at)||Number(x.id)-Number(y.id)));
     el.innerHTML=filtered.map(o=>{
       const items=Array.isArray(o.items)?o.items:[];
-      const txt=items.map(i=>{
+      const txt=items.map((i,idx)=>{
         const nm=escapeOrderText(i.name||'상품명 없음');
         const productId=i.product_id??i.productId??i.id;
         const id=escapeOrderText(productId??'');
@@ -1857,14 +1922,23 @@ function renderOrders(){
         const hasCost=!wholesaleLoadError&&Object.prototype.hasOwnProperty.call(wholesaleByProductId,String(i.id))&&wholesaleByProductId[String(i.id)]!=null;
         const cost=hasCost?Number(wholesaleByProductId[String(i.id)]):null;
         const costText=wholesaleLoadError?'도매가 확인 필요 (SQL 설정 확인)':hasCost?`도매가 ${cost.toLocaleString('ko-KR')}원/개 · 도매가 합계 ${(cost*qty).toLocaleString('ko-KR')}원`:'도매가 미입력';
-        return `<div class="orderItemLine"><div>${brandLabel}<button type="button" class="orderProductLink" data-order-product-link data-product-id="${id}" data-product-name="${nm}">${nm}</button> · ${option||'옵션 없음'} · ${qty}개</div><div class="orderItemMoney">${escapeOrderText(costText)} · 주문금액 ${lineAmount.toLocaleString('ko-KR')}원</div></div>`;
+        const recv=i.received===true;
+        const recvDate=recv&&i.received_at?new Date(i.received_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})+' 입고':'';
+        const cancelled=(o.status||'')==='취소';
+        return `<div class="orderItemLine ${recv?'isReceived':''}"><div class="itemMain"><div><span class="itemNo">${idx+1}</span>${brandLabel}<button type="button" class="orderProductLink" data-order-product-link data-product-id="${id}" data-product-name="${nm}">${nm}</button> · ${option||'옵션 없음'} · ${qty}개</div><div class="orderItemMoney">${escapeOrderText(costText)} · 주문금액 ${lineAmount.toLocaleString('ko-KR')}원</div></div>${cancelled?'':`<button type="button" class="recvBtn ${recv?'on':''}" onclick="toggleItemReceived(${Number(o.id)},${idx},this)">${recv?'입고완료 ✓':'입고'}${recvDate?`<span class="recvAt">${recvDate}</span>`:''}</button>`}</div>`;
       }).join('');
+      const totalQty=items.reduce((n,x)=>n+Math.max(1,Number(x.qty)||1),0);
+      const recvCount=items.filter(x=>x.received===true).length;
+      const list=byCust[custKey(o)]||[];
+      const nth=list.findIndex(x=>String(x.id)===String(o.id))+1;
+      const cancelledOrder=(o.status||'')==='취소';
+      const summaryBar=`<div class="orderSummaryBar"><span class="pill">주문 품목 ${items.length}건 · 총 ${totalQty}개</span>${cancelledOrder?'':`<span class="pill ${items.length&&recvCount===items.length?'recvAll':'recv'}">입고 ${recvCount}/${items.length}${items.length&&recvCount===items.length?' · 전체 입고':''}</span>`}<span class="pill cust">이 고객 주문 총 ${list.length}건 (${nth}번째)</span><span class="spacer"></span>${cancelledOrder||!items.length?'':`<button type="button" class="secondary" onclick="setAllItemsReceived(${Number(o.id)},true)">전체 입고</button><button type="button" class="secondary" onclick="setAllItemsReceived(${Number(o.id)},false)">입고 해제</button>`}</div>`;
       const cls={'주문접수':'status-received','입금확인':'status-paid','상품준비중':'status-ready','배송준비':'status-prep','배송중':'status-shipping','배송완료':'status-done','취소':'status-cancel'}[o.status]||'status-received';
       const memo=o.memo||'';
       const customerEmail=o.email||(o.user_id?emailByUserId[String(o.user_id)]:'')||(o.user_id?'회원 이메일을 찾을 수 없어요':'로그인 계정 연결 없음');
       const safeCustomerEmail=escapeOrderText(customerEmail);
       const customerMessage=escapeOrderText(buildOrderConfirmationMessage(o,items,brandByProductId));
-      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div><div class="orderItems" style="margin-top:8px">${txt}</div>${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}<button type="button" class="orderDeleteBtn" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button><button type="button" class="secondary" style="padding:8px 10px;font-size:11px" onclick="openOrderPointHistory(${Number(o.id)})">적립내역</button></div></div>`;
+      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div>${summaryBar}<div class="orderItems" style="margin-top:8px">${txt}</div>${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}<button type="button" class="orderDeleteBtn" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button><button type="button" class="secondary" style="padding:8px 10px;font-size:11px" onclick="openOrderPointHistory(${Number(o.id)})">적립내역</button></div></div>`;
     }).join('');
     el.onclick=function(event){const button=event.target.closest('[data-order-product-link]');if(!button||!el.contains(button))return;openOrderedProduct(button.dataset.productId,button.dataset.productName)};
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
@@ -1882,6 +1956,26 @@ async function loadOrders(){
     window.__orderCtx={data,emailByUserId,brandByProductId,wholesaleByProductId,wholesaleLoadError};
     renderOrders();
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
+}
+async function saveItemsReceived(orderId,mutator){
+  const rows=await api('/rest/v1/orders?select=id,items&id=eq.'+encodeURIComponent(String(orderId)));
+  const items=Array.isArray(rows)&&rows[0]&&Array.isArray(rows[0].items)?rows[0].items.map(x=>({...x})):null;
+  if(!items)throw new Error('주문 항목을 찾지 못했어요. 새로고침 후 다시 시도해주세요.');
+  mutator(items);
+  const r=await api('/rest/v1/orders?id=eq.'+encodeURIComponent(String(orderId)),{method:'PATCH',body:JSON.stringify({items}),headers:{'Prefer':'return=representation'}});
+  if(!Array.isArray(r)||!r.length)throw new Error('입고 상태를 저장할 권한이 없어요. 관리자 계정의 orders UPDATE 권한(RLS)을 확인해주세요.');
+  const ctx=window.__orderCtx;const row=ctx&&(ctx.data||[]).find(x=>String(x.id)===String(orderId));if(row)row.items=r[0].items||items;
+  renderOrders();
+}
+async function toggleItemReceived(orderId,idx,btn){
+  if(btn)btn.disabled=true;
+  try{await saveItemsReceived(orderId,items=>{const it=items[idx];if(!it)throw new Error('항목을 찾지 못했어요.');if(it.received===true){delete it.received;delete it.received_at}else{it.received=true;it.received_at=new Date().toISOString()}})}
+  catch(e){if(btn)btn.disabled=false;alert('입고 처리 실패\n\n'+(e.message||e))}
+}
+async function setAllItemsReceived(orderId,value){
+  if(value&&!confirm('이 주문의 모든 상품을 입고 처리할까요?'))return;
+  try{await saveItemsReceived(orderId,items=>{const now=new Date().toISOString();items.forEach(it=>{if(value){if(it.received!==true){it.received=true;it.received_at=now}}else{delete it.received;delete it.received_at}})})}
+  catch(e){alert('입고 처리 실패\n\n'+(e.message||e))}
 }
 async function saveOrderMemo(id){const value=$('memo_'+id)?.value.trim()||'';try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:value}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 저장됐어요.')}catch(e){alert('메모 저장 실패\n\n'+e.message)}}
 async function deleteOrderMemo(id){if(!confirm('이 주문의 관리자 메모를 삭제할까요?'))return;try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({admin_memo:null}),headers:{'Prefer':'return=minimal'}});alert('관리자 메모가 삭제됐어요.');loadOrders()}catch(e){alert('메모 삭제 실패\n\n'+e.message)}}
@@ -2115,20 +2209,22 @@ function parseKakaoExport(text){
   return hits>=3?[...nick].filter(Boolean):null;
 }
 function matchChatLine(line,list){
-  // 휴대폰번호 전체가 정확히 일치하면 우선 사용합니다. 번호가 없으면 닉네임/이름 유사도는 확인 후보로만 보여줍니다.
-  const found=(String(line).match(/(?:01[016789][\s.\-]?\d{3,4}[\s.\-]?\d{4})/g)||[]).map(chatDigits).filter(p=>p.length===10||p.length===11);
-  const phones=[...new Set(found)];
+  const norm=chatNorm(line);
+  const phoneLike=(String(line).match(/0\d{1,2}[\s.\-]?\d{3,4}[\s.\-]?\d{4}/g)||[]).map(chatDigits);
+  const groups=String(line).match(/\d+/g)||[];
   const out=[];
-  if(phones.length){
-    for(const m of list){if(m.phone.length>=10&&phones.includes(m.phone))out.push({m,score:100,why:'휴대폰번호 전체 일치'});}
-    return out;
-  }
-  const nick=chatNorm(line);
-  if(nick.length<2)return [];
   for(const m of list){
-    const nm=chatNorm(m.raw?.name||'');
-    if(nm.length>=2&&(nick===nm||nick.includes(nm)||nm.includes(nick)))out.push({m,score:nick===nm?80:60,why:nick===nm?'닉네임과 회원 이름 동일 (수동 확인 필요)':'닉네임에 회원 이름 포함/유사 (수동 확인 필요)'});
+    let score=0,why='';
+    const fullHit=m.phone.length>=10&&phoneLike.some(p=>p===m.phone||(p.length>=8&&m.phone.endsWith(p.slice(-8))));
+    const last4Hit=m.last4&&groups.some(g=>g===m.last4||(g.length>4&&g.endsWith(m.last4)));
+    const nameHit=m.name.length>=2&&norm.includes(m.name);
+    if(fullHit){score=100;why='전화번호 일치'}
+    else if(nameHit&&last4Hit){score=90;why='이름 + 뒤 4자리 일치'}
+    else if(nameHit){score=norm===m.name?70:50;why=norm===m.name?'이름 정확히 일치':'이름 포함'}
+    else if(last4Hit){score=30;why='뒤 4자리만 일치'}
+    if(score)out.push({m,score,why});
   }
+  out.sort((a,b)=>b.score-a.score);
   return out;
 }
 async function runChatMatch(silent){
@@ -2146,9 +2242,9 @@ async function runChatMatch(silent){
       const res=matchChatLine(line,members);
       if(!res.length){unknown.push({line});return}
       const best=res[0].score,top=res.filter(r=>r.score===best);
-      if(best===100&&top.length===1){matched.push({line,m:top[0].m.raw,why:top[0].why,score:best});hitIds.add(String(top[0].m.id))}
-      else if(best>=50){review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:top.length>1?`이름이 비슷한 회원이 ${top.length}명이에요. 직접 확인해주세요.`:'닉네임만으로는 동일인 확인이 불가능해요. 회원 이름과 대조 후보이므로 직접 확인해주세요.'})}
-      else review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:top.length>1?`뒤 4자리만 같은 회원이 ${top.length}명이에요`:'휴대폰번호가 정확히 일치하지 않아요'});
+      if(best>=50&&top.length===1){matched.push({line,m:top[0].m.raw,why:top[0].why,score:best});hitIds.add(String(top[0].m.id))}
+      else if(best>=50){review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:`같은 근거로 맞는 회원이 ${top.length}명이에요 (동명이인 확인)`});top.forEach(r=>hitIds.add(String(r.m.id)))}
+      else review.push({line,cands:top.slice(0,5).map(r=>({m:r.m.raw,why:r.why})),reason:top.length>1?`뒤 4자리만 같은 회원이 ${top.length}명이에요`:'뒤 4자리만 같아요 (다른 사람일 수 있어요)'});
     });
     const notInChat=members.filter(m=>!hitIds.has(String(m.id))).map(m=>m.raw);
     chatMatchState={tab:chatMatchState.tab||'matched',matched,review,unknown,notInChat,total:lines.length};
@@ -2171,12 +2267,12 @@ function renderChatMatch(){
   let html='';
   if(s.tab==='matched')html=s.matched.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}<span class="chatWhy ${r.score>=90?'strong':''}">${escapeOrderText(r.why)}</span></div><div class="chatMember">${chatMemberInfo(r.m)}</div>${chatActions(r.m)}</div>`).join('');
   else if(s.tab==='review')html=s.review.map(r=>`<div class="chatRow review"><div class="chatNick">${escapeOrderText(r.line)}<span class="chatWhy">${escapeOrderText(r.reason)}</span></div><div class="chatMember">${r.cands.map(c=>`<div class="chatCand">${chatMemberInfo(c.m)}<span class="chatWhy">${escapeOrderText(c.why)}</span>${chatActions(c.m)}</div>`).join('')}</div></div>`).join('');
-  else if(s.tab==='unknown')html=s.unknown.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}</div><div class="chatMember smallText">일치하는 회원이 없어요 (휴대폰번호가 없거나 회원 연락처와 정확히 일치하지 않아요)</div></div>`).join('');
+  else if(s.tab==='unknown')html=s.unknown.map(r=>`<div class="chatRow"><div class="chatNick">${escapeOrderText(r.line)}</div><div class="chatMember smallText">일치하는 회원이 없어요 (아직 가입 전이거나 닉네임에 이름·번호가 없어요)</div></div>`).join('');
   else html=s.notInChat.map(m=>`<div class="chatRow"><div class="chatNick smallText">닉네임에서 못 찾음</div><div class="chatMember">${chatMemberInfo(m)}</div>${chatActions(m)}</div>`).join('');
   box.innerHTML=html||'<p class="note">해당하는 항목이 없어요.</p>';
 }
 function setChatMatchTab(k){chatMatchState.tab=k;renderChatMatch()}
-function clearChatMatch(){$('chatMatchInput').value='';$('chatMatchFile').value='';if($('chatOcrStatus'))$('chatOcrStatus').textContent='';chatMatchState={tab:'matched',matched:[],review:[],unknown:[],notInChat:[],total:0};$('chatMatchSummary').textContent='';$('chatMatchTabs').innerHTML='';$('chatMatchResult').innerHTML=''}
+function clearChatMatch(){$('chatMatchInput').value='';$('chatMatchFile').value='';chatMatchState={tab:'matched',matched:[],review:[],unknown:[],notInChat:[],total:0};$('chatMatchSummary').textContent='';$('chatMatchTabs').innerHTML='';$('chatMatchResult').innerHTML=''}
 function chatShowMember(id){
   const m=((window.__memberCtx||{}).data||[]).find(x=>String(x.id).replace(/[^a-zA-Z0-9-]/g,'')===id);
   if(!m)return;
@@ -2209,17 +2305,6 @@ function downloadChatMatchCsv(){
 }
 async function readChatMatchFile(file){
   const name=String(file.name||'').toLowerCase();
-  if(file.type&&file.type.startsWith('image/')||/\.(png|jpe?g|webp|bmp|gif)$/i.test(name)){
-    const status=$('chatOcrStatus');if(status)status.textContent='사진에서 닉네임을 읽는 중이에요. 사진이 길거나 글씨가 작으면 시간이 걸릴 수 있어요.';
-    if(typeof Tesseract==='undefined')await loadExternalScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
-    const result=await Tesseract.recognize(file,'kor+eng',{logger:m=>{if(status&&m.status==='recognizing text')status.textContent=`사진 글자 읽는 중... ${Math.round((m.progress||0)*100)}%`;}});
-    const raw=String(result?.data?.text||'');
-    const lines=raw.split(/\r?\n/).map(x=>x.replace(/[|_]+/g,' ').replace(/^\s*[-•·]+\s*/, '').trim()).filter(x=>x.length>=2);
-    const unique=[...new Set(lines)];
-    if(!unique.length)throw new Error('사진에서 닉네임을 읽지 못했어요. 더 선명한 캡처 사진으로 다시 시도해주세요.');
-    if(status)status.textContent=`사진에서 글자 ${unique.length}줄을 읽었어요. 대조 전에 아래 입력란에서 닉네임이 정확한지 확인해주세요.`;
-    return unique.join('\n');
-  }
   if(/\.xlsx?$/.test(name)){
     if(typeof XLSX==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
     const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
@@ -2238,7 +2323,6 @@ document.getElementById('chatMatchFile')?.addEventListener('change',async e=>{
     const kakao=parseKakaoExport(text);
     if(kakao){text=kakao.join('\n');alert(`카카오톡 대화 내보내기 파일로 인식했어요.\n대화에 나온 닉네임 ${kakao.length}개를 뽑았어요.\n(대화에 한 번도 나오지 않은 참여자는 포함되지 않아요)`)}
     $('chatMatchInput').value=text;
-    if(file.type&&file.type.startsWith('image/')){alert('사진에서 닉네임을 추출했어요. 인식 결과가 정확한지 입력란에서 확인한 뒤 대조하기를 눌러주세요.');return}
     runChatMatch();
   }catch(err){alert('파일을 읽지 못했어요.\n\n'+(err.message||err))}
 });
