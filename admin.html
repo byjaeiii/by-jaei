@@ -401,6 +401,11 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .catSelected{margin-top:9px;font-size:12px;color:var(--muted);line-height:1.6}
 .catSelected b{color:var(--ink)}
 .catSelected .selTag{display:inline-block;margin:2px 4px 2px 0;padding:3px 9px;border-radius:999px;background:#eef3ec;color:#47663f;font-weight:700}
+#categoryParentInput{display:none!important}
+.parentCurrent{margin:0 0 9px;padding:9px 12px;border-radius:10px;background:#eef3ec;color:#47663f;font-size:13px;line-height:1.5}
+.parentCurrent.none{background:#f1e9df;color:var(--ink)}
+.parentPicker .catRootTab{flex:1 1 120px;padding:11px 8px;font-size:13px}
+.parentPicker .catChip{font-family:inherit}
 </style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
@@ -424,7 +429,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <button type="button" data-admin-section="orders">주문관리</button>
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
-<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품등록</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div class="categoryToolbar"><button type="button" class="secondary" onclick="expandAllCategories(true)">전체 펼치기</button><button type="button" class="secondary" onclick="expandAllCategories(false)">전체 접기</button></div><div id="categoryManagerList" style="margin-top:10px"></div></div>
+<div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품등록</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select><div id="categoryParentPicker" class="parentPicker"></div></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div class="categoryToolbar"><button type="button" class="secondary" onclick="expandAllCategories(true)">전체 펼치기</button><button type="button" class="secondary" onclick="expandAllCategories(false)">전체 접기</button></div><div id="categoryManagerList" style="margin-top:10px"></div></div>
 
 
 
@@ -1332,13 +1337,44 @@ function resolveProductCategoryId(p){
 }
 function renderCategoryParentOptions(selected=''){
   const el=$('categoryParentInput');if(!el)return;const blocked=editingCategoryId?new Set([Number(editingCategoryId),...categoryDescendantIds(editingCategoryId)]):new Set();el.innerHTML='<option value="">상위 카테고리 없음</option>'+categoryTreeRows().filter(({c})=>!blocked.has(Number(c.id))).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');if(selected)el.value=String(selected);
+  refreshParentPicker();
+}
+let parentPickerRoot=null;
+function parentRootOf(id){
+  let cur=categories.find(c=>String(c.id)===String(id)),guard=0;
+  while(cur&&cur.parent_id!=null&&guard++<20){cur=categories.find(c=>String(c.id)===String(cur.parent_id))}
+  return cur?String(cur.id):'';
+}
+function refreshParentPicker(){
+  const box=$('categoryParentPicker'),sel=$('categoryParentInput');if(!box||!sel)return;
+  const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  const blocked=editingCategoryId?new Set([String(editingCategoryId),...[...categoryDescendantIds(editingCategoryId)].map(String)]):new Set();
+  const groups=[];
+  categoryTreeRows().forEach(r=>{if(blocked.has(String(r.c.id)))return;if(r.depth===0)groups.push({root:r.c,items:[r]});else if(groups.length&&String(groups[groups.length-1].root.id)===parentRootOf(r.c.id))groups[groups.length-1].items.push(r)});
+  const cur=String(sel.value||'');
+  if(cur)parentPickerRoot=parentRootOf(cur);
+  else if(parentPickerRoot===null)parentPickerRoot='';
+  if(parentPickerRoot&&!groups.some(g=>String(g.root.id)===String(parentPickerRoot)))parentPickerRoot='';
+  const curCat=categories.find(c=>String(c.id)===cur);
+  const curText=cur&&curCat?(typeof categoryLockPath==='function'?categoryLockPath(cur):curCat.name):'';
+  box.innerHTML=`<div class="parentCurrent ${cur?'':'none'}">${cur?`상위 카테고리: <b>${esc(curText)}</b> 아래에 만들어져요`:'<b>최상위 카테고리</b>로 만들어져요 (상위 없음)'}</div>`+
+    `<div class="catRootTabs"><button type="button" class="catRootTab ${parentPickerRoot===''&&!cur?'active':''}" data-pp-root="">상위 없음</button>${groups.map(g=>`<button type="button" class="catRootTab ${String(parentPickerRoot)===String(g.root.id)?'active':''}" data-pp-root="${g.root.id}">${esc(g.root.name)}</button>`).join('')}</div>`+
+    (parentPickerRoot?`<div class="catGroup active">${(groups.find(g=>String(g.root.id)===String(parentPickerRoot))||{items:[]}).items.map(({c,depth})=>`<button type="button" class="catChip d${Math.min(depth,4)} ${String(c.id)===cur?'on':''}" data-pp-pick="${c.id}">${depth===0?'바로 아래 · ':depth>1?'↳ ':''}${esc(c.name)}</button>`).join('')}</div>`:'');
+  if(!box.dataset.bound){
+    box.dataset.bound='1';
+    box.addEventListener('click',e=>{
+      const t=e.target.closest('[data-pp-root]'),p=e.target.closest('[data-pp-pick]');
+      if(p&&box.contains(p)){sel.value=String(p.dataset.ppPick);refreshParentPicker();return}
+      if(t&&box.contains(t)){const r=String(t.dataset.ppRoot);parentPickerRoot=r;if(r===''){sel.value=''}else if(parentRootOf(sel.value)!==r){sel.value=''}refreshParentPicker()}
+    });
+  }
 }
 async function loadCategories(){
   const data=await api('/rest/v1/categories?select=id,name,parent_id,sort_order,created_at,is_hidden&order=sort_order.asc,created_at.asc');
   categories=Array.isArray(data)?data:[];
   renderCategoryOptions();renderBulkCategoryOptions();renderCategoryParentOptions();renderCategoryManager();
 }
-function resetCategoryForm(){editingCategoryId=null;$('categoryNameInput').value='';renderCategoryParentOptions();$('categoryParentInput').value='';$('categorySaveBtn').textContent='카테고리 추가';$('categoryCancelBtn').hidden=true;}
+function resetCategoryForm(){editingCategoryId=null;$('categoryNameInput').value='';renderCategoryParentOptions();$('categoryParentInput').value='';refreshParentPicker();$('categorySaveBtn').textContent='카테고리 추가';$('categoryCancelBtn').hidden=true;}
 function editCategory(id){const c=categories.find(x=>String(x.id)===String(id));if(!c)return;editingCategoryId=c.id;$('categoryNameInput').value=c.name||'';renderCategoryParentOptions(c.parent_id);$('categorySaveBtn').textContent='카테고리 수정';$('categoryCancelBtn').hidden=false;scrollTo({top:document.getElementById('categoryNameInput').getBoundingClientRect().top+scrollY-80,behavior:'smooth'});}
 async function saveCategory(){
   const name=$('categoryNameInput').value.trim(),parentId=$('categoryParentInput').value||null;
