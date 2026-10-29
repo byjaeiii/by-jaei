@@ -857,7 +857,7 @@ let b=document.getElementById('dbgBox');if(!b){b=document.createElement('div');b
 const cnt=n=>products.filter(p=>String(p.brand||'').trim()===n).length;
 const vis=typeof customerVisibleProducts==='function'?customerVisibleProducts():products;
 const vcnt=n=>vis.filter(p=>String(p.brand||'').trim()===n).length;
-b.innerHTML='전체 불러옴: '+products.length+'<br>소유: '+cnt('소유')+' (노출대상 '+vcnt('소유')+')<br>마마스파파: '+cnt('마마스파파')+' (노출대상 '+vcnt('마마스파파')+')<br>카테고리: '+siteCategories.length+' / 현재: '+category+' / '+brandFilter+' / 로그인: '+(user?'O':'X')
+b.innerHTML='전체 불러옴: '+products.length+'<br>소유: '+cnt('소유')+' (노출대상 '+vcnt('소유')+')<br>마마스파파: '+cnt('마마스파파')+' (노출대상 '+vcnt('마마스파파')+')<br>카테고리: '+siteCategories.length+' / 현재: '+category+' / '+brandFilter+' / 로그인: '+(user?'O':'X')+'<br>현재 화면 상품카드: '+document.querySelectorAll('#grid .product').length+'개 / 총 페이지: '+((document.getElementById('pagination')||{dataset:{}}).dataset.totalPages||'-')+' / 보기: '+quickView
 }catch(e){}},1000)}
 </script>
 </body></html>
