@@ -306,6 +306,7 @@ function setCategory(x,id=null){
   quickView='all';
   render();
 }
+function brandKey(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0\u200b-\u200d\ufeff]+/g,'').toLocaleLowerCase('ko-KR')}
 function setBrandFilter(x){
   brandFilter=x;
   quickView='all';
@@ -407,9 +408,18 @@ function cats(){
     brandEl.hidden=true; brandEl.innerHTML=''; return;
   }
   const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
-  const brands=[...new Set(customerVisibleProducts().map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>collator.compare(a,b));
+  const brandGroups=new Map();
+  customerVisibleProducts().forEach(p=>{
+    const label=String(p.brand||'').normalize('NFC').replace(/\s+/g,' ').trim();
+    const key=brandKey(label);
+    if(!key)return;
+    const g=brandGroups.get(key)||{labels:new Map()};
+    g.labels.set(label,(g.labels.get(label)||0)+1);
+    brandGroups.set(key,g);
+  });
+  const brands=[...brandGroups.entries()].map(([key,g])=>({key,label:[...g.labels.entries()].sort((a,b)=>b[1]-a[1])[0][0]})).sort((a,b)=>collator.compare(a.label,b.label));
   brandEl.hidden=false;
-  brandEl.innerHTML=['ALL',...brands].map(x=>`<button type="button" class="${brandFilter===x?'active':''}" data-brand="${x.replaceAll('"','&quot;')}">${x}</button>`).join('');
+  brandEl.innerHTML=[{key:'ALL',label:'ALL'},...brands].map(x=>`<button type="button" class="${brandFilter===x.key?'active':''}" data-brand="${x.key.replaceAll('"','&quot;')}">${x.label}</button>`).join('');
 }
 document.getElementById('cats').addEventListener('click',e=>{
   const b=e.target.closest('button[data-category]');
@@ -447,7 +457,7 @@ function render(){
         categoryOk=!!legacyId&&branchIds.has(String(legacyId));
       }
     }
-    const brandOk=category!=='BRAND'||brandFilter==='ALL'||String(p.brand||'').trim()===brandFilter;
+    const brandOk=category!=='BRAND'||brandFilter==='ALL'||brandKey(p.brand)===brandFilter;
     return viewOk&&categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
   });
 
@@ -501,8 +511,9 @@ function render(){
   a=a.filter(p=>{
     const key=normalizeProductName(p.name);
     if(!key) return true;
-    if(seenProducts.has(key)) return false;
-    seenProducts.add(key);
+    const dedupeKey=brandKey(p.brand)+'|'+key;
+    if(seenProducts.has(dedupeKey)) return false;
+    seenProducts.add(dedupeKey);
     return true;
   });
 
@@ -839,4 +850,14 @@ async function refreshUser(){
 function closeLayer(id){document.getElementById(id).hidden=true}function closeAll(){detailReturnToCart=false;['detail','cart','login'].forEach(x=>document.getElementById(x).hidden=true)}
 sb.auth.onAuthStateChange((_event,session)=>{const prevId=user?.id;user=session?.user||null;loadCart();if(!user){products=[];productsLoaded=false}else{if(user.id!==prevId)syncFavorites();if(!productsLoaded)load()}render()});
 refreshUser().catch(e=>console.warn('회원 정보 확인 실패',e)).then(()=>{authReady=true;authReadyResolve();loadCart();syncFavorites();return load()}).then(()=>{window.__bootDone=true}).catch(e=>{console.error(e);if(window.__bootError)window.__bootError(e&&e.message||e)});
-</script></body></html>
+</script><script>
+/* 진단용: 주소 끝에 ?debug=1 을 붙였을 때만 화면 왼쪽 아래에 표시됩니다 */
+if(/[?&]debug=1/.test(location.search)){setInterval(()=>{try{
+let b=document.getElementById('dbgBox');if(!b){b=document.createElement('div');b.id='dbgBox';b.style.cssText='position:fixed;left:6px;bottom:6px;z-index:99999;background:#000c;color:#fff;font:12px/1.5 sans-serif;padding:8px 10px;border-radius:8px;max-width:90vw';document.body.appendChild(b)}
+const cnt=n=>products.filter(p=>String(p.brand||'').trim()===n).length;
+const vis=typeof customerVisibleProducts==='function'?customerVisibleProducts():products;
+const vcnt=n=>vis.filter(p=>String(p.brand||'').trim()===n).length;
+b.innerHTML='전체 불러옴: '+products.length+'<br>소유: '+cnt('소유')+' (노출대상 '+vcnt('소유')+')<br>마마스파파: '+cnt('마마스파파')+' (노출대상 '+vcnt('마마스파파')+')<br>카테고리: '+siteCategories.length+' / 현재: '+category+' / '+brandFilter+' / 로그인: '+(user?'O':'X')
+}catch(e){}},1000)}
+</script>
+</body></html>
