@@ -384,28 +384,29 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .recvBtn:disabled{opacity:.5}
 .recvAt{display:block;font-size:10px;font-weight:400;opacity:.85;margin-top:2px}
 .catPicker{width:100%}
-.catRootTabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.catRootTab{flex:1 1 140px;display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 10px;border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;letter-spacing:.2px;cursor:pointer;min-height:50px}
+.catRootTabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.catRootTab{flex:1 1 120px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 8px;border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font-size:12px;font-weight:800;letter-spacing:.1px;cursor:pointer;min-height:38px}
 .catRootTab.active{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px rgba(81,70,61,.22)}
-.catRootTab .cnt{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#d9534f;color:#fff;font-size:11px;line-height:20px;text-align:center}
+.catRootTab .cnt{display:none;min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:#d9534f;color:#fff;font-size:10px;line-height:17px;text-align:center}
 .catRootTab .cnt.show{display:inline-block}
-.catGroup{display:none;flex-wrap:wrap;gap:7px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fbf8f3}
+.catGroup{display:none;flex-wrap:wrap;gap:5px;padding:9px;border:1px solid var(--line);border-radius:14px;background:#fbf8f3}
 .catGroup.active{display:flex}
-.catChip{position:relative;display:inline-flex;align-items:center;padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font-size:13px;cursor:pointer;margin:0;line-height:1.2;user-select:none}
+.catChip{position:relative;display:inline-flex;align-items:center;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font-size:11.5px;cursor:pointer;margin:0;line-height:1.2;user-select:none}
 .catChip input{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}
 .catChip.d0{font-weight:800;background:#f1e9df}
 .catChip.d1{font-weight:700}
-.catChip.d2,.catChip.d3,.catChip.d4{font-size:12px;color:#6d6055}
+.catChip.d2,.catChip.d3,.catChip.d4{font-size:11px;color:#6d6055}
 .catChip.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .catChip.dis{opacity:.6;cursor:not-allowed}
-.catSelected{margin-top:9px;font-size:12px;color:var(--muted);line-height:1.6}
+.catSelected{margin-top:7px;font-size:11px;color:var(--muted);line-height:1.6}
 .catSelected b{color:var(--ink)}
 .catSelected .selTag{display:inline-block;margin:2px 4px 2px 0;padding:3px 9px;border-radius:999px;background:#eef3ec;color:#47663f;font-weight:700}
 #categoryParentInput{display:none!important}
-.parentCurrent{margin:0 0 9px;padding:9px 12px;border-radius:10px;background:#eef3ec;color:#47663f;font-size:13px;line-height:1.5}
+.parentCurrent{margin:0 0 7px;padding:7px 10px;border-radius:9px;background:#eef3ec;color:#47663f;font-size:11.5px;line-height:1.5}
 .parentCurrent.none{background:#f1e9df;color:var(--ink)}
-.parentPicker .catRootTab{flex:1 1 120px;padding:11px 8px;font-size:13px}
+.parentPicker .catRootTab{flex:1 1 110px}
 .parentPicker .catChip{font-family:inherit}
+#zipCategory{display:none!important}
 </style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
@@ -446,7 +447,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
     </div>
     <div>
       <label>기본 카테고리 (수정에서 바꿀 수 있어요)</label>
-      <select id="zipCategory"><option value="">카테고리 선택</option></select>
+      <select id="zipCategory"><option value="">카테고리 선택</option></select><div id="zipCategoryPicker" class="parentPicker"></div>
     </div>
   </div>
   <div class="actions">
@@ -1252,12 +1253,35 @@ function refreshCategoryPicker(jump=false){
   const sum=$('catSelectedSummary');
   if(sum)sum.innerHTML=checked.length?`<b>선택됨 ${checked.length}개</b><br>${checked.map(x=>`<span class="selTag">${(typeof categoryLockPath==='function'?categoryLockPath(x.value):x.dataset.categoryName).replaceAll('<','&lt;')}</span>`).join('')}`:'위에서 상위 카테고리를 누르고, 등록할 카테고리를 선택해주세요.';
 }
+const selectPickerRoot={};
+function refreshSelectPicker(selectId,pickerId,emptyText){
+  const box=$(pickerId),sel=$(selectId);if(!box||!sel)return;
+  const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  const groups=[];
+  categoryTreeRows().forEach(r=>{if(r.depth===0)groups.push({root:r.c,items:[r]});else if(groups.length)groups[groups.length-1].items.push(r)});
+  const cur=String(sel.value||'');
+  if(cur)selectPickerRoot[selectId]=parentRootOf(cur);
+  if(!groups.some(g=>String(g.root.id)===String(selectPickerRoot[selectId])))selectPickerRoot[selectId]=groups[0]?String(groups[0].root.id):'';
+  const curCat=categories.find(c=>String(c.id)===cur);
+  const curText=cur&&curCat?(typeof categoryLockPath==='function'?categoryLockPath(cur):curCat.name):'';
+  const activeRoot=String(selectPickerRoot[selectId]);
+  box.innerHTML=`<div class="parentCurrent ${cur?'':'none'}">${cur?`선택됨: <b>${esc(curText)}</b>`:esc(emptyText||'아래에서 카테고리를 선택해주세요')}</div><div class="catRootTabs">${groups.map(g=>`<button type="button" class="catRootTab ${String(g.root.id)===activeRoot?'active':''}" data-sp-root="${g.root.id}">${esc(g.root.name)}</button>`).join('')}</div><div class="catGroup active">${((groups.find(g=>String(g.root.id)===activeRoot)||{items:[]}).items).map(({c,depth})=>`<button type="button" class="catChip d${Math.min(depth,4)} ${String(c.id)===cur?'on':''}" data-sp-pick="${c.id}">${depth===0?'상위 전체 · ':depth>1?'↳ ':''}${esc(c.name)}</button>`).join('')}</div>`;
+  if(!box.dataset.bound){
+    box.dataset.bound='1';
+    box.addEventListener('click',e=>{
+      const p=e.target.closest('[data-sp-pick]'),t=e.target.closest('[data-sp-root]');
+      if(p&&box.contains(p)){sel.value=String(p.dataset.spPick);sel.dispatchEvent(new Event('change',{bubbles:true}));refreshSelectPicker(selectId,pickerId,emptyText);return}
+      if(t&&box.contains(t)){selectPickerRoot[selectId]=String(t.dataset.spRoot);refreshSelectPicker(selectId,pickerId,emptyText)}
+    });
+  }
+}
 function renderBulkCategoryOptions(){
   ['bulkCategory','zipCategory'].forEach(id=>{
     const el=$(id);if(!el)return;const current=el.value;
     el.innerHTML='<option value="">카테고리 선택</option>'+categoryTreeRows().map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${c.name}</option>`).join('');
     if(categories.some(c=>String(c.id)===String(current)))el.value=current;
   });
+  refreshSelectPicker('zipCategory','zipCategoryPicker','기본 카테고리를 선택해주세요');
 }
 function categoryManagerChildren(id){
   return categories.filter(c=>String(c.parent_id??'')===String(id??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true}));
