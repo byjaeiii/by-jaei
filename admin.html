@@ -413,6 +413,13 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .onePlusLabel input{width:18px;height:18px;flex:0 0 auto;margin:0}
 .opTag{display:inline-block;margin-right:5px;padding:1px 7px;border-radius:999px;background:#b5703a;color:#fff;font-size:10px;font-weight:800;vertical-align:middle;letter-spacing:.3px}
 </style>
+<style>
+.untypedRow{display:grid;grid-template-columns:48px 1fr 150px 56px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.untypedRow img,.untypedNoImg{width:48px;height:56px;object-fit:cover;border-radius:8px;background:#f1ece5}
+.untypedInfo{min-width:0}.untypedInfo b{display:block;font-size:13px;word-break:keep-all}.untypedInfo span{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.untypedRow select{padding:9px 8px;font-size:12px}.untypedRow button{padding:9px 6px;font-size:12px}
+@media(max-width:560px){.untypedRow{grid-template-columns:48px 1fr;}.untypedRow select{grid-column:1/2}.untypedRow button{grid-column:2/3}}
+</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -432,6 +439,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 <div class="adminSectionNav">
   <button type="button" class="active" data-admin-section="products">상품등록</button>
   <button type="button" data-admin-section="excel">엑셀등록</button>
+  <button type="button" id="untypedNavBtn" data-admin-section="untyped">분류안된상품</button>
   <button type="button" data-admin-section="orders">주문관리</button>
   <button type="button" data-admin-section="members">회원관리</button>
 </div>
@@ -440,11 +448,11 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 
 
 <div class="box" id="productRegisterBox"><div style="display:flex;justify-content:space-between;align-items:center"><h2>상품 등록</h2></div><div id="stagedEditBanner" class="stagedEditBanner" hidden><b>엑셀 등록 대기 상품 수정 중</b> · <span id="stagedEditName"></span><div class="uploadHint">저장하면 엑셀등록 탭의 대기 목록에 반영돼요. 아직 쇼핑몰에 등록된 상태는 아니에요.</div><button type="button" class="secondary" onclick="cancelStagedEdit()" style="margin-top:8px">수정 취소하고 대기 목록으로</button></div><label>상품 사진</label><input id="images" type="file" accept="image/*" multiple><div class="uploadHint">여러 장을 한 번에 선택할 수 있어요.
-사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="onePlusBox" id="onePlusBox"><label class="onePlusLabel"><input type="checkbox" id="onePlusOne"><span><b>1+1 상품</b> · 고객이 컬러를 2개 선택해요</span></label><div class="uploadHint" style="margin-top:6px">체크하면 고객 페이지에 “컬러 1 / 컬러 2” 선택칸이 따로 나와요. 위 컬러 목록에서 2개를 고르는 방식이고, 같은 컬러를 2개 골라도 돼요. 엑셀로 올릴 때는 “1+1” 열에 O 또는 1+1 이라고 적으면 돼요. (열이 없으면 상품명에 1+1이 들어간 상품은 자동 체크돼요)</div></div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (상품가 25% 할인)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 25% 할인된 금액으로 채워져요. 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="renderAdminProductList()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-excel"><h2 class="adminSectionTitle">엑셀등록</h2>
+사진을 선택하면 바로 미리보기가 보여요 🤍</div><div id="preview" class="preview"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="brand" style="margin:0 0 7px">브랜드</label><button type="button" id="brandLockBtn" class="secondary" onclick="toggleBrandLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">브랜드 고정하기</button></div><input id="brand" placeholder="브랜드명을 입력해주세요."><div class="uploadHint" id="brandLockHint">브랜드를 입력한 뒤 ‘브랜드 고정하기’를 누르면 상품 등록 후에도 브랜드가 유지돼요.</div><label>상품명</label><input id="name" placeholder="상품명을 입력해주세요."><label for="productType">상품 종류 (고객페이지 ALL 분류)</label><select id="productType"><option value="">자동 분류</option><option value="아우터">아우터</option><option value="상의">상의</option><option value="하의">하의</option><option value="원피스·세트">원피스·세트</option><option value="악세사리/모자">악세사리 › 모자</option><option value="악세사리/신발">악세사리 › 신발</option><option value="악세사리/양말">악세사리 › 양말</option><option value="악세사리/헤어">악세사리 › 헤어</option><option value="악세사리/기타">악세사리 › 기타</option></select><div class="uploadHint" id="productTypeHint">비워두면 상품명을 보고 자동으로 분류해요. 틀리면 직접 골라주세요.</div><label style="display:flex;align-items:center;gap:7px;margin-top:12px;cursor:pointer"><input id="isSizeChart" type="checkbox" style="width:auto;margin:0" onchange="toggleSizeChartFields()"> 사이즈표 상품</label><div class="uploadHint">사이즈표 상품은 가격·색상·사이즈 옵션 없이 등록할 수 있어요.</div><div id="sizeChartOptionFields"><label>색상 (쉼표 또는 /로 구분)</label><input id="colors" placeholder="예: BLACK / PINK 또는 BLACK, PINK"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px"><label for="sizes" style="margin:0 0 7px">사이즈 (쉼표 또는 /로 구분)</label><button type="button" id="sizeLockBtn" class="secondary" onclick="toggleSizeLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap;margin-bottom:7px">사이즈 고정하기</button></div><input id="sizes" placeholder="예: 90/100/110/120/130 또는 S, M, 2XL (+4000)"><div class="uploadHint" id="sizeLockHint">사이즈를 입력한 뒤 ‘사이즈 고정하기’를 누르면 상품 등록 후에도 사이즈가 유지돼요.</div><div class="onePlusBox" id="onePlusBox"><label class="onePlusLabel"><input type="checkbox" id="onePlusOne"><span><b>1+1 상품</b> · 고객이 컬러를 2개 선택해요</span></label><div class="uploadHint" style="margin-top:6px">체크하면 고객 페이지에 “컬러 1 / 컬러 2” 선택칸이 따로 나와요. 위 컬러 목록에서 2개를 고르는 방식이고, 같은 컬러를 2개 골라도 돼요. 엑셀로 올릴 때는 “1+1” 열에 O 또는 1+1 이라고 적으면 돼요. (열이 없으면 상품명에 1+1이 들어간 상품은 자동 체크돼요)</div></div><div class="priceRow"><div><label for="wholesale">도매가 (관리자 전용)</label><input id="wholesale" type="number" min="0" step="1" placeholder="도매가"></div><div><label for="normal">상품가</label><input id="normal" type="number" min="0" step="1" placeholder="상품가"></div><div><label for="member">회원가 (25% 할인 · ACC는 20%)</label><input id="member" type="number" min="0" step="1" placeholder="회원가"></div></div><div class="uploadHint">상품가를 입력하면 회원가가 자동으로 채워져요 (기본 25% 할인, ACC 카테고리는 20% 할인, 도매가와는 최소 1,000원 차이). 도매가는 관리자 전용 별도 저장소에 보관돼 고객용 상품 데이터에 포함되지 않아요.</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px"><label for="description" style="margin:0">상품 설명</label><div style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><button type="button" id="saveBtnInline" onclick="saveProduct()" style="padding:7px 12px;font-size:12px;white-space:nowrap">상품 등록하기</button><button type="button" class="secondary" onclick="resetForm()" style="padding:7px 12px;font-size:12px;white-space:nowrap">초기화</button></div></div><textarea id="description"></textarea><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px"><label style="margin:0">카테고리</label><button type="button" id="categoryLockBtn" class="secondary" onclick="toggleCategoryLock()" style="padding:7px 11px;font-size:11px;white-space:nowrap">카테고리 고정하기</button></div><div id="categoryOptions" style="display:flex;gap:7px;flex-wrap:wrap"></div><div class="uploadHint" id="categoryLockHint">카테고리를 선택한 뒤 ‘카테고리 고정하기’를 누르면 상품 등록 후에도 선택이 유지돼요.</div><div class="uploadHint">여러 카테고리를 선택하면 같은 상품이 선택한 카테고리에 각각 등록돼요.</div></div><div class="actions"><button id="saveBtn" onclick="saveProduct()">상품 등록하기</button><button class="secondary" onclick="resetForm()">초기화</button></div><div id="msg" class="msg" style="display:none"></div></div><div class="box"><h2>등록된 상품</h2><div id="adminCatBar" class="adminCatBar"></div><div id="adminBrandBar" class="adminBrandBar" hidden></div><div id="bulkBar" class="bulkBar" hidden><label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);cursor:pointer"><input id="selectAllProducts" type="checkbox" style="width:auto;margin:0"> 모두선택</label><span id="bulkCount" class="bulkCount">선택 0개</span><select id="bulkCategory"><option value="">카테고리 선택</option></select><button type="button" onclick="moveSelectedProducts()">선택 상품 이동</button><button type="button" class="secondary" onclick="addSelectedProductsToCategory()">선택 상품 카테고리에 추가</button></div><div class="productSearchTools"><input id="adminProductSearch" type="search" placeholder="상품명·브랜드·카테고리 검색"><button type="button" class="secondary" onclick="renderAdminProductList()">검색</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(true)">전체 상품 SOLD OUT</button><button type="button" class="secondary" onclick="setAllProductsSoldOut(false)">전체 품절 해제</button></div><div id="list"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-excel"><h2 class="adminSectionTitle">엑셀등록</h2>
 <div id="stagedDraftBanner" class="stagedDraftBanner" hidden></div>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
-  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
+  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
   <div class="row">
     <div>
       <label>통합 압축 파일 (.zip · 여러 개 한 번에 선택 가능)</label>
@@ -468,7 +476,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <div id="stagedGrid" class="productAdminGrid"></div>
   <div id="stagedApplyStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
-</div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="resetOrdersView()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderStatusTabs" class="orderStatusTabs"></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="resetMembersView()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
+</div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="resetOrdersView()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderStatusTabs" class="orderStatusTabs"></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-untyped"><h2 class="adminSectionTitle">분류안된상품</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>분류안된상품</h2><button type="button" id="untypedSaveAll" class="secondary">선택한 것 모두 저장</button></div><p class="note">상품명으로 자동 분류가 안 된 상품이에요. (관리자에게만 보여요) 종류를 고르고 저장하면 같은 상품명의 모든 카테고리 상품에 한 번에 적용돼요. 분류 전에는 고객페이지 ALL에서 종류 버튼을 눌렀을 때 보이지 않아요.</p><div id="untypedCount" class="filterCount"></div><div id="untypedList"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="resetMembersView()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
 <div class="box" id="adminPushBox" style="margin:14px 0;background:#f7f3ed">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:200px"><b style="font-size:14px">휴대폰 승인요청 · 주문 알림</b><div id="adminPushStatus" class="note" style="margin-top:6px">알림을 켜면 새 회원 승인요청과 새 주문이 들어올 때 휴대폰으로 알려드려요. 관리자 계정마다 기기에서 한 번씩 설정해주세요.</div></div>
@@ -648,6 +656,99 @@ function loadExternalScript(src){return new Promise((res,rej)=>{const s=document
 async function ensureZipLibs(){
   if(typeof JSZip==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
   if(typeof XLSX==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+}
+/* ===== 상품 종류 자동 분류 (아우터/상의/하의/원피스·세트/악세사리 세부) ===== */
+const PRODUCT_TYPE_CLEAN=[[new RegExp("^\\([^)]*\\)"),''],[new RegExp("^[^()]{1,10}\\)"),''],[new RegExp("^b(?=[\uac00-\ud7a3])"),''],[new RegExp("^acc(?=[\uac00-\ud7a3])"),''],[new RegExp("(\\([^)]*\\))+$"),''],[new RegExp("-\ub9d8\ucee4\ud50c$"),'']];
+const PRODUCT_TYPE_RULES=[["사이즈표",new RegExp("\uc0ac\uc774\uc988\ud45c")],["악세사리/헤어",new RegExp("\ud5e4\uc5b4|(\ud540\uc138\ud2b8|\ud540|\ubc34\ub4dc|\uc288\uc288|\ub048|\ud074\ub9bd|\uc655\uad00)$")],["악세사리/양말",new RegExp("(\uc591\ub9d0|\uc0ad\uc2a4|\ud0c0\uc774\uc988|\uc2a4\ud0c0\ud0b9|\ub808\uadf8\uc6cc\uba38|\ud48b\uc6cc\uba38|\ubc1c\uc6cc\uba38|\ubc1c\ud1a0\uc2dc)$|(\uc0ad\uc2a4|\uc2a4\ud0c0\ud0b9)\uc138\ud2b8$")],["악세사리/신발",new RegExp("(\uc288\uc988|\uc2ac\ub9ac\ud37c|\uc2a4\ub2c8\ucee4\uc988|\ub85c\ud37c|\uc2ac\ub9bd\uc628|\ubd80\uce20)$|^\uc791\uc740\uae30\ubaa8")],["악세사리/모자",new RegExp("(\ubaa8\uc790|\ube44\ub2c8|\ubc14\ub77c\ud074\ub77c\ubc14|\ubcf4\ub137|\ubcf4\ub2db|\ubcf4\ub0c7|\ud587|\ucea1|\ubc99\uac70\uc9c0|\ubca0\ub808\ubaa8|\ud130\ubc88|\ub450\uac74|\uc0bc\uac01\uac74|\uadc0\ub3c4\ub9ac|\uadc0\ub2ec\uc774|\uace0\uae54|\uc774\uc5b4\ud50c\ub7a9)(set)?$|^\ube44\ub2c8\\+")],["악세사리/기타",new RegExp("(\ubaa9\ub3c4\ub9ac|\uba38\ud50c\ub7ec|\uc2a4\uce74\ud504|\uc7a5\uac11|\uac00\ubc29|\ubc31\ud329|\ubc31|\ud30c\uc6b0\uce58|\ud0a4\ub9c1|\uc5d0\uc774\ud504\ub7f0|\uc55e\uce58\ub9c8|\ud131\ubc1b\uc774|\ube55|\ubaa9\uac78\uc774|\ub125\uc6cc\uba38|\uc774\uc5b4\uc6cc\uba38|\uc6cc\uba38|\ud1a0\uc2dc|\ucee4\uce58\ud504|\ube14\ub7ad\ud0b7|\uc2f8\uac1c|\uce74\ub77c)$")],["원피스·세트",new RegExp("(\uc288\ud2b8|\uc218\ud2b8|\uc138\ud2b8\\d*|\uc14b\ud2b8|\uc14b\uc5c5|set|\uc0c1\ud558|\uc0c1\ud558\ubcf5|\uc2e4\ub0b4\ubcf5|\ub0b4\ubcf5|\uc62c\uc778\uc6d0|\uc6b0\uc8fc\ubcf5|\uc624\ubc84\ub864|\ub86c\ud37c|\uc6d0\ud53c\uc2a4|\ubdd4\uc2a4\ud2f0\uc5d0|\ubdd4\uc2a4\ud2b8\uc5d0|\uc810\ud37c\uc2a4\ucee4\ud2b8|\uc720\ubc1c)$")],["상의",new RegExp("\ubc18\uc9d1\uc5c5$")],["아우터",new RegExp("(\uc810\ud37c|\uc790\ucf13|\uc7c8\ucf13|\uc7ac\ud0b7|\ucf54\ud2b8|\ud328\ub529|\ubca0\uc2a4\ud2b8|\uc870\ub07c|\uac00\ub514\uac74|\uc9d1\uc5c5|\uc544\ub178\ub77d|\ubb34\uc2a4\ud0d5|\ud6c4\ub9ac\uc2a4|\ucf00\uc774\ud504|\ub9dd\ud1a0|\ud310\ucd78|\ud30c\uce74|\uc57c\uc0c1)$|[\uac00-\ud7a3a-z]*(jk|cd|vest)$")],["상의",new RegExp("(\ub9e8\ud22c\ub9e8|mtm|\ud2f0|\ud2f0\uc154\uce20|\ud2f0\uc167|\uc154\uce20|\ub2c8\ud2b8|\uc2a4\uc6e8\ud130|\ube14\ub77c\uc6b0\uc2a4|\ube0c\ub77c\uc6b0\uc2a4|\ub098\uc2dc|\ud0d1|\ud3f4\ub77c|\ud6c4\ub4dc|\ud6c4\ub514|\ubc18\ud314|\ud640\ud130\ub125)$|[\uac00-\ud7a3](nt|t)$")],["하의",new RegExp("(\ud32c\uce20|\ud32c\uc988|\ubc14\uc9c0|\ub808\uae45\uc2a4|\uc2a4\ucee4\ud2b8|\uce58\ub9c8|\uc20f\uce20|\uc1fc\uce20|\ubc18\ubc14\uc9c0|\ub370\ub2d8|\ubd80\uce20\ucef7|\uba5c\ube75|\ube14\ub8e8\uba38|\uc870\uac70|\uace0\uc7c1\uc774|\uce58\ub81d\uc2a4|\uce58\ub7ad|\uc2a4\ud328\uce20|\uc54c\ub77c\ub518|\ubc30\uae30)$|[\uac00-\ud7a3]pt$")]];
+const PRODUCT_TYPE_FALLBACK=[["원피스·세트",new RegExp("\uc288\ud2b8|\uc218\ud2b8|\uc138\ud2b8|\uc14b\uc5c5|\uc0c1\ud558|\uc62c\uc778\uc6d0|\uc6b0\uc8fc\ubcf5|\uc624\ubc84\ub864|\uc6d0\ud53c\uc2a4")],["하의",new RegExp("\ud32c\uce20|\ubc14\uc9c0|\ub808\uae45\uc2a4|\uc2a4\ucee4\ud2b8|\uc870\uac70|\uce58\ub9c8")],["아우터",new RegExp("\uc810\ud37c|\uc790\ucf13|\uc7ac\ud0b7|\ucf54\ud2b8|\ud328\ub529|\ubca0\uc2a4\ud2b8|\uc870\ub07c|\uac00\ub514\uac74|\uc9d1\uc5c5|\uc544\ub178\ub77d")],["상의",new RegExp("\ub9e8\ud22c\ub9e8|\ud2f0|\ub2c8\ud2b8|\uc154\uce20|\ud3f4\ub77c|\ud6c4\ub4dc|\ube14\ub77c\uc6b0\uc2a4|\ub098\uc2dc")],["악세사리/모자",new RegExp("\ubaa8\uc790|\ube44\ub2c8|\ud587|\ucea1|\ubcf4\ub137")],["악세사리/양말",new RegExp("\uc591\ub9d0|\uc0ad\uc2a4")],["악세사리/기타",new RegExp("\ud540|\uba38\ud50c\ub7ec|\ubaa9\ub3c4\ub9ac|\uc6cc\uba38|\uc7a5\uac11|\uac00\ubc29")]];
+function classifyProductType(name){
+  let s=String(name||'').trim().toLowerCase();const isAcc=s.startsWith('acc');
+  PRODUCT_TYPE_CLEAN.forEach(([re,rep])=>{s=s.replace(re,rep)});s=s.trim();
+  for(const [l,re] of PRODUCT_TYPE_RULES)if(re.test(s))return l;
+  for(const [l,re] of PRODUCT_TYPE_FALLBACK)if(re.test(s))return l;
+  return isAcc?"악세사리/기타":null;
+}
+
+/* ===== 상품 종류(드롭다운) / 분류안된상품 관리 ===== */
+const PRODUCT_TYPE_CHOICES=[["아우터", "아우터"], ["상의", "상의"], ["하의", "하의"], ["원피스·세트", "원피스·세트"], ["악세사리/모자", "악세사리 › 모자"], ["악세사리/신발", "악세사리 › 신발"], ["악세사리/양말", "악세사리 › 양말"], ["악세사리/헤어", "악세사리 › 헤어"], ["악세사리/기타", "악세사리 › 기타"]];
+function productTypeOptionsHtml(blankLabel){return '<option value="">'+blankLabel+'</option>'+PRODUCT_TYPE_CHOICES.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')}
+function updateProductTypeHint(){
+  const sel=$('productType'),hint=$('productTypeHint');if(!sel)return;
+  const auto=classifyProductType($('name').value);
+  sel.options[0].textContent='자동 분류'+(auto?' (현재: '+auto.replace('/',' › ')+')':' (분류 불가 → 분류안된상품에 표시)');
+  if(hint)hint.textContent=sel.value?'직접 고른 종류로 저장돼요.':'비워두면 상품명을 보고 자동으로 분류해요. 틀리면 직접 골라주세요.';
+}
+function existingProductTypeOf(id){const r=(window.__allAdminProducts||[]).find(x=>String(x.id)===String(id));return r?r.product_type:null}
+async function setProductTypeByName(brand,name,type){
+  let q='/rest/v1/products?name=eq.'+encodeURIComponent(name);
+  q+=brand?('&brand=eq.'+encodeURIComponent(brand)):'&or=(brand.is.null,brand.eq.)';
+  const r=await api(q,{method:'PATCH',body:JSON.stringify({product_type:type||null}),headers:{'Prefer':'return=representation'}});
+  if(!Array.isArray(r)||!r.length)throw new Error('저장할 권한이 없거나 상품을 찾지 못했어요.');
+  (window.__allAdminProducts||[]).forEach(p=>{if(String(p.name||'')===name&&String(p.brand||'')===String(brand||''))p.product_type=type||null});
+  return r.length;
+}
+function untypedGroups(){
+  const m=new Map();
+  (window.__allAdminProducts||[]).forEach(p=>{
+    if(p.product_type||p.is_size_chart===true||/사이즈\s*표/.test(String(p.name||'')))return;
+    if(classifyProductType(p.name))return;
+    const k=String(p.brand||'')+'||'+String(p.name||'');
+    if(!m.has(k))m.set(k,{brand:String(p.brand||''),name:String(p.name||''),count:0,img:(p.images||[])[0]||''});
+    m.get(k).count++;
+  });
+  return [...m.values()].sort((a,b)=>a.brand.localeCompare(b.brand,'ko-KR')||a.name.localeCompare(b.name,'ko-KR'));
+}
+function renderUntyped(){
+  const box=$('untypedList');if(!box)return;
+  const groups=untypedGroups();window.__untypedGroups=groups;
+  const nav=$('untypedNavBtn');if(nav)nav.textContent='분류안된상품'+(groups.length?' ('+groups.length+')':'');
+  const cnt=$('untypedCount');if(cnt)cnt.textContent=groups.length?('자동 분류가 안 된 상품 '+groups.length+'개'):'';
+  if(!groups.length){box.innerHTML='<p class="note">분류가 필요한 상품이 없어요 🤍</p>';return}
+  const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  box.innerHTML=groups.map((g,i)=>'<div class="untypedRow" data-i="'+i+'">'+
+    (g.img?'<img src="'+esc(g.img)+'" alt="">':'<div class="untypedNoImg"></div>')+
+    '<div class="untypedInfo"><b>'+esc(g.name)+'</b><span>'+esc(g.brand||'브랜드 없음')+(g.count>1?' · '+g.count+'개 카테고리에 등록':'')+'</span></div>'+
+    '<select class="untypedSel">'+productTypeOptionsHtml('종류 선택')+'</select>'+
+    '<button type="button" class="untypedSave" data-i="'+i+'">저장</button></div>').join('');
+}
+async function saveUntypedRow(i,btn){
+  const g=(window.__untypedGroups||[])[i];if(!g)return false;
+  const row=document.querySelector('.untypedRow[data-i="'+i+'"]');const type=row?row.querySelector('.untypedSel').value:'';
+  if(!type){alert('종류를 먼저 선택해주세요.');return false}
+  if(btn)btn.disabled=true;
+  try{await setProductTypeByName(g.brand,g.name,type);return true}
+  catch(e){alert('저장 실패: '+(e.message||e)+'\n\nSupabase에서 product_type 칸을 먼저 만들었는지(product_type_setup.sql ①번) 확인해주세요.');if(btn)btn.disabled=false;return false}
+}
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('.untypedSave');
+  if(b){if(await saveUntypedRow(Number(b.dataset.i),b)){renderUntyped();msg('종류가 저장됐어요 🤍')}return}
+  if(e.target.closest('#untypedSaveAll')){
+    const rows=[...document.querySelectorAll('.untypedRow')].filter(r=>r.querySelector('.untypedSel').value);
+    if(!rows.length)return alert('종류를 선택한 상품이 없어요.');
+    let ok=0;for(const r of rows){if(await saveUntypedRow(Number(r.dataset.i),null))ok++;else break}
+    renderUntyped();if(ok)msg(ok+'개 상품의 종류가 저장됐어요 🤍');
+  }
+});
+
+function isAccCategoryId(id){
+  let c=categories.find(x=>String(x.id)===String(id));const seen=new Set();
+  while(c&&!seen.has(String(c.id))){
+    if(/ACC/i.test(String(c.name||'')))return true;
+    seen.add(String(c.id));
+    c=c.parent_id==null?null:categories.find(x=>String(x.id)===String(c.parent_id));
+  }
+  return false;
+}
+/* 회원가 자동 계산: 일반 25% 할인, ACC(악세사리) 카테고리는 20% 할인.
+   도매가가 있으면 회원가가 도매가보다 최소 1,000원은 높도록 보정(상품가를 넘지는 않음) */
+function calcMemberPrice(normal,wholesale,categoryIds){
+  normal=Number(normal);
+  if(!Number.isFinite(normal)||normal<=0)return null;
+  const acc=(categoryIds||[]).some(isAccCategoryId);
+  let m=Math.round(normal*(acc?0.8:0.75));
+  const w=(wholesale===null||wholesale===''||wholesale===undefined)?NaN:Number(wholesale);
+  if(Number.isFinite(w)&&w>0&&m-w<1000)m=Math.min(normal,w+1000);
+  return m;
 }
 function bulkNorm(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').toLocaleLowerCase('ko-KR')}
 function bulkNum(v){if(typeof v==='number')return v;const n=Number(String(v??'').replace(/[^\d.\-]/g,''));return Number.isFinite(n)?n:NaN}
@@ -859,6 +960,7 @@ function editStaged(sid){
   $('sizes').value=p.sizes.join(', ');
   $('onePlusOne').checked=!!p.onePlusOne;
   $('description').value=p.description||'';
+  $('productType').value=p.productType||'';updateProductTypeHint();
   setSelectedCategories(p.categoryIds);
   toggleSizeChartFields();
   renderSelectedImages();
@@ -889,7 +991,7 @@ function saveStagedFromForm(){
     colors:isSizeChart?[]:parseOptionList($('colors').value),
     sizes:isSizeChart?[]:parseOptionList($('sizes').value),
     onePlusOne:!isSizeChart&&$('onePlusOne').checked,
-    isSizeChart,description:$('description').value,categoryIds:selectedCategoryIds,
+    isSizeChart,productType:$('productType').value||null,description:$('description').value,categoryIds:selectedCategoryIds,
     files:photoItems.filter(x=>x.type==='new').map(x=>x.file),
     lastError:'',uploadedUrls:null,selected:true
   });
@@ -966,7 +1068,7 @@ async function analyzeBulkZip(){
       }
       const files=await readFiles(imgs);
       const normal=Number.isFinite(p.retail)?p.retail:0;
-      const member=(p.member!==null&&Number.isFinite(p.member))?p.member:(normal>0?Math.round(normal*0.75):null);
+      const member=(p.member!==null&&Number.isFinite(p.member))?p.member:calcMemberPrice(normal,p.wholesale,[String(cat.id)]);
       const item={sid:++stagedSeq,row:p.row,photoFolder:p.folder,code:p.code,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,onePlusOne:!!p.onePlus,description:'',categoryIds:[String(cat.id)],files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null};
       added.push(item);stagedByKey.set(key,item);
     }
@@ -1016,7 +1118,7 @@ async function applyStagedProducts(){
         for(const cid of p.categoryIds){
           const cat=categories.find(c=>String(c.id)===String(cid));
           if(!cat)throw new Error('카테고리를 찾을 수 없어요');
-          const inserted=await api('/rest/v1/products',{method:'POST',body:JSON.stringify({name:p.name,brand:p.brand,normal_price:p.isSizeChart?0:p.normal,member_price:p.isSizeChart?null:p.member,colors:p.colors,sizes:p.sizes,is_size_chart:!!p.isSizeChart,...(p.onePlusOne&&!p.isSizeChart?{is_one_plus_one:true}:{}),description:p.description||'',images:p.uploadedUrls,category:cat.name,category_id:cat.id,sort_order:nextOrder++}),headers:{'Prefer':'return=representation'}});
+          const inserted=await api('/rest/v1/products',{method:'POST',body:JSON.stringify({name:p.name,brand:p.brand,normal_price:p.isSizeChart?0:p.normal,member_price:p.isSizeChart?null:p.member,colors:p.colors,sizes:p.sizes,is_size_chart:!!p.isSizeChart,product_type:p.isSizeChart?'사이즈표':(p.productType||classifyProductType(p.name)),...(p.onePlusOne&&!p.isSizeChart?{is_one_plus_one:true}:{}),description:p.description||'',images:p.uploadedUrls,category:cat.name,category_id:cat.id,sort_order:nextOrder++}),headers:{'Prefer':'return=representation'}});
           if(inserted?.[0]?.id!=null)savedIds.push(String(inserted[0].id));
           remaining.splice(remaining.indexOf(cid),1);
           p.categoryIds=remaining.length?remaining:p.categoryIds;
@@ -1121,6 +1223,7 @@ async function saveProduct(){
       colors:isSizeChart?[]:parseOptionList($('colors').value),
       sizes:isSizeChart?[]:parseOptionList($('sizes').value),
       is_size_chart:isSizeChart,
+      product_type:isSizeChart?'사이즈표':($('productType').value||(editingId?existingProductTypeOf(editingId):null)||classifyProductType(name)),
       ...onePlusPayload(isSizeChart),
       description:$('description').value,
       images:urls
@@ -1142,6 +1245,7 @@ async function saveProduct(){
         if(inserted?.[0]?.id!=null)savedProductIds.push(String(inserted[0].id));
       }
     }
+    if(wasEditing&&$('productType').value&&!isSizeChart){try{await setProductTypeByName(basePayload.brand||'',name,$('productType').value)}catch(typeErr){console.warn('종류 일괄 저장 실패',typeErr)}}
     let wholesaleSaveError=null;
     if(wholesaleRaw!==''||wasEditing){
       try{
@@ -1181,8 +1285,21 @@ $('normal').addEventListener('input',()=>{
   const raw=$('normal').value.trim();
   if(raw===''){$('member').value='';return;}
   const normal=Number(raw);
-  if(Number.isFinite(normal)&&normal>=0){$('member').value=String(Math.round(normal*0.75));}
+  if(Number.isFinite(normal)&&normal>=0){const m=calcMemberPrice(normal,$('wholesale').value.trim(),getSelectedCategories());$('member').value=m==null?'':String(m);}
 });
+/* 도매가·카테고리를 바꿔도 회원가 자동 재계산 (회원가를 직접 고친 경우는 건드리지 않음) */
+let memberManuallyEdited=false;
+$('member').addEventListener('input',e=>{if(e.isTrusted)memberManuallyEdited=true});
+function recalcMemberAuto(){
+  if(memberManuallyEdited||$('isSizeChart').checked)return;
+  const raw=$('normal').value.trim();if(raw==='')return;
+  const m=calcMemberPrice(Number(raw),$('wholesale').value.trim(),getSelectedCategories());
+  $('member').value=m==null?'':String(m);
+}
+$('wholesale').addEventListener('input',recalcMemberAuto);
+$('name').addEventListener('input',updateProductTypeHint);
+$('productType').addEventListener('change',updateProductTypeHint);
+document.addEventListener('change',e=>{if(e.target&&e.target.name==='category')recalcMemberAuto()});
 $('preview').addEventListener('dragstart',e=>{const item=e.target.closest('.previewItem');if(!item)return;draggedPhotoId=item.dataset.photoId;item.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',draggedPhotoId)});
 $('preview').addEventListener('dragover',e=>{const item=e.target.closest('.previewItem');if(!item)return;e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('#preview .previewItem.dragOver').forEach(x=>x.classList.remove('dragOver'));if(item.dataset.photoId!==draggedPhotoId)item.classList.add('dragOver')});
 $('preview').addEventListener('drop',e=>{const target=e.target.closest('.previewItem');if(!target)return;e.preventDefault();const targetId=target.dataset.photoId;if(!draggedPhotoId||draggedPhotoId===targetId)return;const from=photoItems.findIndex(x=>x.id===draggedPhotoId),to=photoItems.findIndex(x=>x.id===targetId);if(from<0||to<0)return;const [moved]=photoItems.splice(from,1);photoItems.splice(to,0,moved);syncSelectedFiles();renderSelectedImages()});
@@ -1192,7 +1309,7 @@ function resetForm(){
   if($('onePlusOne'))$('onePlusOne').checked=false;window.__editingOnePlusInitial=false;
   editingId=null;editingImages=[];photoItems=[];draggedPhotoId='';
   stagedEditingId=null;if($('stagedEditBanner'))$('stagedEditBanner').hidden=true;
-  ['name','wholesale','normal','member','colors','sizes','description'].forEach(id=>$(id).value='');
+  ['name','wholesale','normal','member','colors','sizes','description','productType'].forEach(id=>$(id).value='');updateProductTypeHint();
   $('brand').value=brandLocked?brandLockedValue:'';
   syncBrandLockUI();
   syncSizeLockUI();
@@ -1211,7 +1328,7 @@ function msg(t){$('msg').textContent=t;$('msg').style.display='block';setTimeout
 let adminCategoryFilter='ALL',adminCategoryFilterId=null,adminBrandFilter='ALL',selectedProductIds=new Set(),categories=[],editingCategoryId=null,categoryOpenIds=new Set();
 
 function normalizeBrand(v){
-  return String(v||'').trim().toLocaleLowerCase('ko-KR');
+  return String(v??'').normalize('NFKC').replace(/[\s\u00a0\u200b-\u200d\ufeff]+/g,'').toLocaleLowerCase('ko-KR');
 }
 function categoryTreeRows(parentId=null,depth=0,rows=[]){
   categories.filter(c=>String(c.parent_id??'')===String(parentId??'')).sort((x,y)=>(Number(x.sort_order)||0)-(Number(y.sort_order)||0)||String(x.name).localeCompare(String(y.name),'ko-KR',{numeric:true})).forEach(c=>{rows.push({c,depth});categoryTreeRows(c.id,depth+1,rows)});
@@ -1504,7 +1621,8 @@ function renderAdminFilters(data){
     loadProducts();
   }));
 
-  const brands=[...new Set(data.map(p=>String(p.brand||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
+  const brandMap=new Map();data.forEach(p=>{const label=String(p.brand||'').normalize('NFC').replace(/\s+/g,' ').trim();const k=normalizeBrand(label);if(k&&!brandMap.has(k))brandMap.set(k,label)});
+  const brands=[...brandMap.values()].sort((a,b)=>a.localeCompare(b,'ko-KR',{numeric:true}));
   if(adminCategoryFilter!=='BRAND'){
     brandBar.hidden=true; brandBar.innerHTML=''; return;
   }
@@ -1664,6 +1782,7 @@ async function loadProducts(){
     renderAdminFilters(data);
     window.__allAdminProducts=data;
     renderAdminProductList();
+    try{renderUntyped()}catch(_){}
   }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
 }
 
@@ -1702,7 +1821,7 @@ async function moveProduct(id,direction){
 }
 
 async function getProduct(id){const d=await api('/rest/v1/products?select=*&id=eq.'+id);return d[0]}
-async function editProduct(id){const p=await getProduct(id);if(!p)return;if(brandLocked&&normalizeBrand(p.brand)!==normalizeBrand(brandLockedValue)){alert('현재 '+brandLockedValue+' 브랜드가 고정되어 있어요. 다른 브랜드 상품을 수정하려면 먼저 브랜드 고정을 해제해주세요.');return;}if(categoryLocked&&!categoryLockedIds.includes(String(resolveProductCategoryId(p)))){alert('현재 카테고리가 고정되어 있어요. 다른 카테고리 상품을 수정하려면 먼저 카테고리 고정을 해제해주세요.');return;}if(sizeLocked&&parseOptionList((p.sizes||[]).join(',')).join('|')!==parseOptionList(sizeLockedValue).join('|')){alert('현재 사이즈가 '+sizeLockedValue+'로 고정되어 있어요. 다른 사이즈 상품을 수정하려면 먼저 사이즈 고정을 해제해주세요.');return;}editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([resolveProductCategoryId(p)].filter(Boolean));$('isSizeChart').checked=!!p.is_size_chart;$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('onePlusOne').checked=p.is_one_plus_one===true;window.__editingOnePlusInitial=p.is_one_plus_one===true;$('description').value=p.description||'';try{$('wholesale').value=await getPrivateWholesalePrice(p.id)}catch(priceReadError){$('wholesale').value='';console.warn('도매가를 불러오지 못했어요.',priceReadError)}toggleSizeChartFields();$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';$('saveBtnInline').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
+async function editProduct(id){const p=await getProduct(id);if(!p)return;if(brandLocked&&normalizeBrand(p.brand)!==normalizeBrand(brandLockedValue)){alert('현재 '+brandLockedValue+' 브랜드가 고정되어 있어요. 다른 브랜드 상품을 수정하려면 먼저 브랜드 고정을 해제해주세요.');return;}if(categoryLocked&&!categoryLockedIds.includes(String(resolveProductCategoryId(p)))){alert('현재 카테고리가 고정되어 있어요. 다른 카테고리 상품을 수정하려면 먼저 카테고리 고정을 해제해주세요.');return;}if(sizeLocked&&parseOptionList((p.sizes||[]).join(',')).join('|')!==parseOptionList(sizeLockedValue).join('|')){alert('현재 사이즈가 '+sizeLockedValue+'로 고정되어 있어요. 다른 사이즈 상품을 수정하려면 먼저 사이즈 고정을 해제해주세요.');return;}editingId=p.id;editingImages=p.images||[];photoItems=editingImages.map((url,i)=>({id:'photo-existing-'+i+'-'+crypto.randomUUID(),type:'existing',url}));setSelectedFiles([]);$('name').value=p.name||'';$('brand').value=p.brand||'';setSelectedCategories([resolveProductCategoryId(p)].filter(Boolean));$('isSizeChart').checked=!!p.is_size_chart;$('normal').value=p.normal_price||'';$('member').value=p.member_price??'';$('colors').value=(p.colors||[]).join(', ');$('sizes').value=(p.sizes||[]).join(', ');$('onePlusOne').checked=p.is_one_plus_one===true;window.__editingOnePlusInitial=p.is_one_plus_one===true;$('description').value=p.description||'';$('productType').value=p.product_type||'';updateProductTypeHint();try{$('wholesale').value=await getPrivateWholesalePrice(p.id)}catch(priceReadError){$('wholesale').value='';console.warn('도매가를 불러오지 못했어요.',priceReadError)}toggleSizeChartFields();$('preview').innerHTML='';renderSelectedImages();$('saveBtn').textContent='상품 수정하기';$('saveBtnInline').textContent='상품 수정하기';document.getElementById('productRegisterBox')?.scrollIntoView({behavior:'smooth',block:'center'})}
 function categoryPathText(name,categoryId=null){
   const target=String(name||'').trim();
   if(!target)return '-';
