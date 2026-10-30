@@ -310,22 +310,71 @@ function setCategory(x,id=null){
 function brandKey(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0\u200b-\u200d\ufeff]+/g,'').toLocaleLowerCase('ko-KR')}
 const PRODUCT_TYPE_TOP=['아우터','상의','하의','원피스·세트','악세사리'];
 const PRODUCT_TYPE_ACC_SUB=['모자','신발','양말','헤어','기타'];
-function productTypeMatches(p){
-  if(category!=='ALL'||typeFilter==='ALL')return true;
-  const t=String(p.product_type||'');
-  if(typeFilter==='악세사리'){
-    if(!t.startsWith('악세사리/'))return false;
-    return subTypeFilter==='ALL'||t==='악세사리/'+subTypeFilter;
+const __accChainCache=new Map();
+function isAccCategoryChain(id){
+  if(id==null||id==='')return false;
+  const ck=String(id)+'|'+siteCategories.length;
+  if(__accChainCache.has(ck))return __accChainCache.get(ck);
+  let cur=siteCategories.find(c=>String(c.id)===String(id)),res=false;const seen=new Set();
+  while(cur&&!seen.has(String(cur.id))){
+    if(/acc/i.test(String(cur.name||''))){res=true;break}
+    seen.add(String(cur.id));
+    cur=cur.parent_id==null?null:siteCategories.find(c=>String(c.id)===String(cur.parent_id));
   }
-  return t===typeFilter;
+  __accChainCache.set(ck,res);return res;
+}
+function accSubFromCategoryName(n){
+  n=String(n||'').trim();
+  if(/모자/.test(n))return'모자';
+  if(/신발/.test(n))return'신발';
+  if(/양말|타이즈/.test(n))return'양말';
+  if(/헤어|핀/.test(n))return'헤어';
+  if(n==='기타')return'기타';
+  return null;
+}
+/* 악세사리 세부 종류: ACC 카테고리 안의 상품은 카테고리 이름(모자/신발/…)을 우선, 없으면 상품 종류값, 그래도 없으면 기타 */
+function accSubOf(p){
+  const t=String(p.product_type||'');
+  const typeSub=t.startsWith('악세사리/')?t.slice(5):null;
+  if(p.category_id!=null&&isAccCategoryChain(p.category_id)){
+    const c=siteCategories.find(x=>String(x.id)===String(p.category_id));
+    return accSubFromCategoryName(c?c.name:p.category)||typeSub||'기타';
+  }
+  return typeSub;
+}
+/* 26WINTER ACC 처럼 악세사리 묶음 카테고리를 보는 중이면 세부 버튼(모자/신발/양말/헤어/기타)을 보여줌 */
+function accSubBarVisible(){
+  if(category==='ALL'||category==='BRAND'||categoryId==null||categoryId==='')return false;
+  if(!isAccCategoryChain(categoryId))return false;
+  const cur=siteCategories.find(c=>String(c.id)===String(categoryId));
+  return !(cur&&accSubFromCategoryName(cur.name));
+}
+function productTypeMatches(p){
+  if(category==='ALL'){
+    if(typeFilter==='ALL')return true;
+    if(typeFilter==='악세사리'){
+      const sub=accSubOf(p);
+      if(!sub)return false;
+      return subTypeFilter==='ALL'||sub===subTypeFilter;
+    }
+    return String(p.product_type||'')===typeFilter;
+  }
+  if(accSubBarVisible()){
+    return subTypeFilter==='ALL'||(accSubOf(p)||'기타')===subTypeFilter;
+  }
+  return true;
 }
 function setTypeFilter(x){typeFilter=x||'ALL';subTypeFilter='ALL';currentProductPage=1;render()}
 function setSubTypeFilter(x){subTypeFilter=x||'ALL';currentProductPage=1;render()}
 function renderTypeFilters(){
   const el=document.getElementById('typeCats');if(!el)return;
-  /* 분류값(product_type)이 DB에 아직 없으면 버튼을 숨겨둠 */
-  if(category!=='ALL'||!products.some(p=>p.product_type)){el.hidden=true;el.innerHTML='';return}
   const row=(items,cur,attr,cls)=>`<div class="typeRow ${cls||''}">${['ALL',...items].map(x=>`<button type="button" class="${cur===x?'active':''}" ${attr}="${x}">${x}</button>`).join('')}</div>`;
+  if(accSubBarVisible()){
+    el.innerHTML=row(PRODUCT_TYPE_ACC_SUB,subTypeFilter,'data-subtype');
+    el.hidden=false;return;
+  }
+  /* 분류값(product_type)이 DB에 아직 없으면 ALL 화면의 종류 버튼은 숨겨둠 */
+  if(category!=='ALL'||!products.some(p=>p.product_type)){el.hidden=true;el.innerHTML='';return}
   el.innerHTML=row(PRODUCT_TYPE_TOP,typeFilter,'data-type')+(typeFilter==='악세사리'?row(PRODUCT_TYPE_ACC_SUB,subTypeFilter,'data-subtype','sub'):'');
   el.hidden=false;
 }
@@ -466,7 +515,7 @@ function render(){
   if(!user){renderGuestGate();return}
   cats();renderQuickLinks();
   const q=(document.getElementById('search').value||'').toLowerCase();
-  const filterKey=JSON.stringify([category,categoryId,brandFilter,quickView,q,sortMode]);
+  const filterKey=JSON.stringify([category,categoryId,brandFilter,typeFilter,subTypeFilter,quickView,q,sortMode]);
   if(filterKey!==lastProductFilterKey){currentProductPage=1;lastProductFilterKey=filterKey;}
   const favIds=favoriteIds(),recentProductIds=recentIds(),newCutoff=Date.now()-30*24*60*60*1000;
   const visibleProducts=customerVisibleProducts();
