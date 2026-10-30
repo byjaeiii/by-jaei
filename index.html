@@ -144,9 +144,10 @@ body.guestMode #cats,body.guestMode #brandCats,body.guestMode .search,body.guest
 .sortBar select{border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-size:12px;padding:7px 28px 7px 12px;font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,#9b8f84 50%),linear-gradient(135deg,#9b8f84 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
 body.guestMode .sortBar{display:none!important}
 </style>
+<style>.typeCats{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 16px 14px}.typeCats[hidden]{display:none}.typeRow{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px}.typeRow button{white-space:nowrap;border:0;background:transparent;padding:5px 0;color:var(--muted);cursor:pointer;font-size:12px}.typeRow button.active{color:var(--ink);font-weight:700}.typeRow button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:6px}.typeRow.sub button{font-size:11.5px}body.guestMode #typeCats{display:none!important}</style>
 </head>
 <body class="guestMode"><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
-<section class="notice"><b>NOTICE</b><p><strong>주문 전, 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.</p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" enterkeyhint="search" autocomplete="off" oninput="onSearchInput()" onkeydown="onSearchKey(event)"><button type="button" id="searchClear" class="searchClear" aria-label="검색어 지우기" onclick="clearSearch()" hidden>✕</button></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><div class="sortBar" id="sortBar"><select id="sortSelect" aria-label="상품 정렬" onchange="setSort(this.value)"><option value="default">추천순(최신)</option><option value="low">낮은가격순</option><option value="high">높은가격순</option></select></div><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
+<section class="notice"><b>NOTICE</b><p><strong>주문 전, 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.</p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div id="typeCats" class="typeCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" enterkeyhint="search" autocomplete="off" oninput="onSearchInput()" onkeydown="onSearchKey(event)"><button type="button" id="searchClear" class="searchClear" aria-label="검색어 지우기" onclick="clearSearch()" hidden>✕</button></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><div class="sortBar" id="sortBar"><select id="sortSelect" aria-label="상품 정렬" onchange="setSort(this.value)"><option value="default">추천순(최신)</option><option value="low">낮은가격순</option><option value="high">높은가격순</option></select></div><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
 /* 화면 로딩 안전장치: config.js를 못 찾아도 같은 Supabase 프로젝트로 연결하고, 로딩 오류는 화면에 안내해요 */
@@ -174,7 +175,7 @@ body.guestMode .sortBar{display:none!important}
 })();
 </script>
 <script>
-const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',user=null,approved=false,cart=[],detailReturnToCart=false,quickView='all',checkoutDraft=null;
+const {createClient}=supabase;const sb=createClient(BYJAEI_CONFIG.supabaseUrl,BYJAEI_CONFIG.supabaseKey);let products=[],siteCategories=[],category='ALL',categoryId=null,brandFilter='ALL',typeFilter='ALL',subTypeFilter='ALL',user=null,approved=false,cart=[],detailReturnToCart=false,quickView='all',checkoutDraft=null;
 let loyaltyPointsBalance=0, checkoutProductTotal=0, loyaltyPointsReady=false;
 let sortMode='default',authReady=false,authReadyResolve=null;const authReadyPromise=new Promise(r=>{authReadyResolve=r});
 let currentProductPage=1, lastProductFilterKey='', orderSubmissionInProgress=false; const PRODUCTS_PER_PAGE=30;
@@ -242,7 +243,7 @@ async function syncSoldOut(ids){
   }catch(e){console.warn('품절 상태 확인 실패',e);return false}
 }
 function setSort(v){sortMode=(v==='low'||v==='high')?v:'default';currentProductPage=1;render()}
-function setQuickView(view){resetSearchBox();quickView=view||'all';category='ALL';categoryId=null;brandFilter='ALL';render();window.scrollTo({top:0,behavior:'smooth'})}
+function setQuickView(view){resetSearchBox();quickView=view||'all';category='ALL';categoryId=null;brandFilter='ALL';typeFilter='ALL';subTypeFilter='ALL';render();window.scrollTo({top:0,behavior:'smooth'})}
 function renderQuickLinks(){const el=document.getElementById('quickLinks');if(!el)return;el.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===quickView))}
 function rememberRecent(id){const ids=recentIds().filter(x=>x!==String(id));ids.unshift(String(id));writeIdList(recentKey,ids.slice(0,30))}
 function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
@@ -297,16 +298,37 @@ function onSearchKey(e){
   const bar=document.querySelector('.search'),header=document.querySelector('header');
   if(bar)window.scrollTo({top:Math.max(0,window.scrollY+bar.getBoundingClientRect().top-(header?header.getBoundingClientRect().height:0)-8),behavior:'auto'});
 }
-function goHome(){resetSearchBox();category='ALL';categoryId=null;brandFilter='ALL';quickView='all';window.scrollTo({top:0,behavior:'smooth'});render()}
+function goHome(){resetSearchBox();category='ALL';categoryId=null;brandFilter='ALL';typeFilter='ALL';subTypeFilter='ALL';quickView='all';window.scrollTo({top:0,behavior:'smooth'});render()}
 function setCategory(x,id=null){
   resetSearchBox();
   category=x;
   categoryId=id?String(id):null;
-  brandFilter='ALL';
+  brandFilter='ALL';typeFilter='ALL';subTypeFilter='ALL';
   quickView='all';
   render();
 }
 function brandKey(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0\u200b-\u200d\ufeff]+/g,'').toLocaleLowerCase('ko-KR')}
+const PRODUCT_TYPE_TOP=['아우터','상의','하의','원피스·세트','악세사리'];
+const PRODUCT_TYPE_ACC_SUB=['모자','신발','양말','헤어','기타'];
+function productTypeMatches(p){
+  if(category!=='ALL'||typeFilter==='ALL')return true;
+  const t=String(p.product_type||'');
+  if(typeFilter==='악세사리'){
+    if(!t.startsWith('악세사리/'))return false;
+    return subTypeFilter==='ALL'||t==='악세사리/'+subTypeFilter;
+  }
+  return t===typeFilter;
+}
+function setTypeFilter(x){typeFilter=x||'ALL';subTypeFilter='ALL';currentProductPage=1;render()}
+function setSubTypeFilter(x){subTypeFilter=x||'ALL';currentProductPage=1;render()}
+function renderTypeFilters(){
+  const el=document.getElementById('typeCats');if(!el)return;
+  /* 분류값(product_type)이 DB에 아직 없으면 버튼을 숨겨둠 */
+  if(category!=='ALL'||!products.some(p=>p.product_type)){el.hidden=true;el.innerHTML='';return}
+  const row=(items,cur,attr,cls)=>`<div class="typeRow ${cls||''}">${['ALL',...items].map(x=>`<button type="button" class="${cur===x?'active':''}" ${attr}="${x}">${x}</button>`).join('')}</div>`;
+  el.innerHTML=row(PRODUCT_TYPE_TOP,typeFilter,'data-type')+(typeFilter==='악세사리'?row(PRODUCT_TYPE_ACC_SUB,subTypeFilter,'data-subtype','sub'):'');
+  el.hidden=false;
+}
 function setBrandFilter(x){
   brandFilter=x;
   quickView='all';
@@ -403,6 +425,7 @@ function cats(){
   }).join('');
   catEl.innerHTML=`<div class="catScroll"><div class="catTopRow">${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catSubScroll"><div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${selectedCategory&&String(selectedCategory.id)===String(c.id)?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`).join('')}</div></div>`:''}`;
   const newCatScroll=catEl.querySelector('.catScroll');if(newCatScroll&&prevCatScroll)newCatScroll.scrollLeft=prevCatScroll;
+  renderTypeFilters();
   const brandEl=document.getElementById('brandCats');
   if(category!=='BRAND'){
     brandEl.hidden=true; brandEl.innerHTML=''; return;
@@ -431,6 +454,10 @@ document.getElementById('brandCats').addEventListener('click',e=>{
   if(!b) return;
   setBrandFilter(b.dataset.brand);
 });
+document.getElementById('typeCats').addEventListener('click',e=>{
+  const t=e.target.closest('button[data-type]');if(t){setTypeFilter(t.dataset.type);return}
+  const s=e.target.closest('button[data-subtype]');if(s){setSubTypeFilter(s.dataset.subtype)}
+});
 document.getElementById('quickLinks').addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(b)setQuickView(b.dataset.view)});
 function render(){
   const accountLink=document.querySelector('.loginLink');
@@ -458,7 +485,8 @@ function render(){
       }
     }
     const brandOk=category!=='BRAND'||brandFilter==='ALL'||brandKey(p.brand)===brandFilter;
-    return viewOk&&categoryOk&&brandOk&&String(p.name||'').toLowerCase().includes(q);
+    const typeOk=productTypeMatches(p);
+    return viewOk&&categoryOk&&brandOk&&typeOk&&String(p.name||'').toLowerCase().includes(q);
   });
 
   const stamp=v=>{
