@@ -478,7 +478,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 <div id="stagedDraftBanner" class="stagedDraftBanner" hidden></div>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
-  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같아야 해요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
+  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같거나, “하이키키 상품명 색상 사이즈 가격”처럼 상품명이 단어로 들어 있어도 돼요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
   <div class="row">
     <div>
       <label>통합 압축 파일 (.zip · 여러 개 한 번에 선택 가능)</label>
@@ -864,11 +864,12 @@ async function readBulkZip(zipFiles){
     if(ak&&ak!==k){aliasOfKey.set(k,ak);if(!folders.has(ak))folders.set(ak,folders.get(k))}
   });
   folders.forEach(list=>list.sort((a,b)=>bulkNaturalCompare(a.base,b.base)));
-  return {products,folders,folderKeys,aliasOfKey,hasExcel:xlsxEntries.length>0,excelNames};
+  return {products,folders,folderKeys,aliasOfKey,rawByKey,hasExcel:xlsxEntries.length>0,excelNames};
 }
 
-function bulkFindFolder(p,folders,folderKeys){
-  // 우선순위: 엑셀의 사진폴더 열 → 상품명 → 상품코드+상품명 → 상품코드로 시작하는 폴더
+function bulkFindFolder(p,folders,folderKeys,rawByKey,usedKeys){
+  // 우선순위: 엑셀의 사진폴더 열 → 상품명(폴더 이름과 완전히 같을 때) → 상품코드+상품명 → 상품코드로 시작하는 폴더
+  //          → (추가) 폴더 이름이 "브랜드 상품명 색상 사이즈 도매가"처럼 길게 붙어 있어도 상품명이 들어 있으면 찾기
   const tries=[];
   const pf=p.folder||p.photoFolder;
   if(pf)tries.push(bulkNorm(pf));
@@ -879,6 +880,31 @@ function bulkFindFolder(p,folders,folderKeys){
     const ck=bulkNorm(p.code);
     const hit=folderKeys.find(fk=>fk.startsWith(ck)&&!/\d/.test(fk.charAt(ck.length)||''));
     if(hit)return {key:hit,list:folders.get(hit)||[]};
+  }
+  if(rawByKey){
+    const nk=bulkNorm(p.name),bk=bulkNorm(p.brand);
+    if(nk){
+      // 1단계: 폴더 이름을 띄어쓰기로 나눈 단어(또는 이어붙인 단어들)가 상품명과 똑같은 폴더
+      let hits=folderKeys.filter(fk=>{
+        const toks=String(rawByKey.get(fk)||'').split(/[\s_]+/).filter(Boolean);
+        for(let i=0;i<toks.length;i++){let acc='';for(let j=i;j<toks.length&&j<i+6;j++){acc+=bulkNorm(toks[j]);if(acc===nk)return true;if(acc.length>=nk.length)break}}
+        return false;
+      });
+      // 2단계: 그래도 없으면 "브랜드+상품명"으로 시작하는 폴더 (예: 하이키키MS조거팬츠올리브…)
+      if(!hits.length)hits=folderKeys.filter(fk=>fk.startsWith(bk+nk)||fk.startsWith(nk));
+      if(hits.length){
+        const colors=(p.colors||[]).map(c=>bulkNorm(String(c).replace(/\(.*?\)/g,''))).filter(Boolean);
+        const score=fk=>{
+          let s=0;
+          if(bk&&fk.startsWith(bk))s+=4;
+          if(colors.length&&colors.every(c=>fk.includes(c)))s+=3;      // 같은 이름 상품이 여러 개일 때 색상으로 구분
+          if(!(usedKeys&&usedKeys.has(fk)))s+=2;                         // 이미 다른 상품이 쓴 폴더는 뒤로
+          return s;
+        };
+        const best=hits.map((fk,i)=>({fk,i,s:score(fk)})).sort((x,y)=>y.s-x.s||x.i-y.i)[0];
+        return {key:best.fk,list:folders.get(best.fk)||[]};
+      }
+    }
   }
   return {key:'',list:[]};
 }
@@ -1050,14 +1076,14 @@ async function analyzeBulkZip(){
       }
     }
     say(`ZIP ${zipFiles.length}개를 분석하는 중...`);
-    const {products,folders,folderKeys,aliasOfKey,hasExcel,excelNames}=await readBulkZip(snapshots);
+    const {products,folders,folderKeys,aliasOfKey,rawByKey,hasExcel,excelNames}=await readBulkZip(snapshots);
     const readFiles=async list=>{const files=[];for(const im of list){const blob=await im.entry.async('blob');files.push(new File([blob],im.base,{type:bulkMime(im.base)}))}return files};
     if(!hasExcel){
       // 엑셀이 없는 ZIP만 고른 경우: 이미 대기 목록에 있는 상품 중 이미지가 비어 있는 상품에 폴더 이름으로 이미지를 채워요
       let filledOnly=0;const used=new Set();
       for(const sp of stagedProducts){
         if(sp.files.length)continue;
-        const foundSp=bulkFindFolder(sp,folders,folderKeys);
+        const foundSp=bulkFindFolder(sp,folders,folderKeys,rawByKey,used);
         const imgs=foundSp.list;
         if(!imgs||!imgs.length)continue;
         say(`이미지 채우는 중... ${sp.name}`);
@@ -1082,7 +1108,7 @@ async function analyzeBulkZip(){
       const p=products[i];
       say(`이미지 읽는 중... ${i+1}/${products.length}\n${p.name}`);
       const key=bulkNorm(p.brand)+'|'+bulkNorm(p.name);
-      const found=bulkFindFolder(p,folders,folderKeys);
+      const found=bulkFindFolder(p,folders,folderKeys,rawByKey,usedFolderKeys);
       const imgs=found.list;
       if(found.key)usedFolderKeys.add(found.key);
       const old=stagedByKey.get(key);
