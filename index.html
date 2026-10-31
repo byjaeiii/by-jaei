@@ -813,7 +813,7 @@ async function submitOrder(){
   checkoutDraft=null;
   orderSubmissionInProgress=false;
   const payable=Math.max(0,total-pointsUsed)+3500;
-  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문해주셔서 감사합니다 🤍</strong><br><br>${pointsUsed>0?`적립금 ${won(pointsUsed)} 사용 · `:''}입금 예정액 ${won(payable)} (배송비 ${won(3500)} 포함)<br><br>바이재이에게 1:1 채팅으로 <strong>성함과 연락처</strong>를 남겨주세요!<br><a class="orderDoneChat" href="https://open.kakao.com/o/sm7jFPUi" target="_blank" rel="noopener noreferrer">채팅방 바로 이동하기 ↗</a><button class="continueShopping" onclick="closeLayer('cart')">쇼핑 계속하기</button></div></div>`;
+  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문해주셔서 감사합니다 🤍</strong><br><br>${pointsUsed>0?`적립금 ${won(pointsUsed)} 사용 · `:''}입금 예정액 ${won(payable)} (배송비 ${won(3500)} 포함)<br><button class="continueShopping" onclick="closeLayer('cart')">쇼핑 계속하기</button></div></div>`;
 }
 function orderStatusClass(status){return ({'입금확인':'paid','상품준비중':'prep','배송준비':'prep','배송중':'shipped','배송완료':'done','취소':'cancel'})[status]||''}
 function orderStatusMessage(status){return ({'주문접수':'주문서가 접수되었어요. 입금 안내를 기다려주세요.','입금확인':'입금 확인이 완료되었어요.','상품준비중':'상품을 준비하고 있어요.','배송준비':'배송을 준비하고 있어요.','배송중':'상품이 발송되었어요. 아래 배송 조회를 이용해 주세요.','배송완료':'배송 완료로 처리되었어요.','취소':'취소 처리된 주문이에요.'})[status]||'주문 상태를 확인 중이에요.'}
