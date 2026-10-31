@@ -445,6 +445,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .catMoveInc{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:13px;cursor:pointer}.catMoveInc input{width:auto;margin:0}
 .catMoveBtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 </style>
+<style>.categoryManagerRow{gap:5px}.categoryManagerRow button.catMoveBtn{padding:7px 9px;min-width:0}.catMoveMode{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:13px;font-weight:700;cursor:pointer}.catMoveMode input{width:auto;margin:0}.catMoveMode small{font-weight:400;color:var(--muted);font-size:11px}</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -1479,7 +1480,7 @@ function renderCategoryManager(){
     const statusClass=ownHidden?'isHidden':inheritedHidden?'inheritedHidden':'';
     const toggleText=ownHidden?'다시 표시':'숨기기';
     const toggleClass=ownHidden?'secondary categoryVisibilityBtn':'secondary categoryVisibilityBtn';
-    return `<div class="categoryTreeNode"><div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="categoryToggle">${children.length?`<button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen(${c.id})">${open?'−':'+'}</button>`:'<span class="categoryExpandSpacer"></span>'}</div><div class="grow"><b>${c.name}</b>${children.length?`<div class="categoryDepth">하위 ${children.length}개</div>`:''}<div><span class="categoryVisibilityTag ${statusClass}">${statusText}</span></div></div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="secondary" onclick="openCategoryMoveDialog(${c.id})">상품 이동</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button><button type="button" class="${toggleClass}" onclick="toggleCategoryVisibility('${String(c.id)}')">${toggleText}</button></div>${open?`<div class="categoryTreeChildren">${children.map(ch=>row(ch,depth+1)).join('')}</div>`:''}</div>`;
+    return `<div class="categoryTreeNode"><div class="categoryManagerRow ${depth?'categoryManagerChild':''}"><div class="categoryToggle">${children.length?`<button type="button" class="secondary categoryExpandBtn" onclick="toggleCategoryOpen(${c.id})">${open?'−':'+'}</button>`:'<span class="categoryExpandSpacer"></span>'}</div><div class="grow"><b>${c.name}</b>${children.length?`<div class="categoryDepth">하위 ${children.length}개</div>`:''}<div><span class="categoryVisibilityTag ${statusClass}">${statusText}</span></div></div><button type="button" class="secondary" onclick="moveCategory(${c.id},-1)">↑</button><button type="button" class="secondary" onclick="moveCategory(${c.id},1)">↓</button><button type="button" class="secondary" onclick="editCategory(${c.id})">수정</button><button type="button" class="secondary catMoveBtn" onclick="openCategoryMoveDialog(${c.id})">이동</button><button type="button" class="danger" onclick="deleteCategory(${c.id})">삭제</button><button type="button" class="${toggleClass}" onclick="toggleCategoryVisibility('${String(c.id)}')">${toggleText}</button></div>${open?`<div class="categoryTreeChildren">${children.map(ch=>row(ch,depth+1)).join('')}</div>`:''}</div>`;
   };
   list.innerHTML=roots.map(c=>row(c,0)).join('') || '<p class="note">등록된 카테고리가 없어요.</p>';
 }
@@ -1706,12 +1707,55 @@ function openCategoryMoveDialog(id){
   const old=document.getElementById('catMoveDlg');if(old)old.remove();
   const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
   const hasChildren=categories.some(c=>String(c.parent_id??'')===String(id));
-  const opts=categoryTreeRows().filter(({c})=>String(c.id)!==String(id)).map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${esc(c.name)}</option>`).join('');
   const dlg=document.createElement('div');dlg.id='catMoveDlg';dlg.className='catMoveOverlay';
-  dlg.innerHTML=`<div class="catMoveBox"><h3>'${esc(src.name)}' 상품 전체 이동</h3><p class="note" id="catMoveCount"></p><label>이동할 카테고리</label><select id="catMoveTarget"><option value="">카테고리 선택</option>${opts}</select>${hasChildren?`<label class="catMoveInc"><input type="checkbox" id="catMoveInc"> 하위 카테고리 상품도 함께 이동</label>`:''}<div class="catMoveBtns"><button type="button" class="secondary" onclick="document.getElementById('catMoveDlg').remove()">취소</button><button type="button" onclick="runCategoryMove(${Number(id)})">전체 이동</button></div></div>`;
+  dlg.innerHTML=`<div class="catMoveBox"><h3>'${esc(src.name)}' 이동</h3>
+    <label class="catMoveMode"><input type="radio" name="catMoveMode" value="tree" checked> 카테고리째 이동 <small>(상품·하위 카테고리 모두 함께)</small></label>
+    <label class="catMoveMode"><input type="radio" name="catMoveMode" value="products"> 상품만 이동 <small>(이 카테고리는 그대로 남아요)</small></label>
+    <p class="note" id="catMoveCount" style="margin:10px 0 6px"></p>
+    <label>이동할 곳</label><select id="catMoveTarget"></select>
+    ${hasChildren?`<label class="catMoveInc" id="catMoveIncRow" hidden><input type="checkbox" id="catMoveInc"> 하위 카테고리 상품도 함께 이동</label>`:''}
+    <div class="catMoveBtns"><button type="button" class="secondary" onclick="document.getElementById('catMoveDlg').remove()">취소</button><button type="button" onclick="runCategoryMoveAction(${Number(id)})">이동</button></div></div>`;
   document.body.appendChild(dlg);
-  const upd=()=>{const n=categoryMoveRows(id,!!document.getElementById('catMoveInc')?.checked).length;document.getElementById('catMoveCount').textContent='이동 대상 상품 '+n+'개';};
-  upd();const inc=document.getElementById('catMoveInc');if(inc)inc.addEventListener('change',upd);
+  const mode=()=>(dlg.querySelector('input[name="catMoveMode"]:checked')||{}).value||'tree';
+  const fill=()=>{
+    const m=mode(),sel=document.getElementById('catMoveTarget');
+    const blocked=new Set([String(id),...[...categoryDescendantIds(id)].map(String)]);
+    const rows=categoryTreeRows().filter(({c})=>m==='tree'?!blocked.has(String(c.id)):String(c.id)!==String(id));
+    sel.innerHTML=(m==='tree'?'<option value="">최상위 카테고리로 (상위 없음)</option>':'<option value="">카테고리 선택</option>')+rows.map(({c,depth})=>`<option value="${c.id}">${depth?'↳ ':''}${esc(c.name)}</option>`).join('');
+    if(m==='tree'&&src.parent_id!=null)sel.value='';
+    const incRow=document.getElementById('catMoveIncRow');if(incRow)incRow.hidden=(m!=='products');
+    const inc=!!document.getElementById('catMoveInc')?.checked;
+    document.getElementById('catMoveCount').textContent=m==='tree'
+      ?('상품 '+categoryMoveRows(id,true).length+'개 · 하위 카테고리 '+categoryDescendantIds(id).size+'개가 카테고리와 함께 이동돼요')
+      :('이동 대상 상품 '+categoryMoveRows(id,inc).length+'개');
+  };
+  dlg.querySelectorAll('input[name="catMoveMode"]').forEach(r=>r.addEventListener('change',fill));
+  const incEl=document.getElementById('catMoveInc');if(incEl)incEl.addEventListener('change',fill);
+  fill();
+}
+function runCategoryMoveAction(srcId){
+  const m=(document.querySelector('#catMoveDlg input[name="catMoveMode"]:checked')||{}).value||'tree';
+  return m==='tree'?runCategoryTreeMove(srcId):runCategoryMove(srcId);
+}
+async function runCategoryTreeMove(srcId){
+  const src=categories.find(c=>String(c.id)===String(srcId));if(!src)return;
+  const targetId=document.getElementById('catMoveTarget')?.value||'';
+  const target=targetId?categories.find(c=>String(c.id)===String(targetId)):null;
+  if(targetId&&!target)return alert('이동할 곳을 찾지 못했어요.');
+  if(String(src.parent_id??'')===String(targetId))return alert('이미 그 위치에 있는 카테고리예요.');
+  if(targetId&&(String(targetId)===String(srcId)||[...categoryDescendantIds(srcId)].map(String).includes(String(targetId))))return alert('자기 자신이나 자기 하위 카테고리 안으로는 이동할 수 없어요.');
+  const prodCount=categoryMoveRows(srcId,true).length,childCount=categoryDescendantIds(srcId).size;
+  if(!confirm(`'${src.name}' 카테고리를 ${target?`'${target.name}' 아래로`:'최상위 카테고리로'} 이동할까요?\n\n카테고리 안의 상품 ${prodCount}개와 하위 카테고리 ${childCount}개도 함께 이동돼요.`))return;
+  try{
+    const siblings=categories.filter(c=>String(c.parent_id??'')===String(targetId||''));
+    const maxOrder=siblings.reduce((m,c)=>Math.max(m,Number(c.sort_order)||0),0);
+    const r=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(String(srcId)),{method:'PATCH',body:JSON.stringify({parent_id:targetId||null,sort_order:maxOrder+1}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(r)||!r.length)throw new Error('카테고리를 이동할 권한이 없거나 카테고리를 찾지 못했어요.');
+    const dlg=document.getElementById('catMoveDlg');if(dlg)dlg.remove();
+    if(target)categoryOpenIds.add(String(target.id));
+    await loadCategories();await loadProducts();
+    alert(`'${src.name}' 카테고리를 ${target?`'${target.name}' 아래로`:'최상위로'} 이동했어요. 상품 ${prodCount}개와 하위 카테고리 ${childCount}개도 함께 이동됐어요.`);
+  }catch(e){alert('카테고리 이동에 실패했어요.\n\n'+(e.message||e));}
 }
 function categoryMoveRows(id,includeChildren){
   const ids=includeChildren?categoryBranchIds(id):new Set([String(id)]);
