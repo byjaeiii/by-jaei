@@ -146,6 +146,7 @@ body.guestMode .sortBar{display:none!important}
 </style>
 <style>.typeCats{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 16px 14px}.typeCats[hidden]{display:none}.typeRow{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px}.typeRow button{white-space:nowrap;border:0;background:transparent;padding:5px 0;color:var(--muted);cursor:pointer;font-size:12px}.typeRow button.active{color:var(--ink);font-weight:700}.typeRow button.active:after{content:"";display:block;width:100%;height:1px;background:currentColor;margin-top:6px}.typeRow.sub button{font-size:11.5px}body.guestMode #typeCats{display:none!important}</style>
 <style>.shipTag{background:#e3edf6;color:#2f5d8a}.soldTag{background:#f7e4e0;color:#8f3a2c}.refundTag{background:#ece7f4;color:#6b5a8e}.recvTag+.recvTag{margin-left:3px}.shipSummary{background:#eef4fa;color:#2f5d8a}</style>
+<style>.combineShipRow.disabled{opacity:.5;cursor:not-allowed}.combineShipRow.disabled input{cursor:not-allowed}</style>
 </head>
 <body class="guestMode"><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
 <section class="notice"><b>NOTICE</b><p><strong>주문 전, 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.</p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div id="typeCats" class="typeCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" enterkeyhint="search" autocomplete="off" oninput="onSearchInput()" onkeydown="onSearchKey(event)"><button type="button" id="searchClear" class="searchClear" aria-label="검색어 지우기" onclick="clearSearch()" hidden>✕</button></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><div class="sortBar" id="sortBar"><select id="sortSelect" aria-label="상품 정렬" onchange="setSort(this.value)"><option value="default">추천순(최신)</option><option value="low">낮은가격순</option><option value="high">높은가격순</option></select></div><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
@@ -714,6 +715,43 @@ function openCart(){
 function toggleAllCart(checked){document.querySelectorAll('.cartCheck').forEach(x=>x.checked=checked)}
 function removeSelected(){const checked=[...document.querySelectorAll('.cartCheck:checked')].map(x=>Number(x.dataset.index));if(!checked.length)return alert('삭제할 상품을 선택해주세요.');loadCart();cart=cart.filter((_,i)=>!checked.includes(i));save();openCart()}
 function qty(i,n){loadCart();if(!cart[i])return;cart[i].qty+=n;if(cart[i].qty<1)cart.splice(i,1);save();openCart()}
+/* ===== 합배요청: 진행 중인 기존 주문이 있을 때만 선택 가능, 합배 시 배송비 0원 ===== */
+const COMBINE_ELIGIBLE_STATUSES=['주문접수','입금확인','상품준비중','배송준비'];
+const SHIPPING_FEE=3500;
+let combineEligibleCount=0,orderProductTotal=0;
+function currentShippingFee(){return document.getElementById('combineShipping')?.checked?0:SHIPPING_FEE}
+async function fetchCombineEligibleCount(){
+  try{
+    if(!user)return 0;
+    const r=await sb.from('orders').select('id,status').eq('user_id',user.id).in('status',COMBINE_ELIGIBLE_STATUSES).limit(50);
+    if(r.error)throw r.error;
+    return (r.data||[]).length;
+  }catch(e){console.warn('합배 가능 주문 조회 실패:',e);return 0}
+}
+function updateOrderTotals(){
+  const fee=currentShippingFee();
+  const feeEl=document.getElementById('orderShipFee'),grandEl=document.getElementById('orderGrandTotal'),labelEl=document.getElementById('checkoutShipLabel'),grandLabel=document.getElementById('orderGrandLabel');
+  if(feeEl)feeEl.textContent=fee?won(fee):'합배요청 · 0원';
+  if(grandEl)grandEl.textContent=won(orderProductTotal+fee);
+  if(grandLabel)grandLabel.textContent=fee?'배송비 포함 총액':'총액 (배송비 없음)';
+  if(labelEl)labelEl.textContent=fee?('배송비 '+won(SHIPPING_FEE)+' 포함'):'합배요청 · 배송비 없음';
+  if(typeof updateCheckoutPointsPreview==='function')updateCheckoutPointsPreview();
+}
+function renderCombineState(){
+  const cb=document.getElementById('combineShipping');if(!cb)return;
+  const note=document.getElementById('combineShipNote2'),row=cb.closest('.combineShipRow');
+  const ok=combineEligibleCount>0;
+  cb.disabled=!ok;if(!ok)cb.checked=false;
+  if(row)row.classList.toggle('disabled',!ok);
+  if(note)note.textContent=ok?('진행 중인 주문 '+combineEligibleCount+'건과 함께 발송돼요. 합배요청 시 배송비가 없어요.'):'진행 중인 기존 주문이 있을 때만 선택할 수 있어요. (이미 주문한 상품과 함께 받고 싶을 때만 체크해주세요.)';
+  updateOrderTotals();
+}
+async function initCombineOption(){
+  combineEligibleCount=0;renderCombineState();
+  const note=document.getElementById('combineShipNote2');if(note)note.textContent='진행 중인 기존 주문을 확인하는 중이에요...';
+  combineEligibleCount=await fetchCombineEligibleCount();
+  renderCombineState();
+}
 function openOrder(itemsOverride=null){
   closeAll();const el=document.getElementById('cart');el.hidden=false;
   cartViewMode='order';
@@ -727,7 +765,9 @@ function openOrder(itemsOverride=null){
   const total=itemsToOrder.reduce((a,x)=>{const p=products.find(p=>String(p.id)===String(x.id));return a+(p?(getPrice(p)+Number(x.add||0)):0)*x.qty},0);
   const discount=Math.max(0,normalTotal-total);
   const rows=itemsToOrder.map(x=>{const p=products.find(p=>String(p.id)===String(x.id));if(!p)return '';const line=(getPrice(p)+Number(x.add||0))*x.qty;return `<div class="orderMini"><img src="${p.images?.[0]||''}" alt="${p.name}"><div class="orderMiniText"><div class="orderMiniName">${p.name}</div><div class="orderMiniOption">${x.color} / ${x.size} · ${x.qty}개</div></div><div class="orderMiniPrice">${won(line)}</div></div>`}).join('');
-  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openCart()">← 장바구니</button><b>주문서</b><span></span></div><div class="orderSummary">${excludedCount?`<div class="soldOutNotice">품절·판매 종료된 상품 ${excludedCount}개는 제외하고 주문서를 작성해요.</div>`:''}${checkoutDraft?'<div style="padding:0 0 9px;color:#9b6f55;font-weight:600">바로 구매 상품</div>':''}${rows}<div style="padding-top:12px;font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:16px"><span>상품금액</span><b>${won(total)}</b></div><div style="display:flex;justify-content:space-between"><span>배송비</span><b>${won(3500)}</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:17px;font-weight:700"><span>배송비 포함 총액</span><b>${won(total+3500)}</b></div></div></div><div class="orderForm"><label>성함</label><input id="orderName" placeholder="성함을 입력해주세요"><label>연락처</label><input id="orderPhone" placeholder="연락처를 입력해주세요"><label>배송지 <span style="font-size:11px;color:var(--muted);font-weight:400">(주소를 정확히 입력해주세요.)</span></label><input id="orderAddress" placeholder="배송지를 직접 입력해주세요"><label>요청사항</label><textarea id="orderMemo" placeholder="요청사항이 있다면 입력해주세요"></textarea><label class="combineShipRow" for="combineShipping"><input type="checkbox" id="combineShipping"><span>합배요청</span></label><div class="combineShipNote">※ 합배요청 시 배송기간이 늘어날 수 있다는 점 참고해주세요.<br>※ 합배요청 시 이벤트로 지급되는 첫구매 적립금(5,000원)은 사용이 불가합니다.</div><div class="checkoutPoints"><div class="checkoutPointsHead"><span>보유 적립금</span><b id="checkoutPointsBalance">조회 중...</b></div><div class="checkoutPointsInputRow"><div><label for="pointsToUse">사용할 적립금 (1원 = 1P)</label><input id="pointsToUse" type="number" min="0" step="1" inputmode="numeric" value="0" disabled oninput="updateCheckoutPointsPreview()" onblur="normalizeCheckoutPointsInput()"></div><button type="button" onclick="useAllLoyaltyPoints()" id="useAllPointsButton" disabled>모두 사용</button></div><div id="checkoutPointsHint" class="checkoutPointsHint">적립금 잔액을 불러오고 있어요.</div><div class="checkoutPointsTotal"><span>적립금 적용 후 입금 예정액<br><small style="font-weight:400;color:var(--muted)">배송비 3,500원 포함</small></span><b id="checkoutPointsFinalTotal">${won(total+3500)}</b></div></div><button class="primary" style="padding:13px;border:0;border-radius:11px;background:var(--ink);color:white;cursor:pointer" onclick="submitOrder()">주문서 제출하기</button></div></div>`;
+  el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="openCart()">← 장바구니</button><b>주문서</b><span></span></div><div class="orderSummary">${excludedCount?`<div class="soldOutNotice">품절·판매 종료된 상품 ${excludedCount}개는 제외하고 주문서를 작성해요.</div>`:''}${checkoutDraft?'<div style="padding:0 0 9px;color:#9b6f55;font-weight:600">바로 구매 상품</div>':''}${rows}<div style="padding-top:12px;font-size:14px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span>정상가</span><b>${won(normalTotal)}</b></div>${member&&discount>0?`<div style="display:flex;justify-content:space-between;color:#9b6f55"><span>회원특별할인</span><b>- ${won(discount)}</b></div>`:''}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:16px"><span>상품금액</span><b>${won(total)}</b></div><div style="display:flex;justify-content:space-between"><span>배송비</span><b id="orderShipFee">${won(3500)}</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:10px;font-size:17px;font-weight:700"><span id="orderGrandLabel">배송비 포함 총액</span><b id="orderGrandTotal">${won(total+3500)}</b></div></div></div><div class="orderForm"><label>성함</label><input id="orderName" placeholder="성함을 입력해주세요"><label>연락처</label><input id="orderPhone" placeholder="연락처를 입력해주세요"><label>배송지 <span style="font-size:11px;color:var(--muted);font-weight:400">(주소를 정확히 입력해주세요.)</span></label><input id="orderAddress" placeholder="배송지를 직접 입력해주세요"><label>요청사항</label><textarea id="orderMemo" placeholder="요청사항이 있다면 입력해주세요"></textarea><label class="combineShipRow" for="combineShipping"><input type="checkbox" id="combineShipping" disabled onchange="updateOrderTotals()"><span>합배요청</span></label><div class="combineShipNote" id="combineShipNote2" style="font-weight:700;color:var(--ink)">진행 중인 기존 주문을 확인하는 중이에요...</div><div class="combineShipNote">※ 합배요청 시 배송기간이 늘어날 수 있다는 점 참고해주세요.<br>※ 합배요청 시 이벤트로 지급되는 첫구매 적립금(5,000원)은 사용이 불가합니다.</div><div class="checkoutPoints"><div class="checkoutPointsHead"><span>보유 적립금</span><b id="checkoutPointsBalance">조회 중...</b></div><div class="checkoutPointsInputRow"><div><label for="pointsToUse">사용할 적립금 (1원 = 1P)</label><input id="pointsToUse" type="number" min="0" step="1" inputmode="numeric" value="0" disabled oninput="updateCheckoutPointsPreview()" onblur="normalizeCheckoutPointsInput()"></div><button type="button" onclick="useAllLoyaltyPoints()" id="useAllPointsButton" disabled>모두 사용</button></div><div id="checkoutPointsHint" class="checkoutPointsHint">적립금 잔액을 불러오고 있어요.</div><div class="checkoutPointsTotal"><span>적립금 적용 후 입금 예정액<br><small id="checkoutShipLabel" style="font-weight:400;color:var(--muted)">배송비 3,500원 포함</small></span><b id="checkoutPointsFinalTotal">${won(total+3500)}</b></div></div><button class="primary" style="padding:13px;border:0;border-radius:11px;background:var(--ink);color:white;cursor:pointer" onclick="submitOrder()">주문서 제출하기</button></div></div>`;
+  orderProductTotal=total;
+  initCombineOption();
   loadCheckoutPointBalance(total);
 }
 const POINTS_MIN_ORDER_TOTAL=30000;
@@ -761,7 +801,7 @@ async function loadCheckoutPointBalance(subtotal){
 function requestedCheckoutPoints(){const el=document.getElementById('pointsToUse');return Math.max(0,Math.floor(Number(el?.value)||0))}
 function updateCheckoutPointsPreview(){
   const input=document.getElementById('pointsToUse');const hint=document.getElementById('checkoutPointsHint');const totalEl=document.getElementById('checkoutPointsFinalTotal');if(!totalEl)return;
-  const requested=requestedCheckoutPoints();const maximum=Math.min(loyaltyPointsBalance,checkoutProductTotal);const applied=Math.min(requested,maximum,checkoutProductTotal);totalEl.textContent=won(Math.max(0,checkoutProductTotal-applied)+3500);
+  const requested=requestedCheckoutPoints();const maximum=Math.min(loyaltyPointsBalance,checkoutProductTotal);const applied=Math.min(requested,maximum,checkoutProductTotal);totalEl.textContent=won(Math.max(0,checkoutProductTotal-applied)+currentShippingFee());
   if(input&&requested>maximum){if(hint)hint.textContent=`사용 가능 적립금은 최대 ${won(maximum)}이에요. 금액을 확인해주세요.`}
   else if(hint&&loyaltyPointsReady&&loyaltyPointsBalance>0&&checkoutProductTotal>=POINTS_MIN_ORDER_TOTAL)hint.textContent=`${requested>0?won(requested)+' 사용 · ':''}최대 ${won(maximum)}까지 사용할 수 있어요.`;
 }
@@ -775,6 +815,7 @@ async function submitOrder(){
   const n=document.getElementById('orderName').value.trim(),ph=document.getElementById('orderPhone').value.trim(),ad=document.getElementById('orderAddress').value.trim(),memo=document.getElementById('orderMemo').value.trim();
   if(!n||!ph||!ad)return alert('성함, 연락처, 배송지를 입력해주세요.');
   const combineShipping=!!document.getElementById('combineShipping')?.checked;
+  if(combineShipping&&(await fetchCombineEligibleCount())<1){combineEligibleCount=0;renderCombineState();return alert('합배요청은 진행 중인 기존 주문이 있을 때만 할 수 있어요.\n합배요청 체크가 해제되었어요. 확인 후 다시 주문해주세요.')}
   const memoToSend=combineShipping?('[합배요청]'+(memo?' '+memo:'')):memo;
   const isDirectBuy=Array.isArray(checkoutDraft);
   if(!isDirectBuy)loadCart();
@@ -813,8 +854,8 @@ async function submitOrder(){
   }
   checkoutDraft=null;
   orderSubmissionInProgress=false;
-  const payable=Math.max(0,total-pointsUsed)+3500;
-  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문해주셔서 감사합니다 🤍</strong><br><br>${pointsUsed>0?`적립금 ${won(pointsUsed)} 사용 · `:''}입금 예정액 ${won(payable)} (배송비 ${won(3500)} 포함)<br><br><strong>바이재이에게 1:1 채팅을 통해 주문을 확인해주세요 🤍</strong><br><button class="continueShopping" onclick="closeLayer('cart')">쇼핑 계속하기</button></div></div>`;
+  const payable=Math.max(0,total-pointsUsed)+(combineShipping?0:3500);
+  const el=document.getElementById('cart');el.innerHTML=`<div class="inner"><div class="topbar"><button class="back" onclick="closeLayer('cart')">←</button><b>주문서 접수</b><span></span></div><div class="orderDone"><strong>주문해주셔서 감사합니다 🤍</strong><br><br>${pointsUsed>0?`적립금 ${won(pointsUsed)} 사용 · `:''}입금 예정액 ${won(payable)} ${combineShipping?'(합배요청 · 배송비 없음)':`(배송비 ${won(3500)} 포함)`}<br><br><strong>바이재이에게 1:1 채팅을 통해 주문을 확인해주세요 🤍</strong><br><button class="continueShopping" onclick="closeLayer('cart')">쇼핑 계속하기</button></div></div>`;
 }
 function orderStatusClass(status){return ({'입금확인':'paid','상품준비중':'prep','배송준비':'prep','배송중':'shipped','배송완료':'done','취소':'cancel'})[status]||''}
 function orderStatusMessage(status){return ({'주문접수':'주문서가 접수되었어요. 입금 안내를 기다려주세요.','입금확인':'입금 확인이 완료되었어요.','상품준비중':'상품을 준비하고 있어요.','배송준비':'배송을 준비하고 있어요.','배송중':'상품이 발송되었어요. 아래 배송 조회를 이용해 주세요.','배송완료':'배송 완료로 처리되었어요.','취소':'취소 처리된 주문이에요.'})[status]||'주문 상태를 확인 중이에요.'}
