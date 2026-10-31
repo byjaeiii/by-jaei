@@ -351,8 +351,19 @@ function accSubBarVisible(){
   const cur=siteCategories.find(c=>String(c.id)===String(categoryId));
   return !(cur&&accSubFromCategoryName(cur.name));
 }
+/* 26WINTER BEBE / KIDS / JUNIOR 카테고리 화면에서도 ALL과 같은 종류 버튼(아우터/상의/하의/원피스·세트/악세사리)을 보여줌 */
+function typeBarCategoryVisible(){
+  if(category==='ALL'||category==='BRAND'||categoryId==null||categoryId==='')return false;
+  if(isAccCategoryChain(categoryId))return false;
+  let cur=siteCategories.find(c=>String(c.id)===String(categoryId)),guard=0;
+  while(cur&&guard++<20){
+    if(/BEBE|KIDS|JUNIOR/i.test(String(cur.name||'')))return true;
+    cur=cur.parent_id==null?null:siteCategories.find(c=>String(c.id)===String(cur.parent_id));
+  }
+  return false;
+}
 function productTypeMatches(p){
-  if(category==='ALL'){
+  if(category==='ALL'||typeBarCategoryVisible()){
     if(typeFilter==='ALL')return true;
     if(typeFilter==='악세사리'){
       const sub=accSubOf(p);
@@ -376,7 +387,7 @@ function renderTypeFilters(){
     el.hidden=false;return;
   }
   /* 분류값(product_type)이 DB에 아직 없으면 ALL 화면의 종류 버튼은 숨겨둠 */
-  if(category!=='ALL'||!products.some(p=>p.product_type)){el.hidden=true;el.innerHTML='';return}
+  if(!(category==='ALL'||typeBarCategoryVisible())||!products.some(p=>p.product_type)){el.hidden=true;el.innerHTML='';return}
   el.innerHTML=row(PRODUCT_TYPE_TOP,typeFilter,'data-type')+(typeFilter==='악세사리'?row(PRODUCT_TYPE_ACC_SUB,subTypeFilter,'data-subtype','sub'):'');
   el.hidden=false;
 }
