@@ -420,6 +420,21 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .untypedRow select{padding:9px 8px;font-size:12px}.untypedRow button{padding:9px 6px;font-size:12px}
 @media(max-width:560px){.untypedRow{grid-template-columns:48px 1fr;}.untypedRow select{grid-column:1/2}.untypedRow button{grid-column:2/3}}
 </style>
+<style>
+.itemBtns{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:230px}
+.stBtn{flex:0 0 auto;min-width:56px;padding:9px 10px;font-size:12px;font-weight:700;border-radius:10px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;line-height:1.2}
+.stBtn.ship.on{background:#2f5d8a;border-color:#2f5d8a;color:#fff}
+.stBtn.sold.on{background:#8f3a2c;border-color:#8f3a2c;color:#fff}
+.stBtn.refund.on{background:#6b5a8e;border-color:#6b5a8e;color:#fff}
+.stBtn:disabled{opacity:.5}
+.orderItemLine.isSold .itemMain{opacity:.6}
+.orderSummaryBar .pill.ship{background:#e3edf6;color:#2f5d8a}
+.orderSummaryBar .pill.sold{background:#f7e4e0;color:#8f3a2c}
+.orderSummaryBar .pill.refund{background:#ece7f4;color:#6b5a8e}
+.preshipBox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px}
+.preshipRow{display:grid;grid-template-columns:20px 130px 1fr;gap:6px;align-items:center;margin-top:6px}
+.preshipRow select,.preshipRow input{padding:9px;font-size:12px;width:100%;box-sizing:border-box}
+</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -2139,20 +2154,21 @@ function renderOrders(){
         const recv=i.received===true;
         const recvDate=recv&&i.received_at?new Date(i.received_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})+' 입고':'';
         const cancelled=(o.status||'')==='취소';
-        return `<div class="orderItemLine ${recv?'isReceived':''}"><div class="itemMain"><div><span class="itemNo">${idx+1}</span>${i.one_plus_one?'<span class="opTag">1+1</span>':''}${brandLabel}<button type="button" class="orderProductLink" data-order-product-link data-product-id="${id}" data-product-name="${nm}">${nm}</button> · ${option||'옵션 없음'} · ${qty}개</div><div class="orderItemMoney">${escapeOrderText(costText)} · 주문금액 ${lineAmount.toLocaleString('ko-KR')}원</div></div>${cancelled?'':`<button type="button" class="recvBtn ${recv?'on':''}" onclick="toggleItemReceived(${Number(o.id)},${idx},this)">${recv?'입고완료 ✓':'입고'}${recvDate?`<span class="recvAt">${recvDate}</span>`:''}</button>`}</div>`;
+        return `<div class="orderItemLine ${recv?'isReceived':''} ${i.sold_out===true?'isSold':''}"><div class="itemMain"><div><span class="itemNo">${idx+1}</span>${i.one_plus_one?'<span class="opTag">1+1</span>':''}${brandLabel}<button type="button" class="orderProductLink" data-order-product-link data-product-id="${id}" data-product-name="${nm}">${nm}</button> · ${option||'옵션 없음'} · ${qty}개</div><div class="orderItemMoney">${escapeOrderText(costText)} · 주문금액 ${lineAmount.toLocaleString('ko-KR')}원</div></div>${cancelled?'':`<div class="itemBtns"><button type="button" class="recvBtn ${recv?'on':''}" onclick="toggleItemReceived(${Number(o.id)},${idx},this)">${recv?'입고완료 ✓':'입고'}${recvDate?`<span class="recvAt">${recvDate}</span>`:''}</button>${itemStateBtn(o.id,idx,'pre_shipped','ship','선발송','선발송완료 ✓',i.pre_shipped===true,i.pre_shipped_at)}${itemStateBtn(o.id,idx,'sold_out','sold','품절','품절 ✓',i.sold_out===true,i.sold_out_at)}${itemStateBtn(o.id,idx,'refunded','refund','환불','환불완료 ✓',i.refunded===true,i.refunded_at)}</div>`}</div>`;
       }).join('');
       const totalQty=items.reduce((n,x)=>n+Math.max(1,Number(x.qty)||1),0);
       const recvCount=items.filter(x=>x.received===true).length;
+      const shipCount=items.filter(x=>x.pre_shipped===true).length,soldCount=items.filter(x=>x.sold_out===true).length,refundCount=items.filter(x=>x.refunded===true).length;
       const list=byCust[custKey(o)]||[];
       const nth=list.findIndex(x=>String(x.id)===String(o.id))+1;
       const cancelledOrder=(o.status||'')==='취소';
-      const summaryBar=`<div class="orderSummaryBar"><span class="pill">주문 품목 ${items.length}건 · 총 ${totalQty}개</span>${cancelledOrder?'':`<span class="pill ${items.length&&recvCount===items.length?'recvAll':'recv'}">입고 ${recvCount}/${items.length}${items.length&&recvCount===items.length?' · 전체 입고':''}</span>`}<span class="pill cust">이 고객 주문 총 ${list.length}건 (${nth}번째)</span><span class="spacer"></span>${cancelledOrder||!items.length?'':`<button type="button" class="secondary" onclick="setAllItemsReceived(${Number(o.id)},true)">전체 입고</button><button type="button" class="secondary" onclick="setAllItemsReceived(${Number(o.id)},false)">입고 해제</button>`}</div>`;
+      const summaryBar=`<div class="orderSummaryBar"><span class="pill">주문 품목 ${items.length}건 · 총 ${totalQty}개</span>${cancelledOrder?'':`<span class="pill ${items.length&&recvCount===items.length?'recvAll':'recv'}">입고 ${recvCount}/${items.length}${items.length&&recvCount===items.length?' · 전체 입고':''}</span>`}${cancelledOrder?'':`${shipCount?`<span class="pill ship">선발송 ${shipCount}/${items.length}</span>`:''}${soldCount?`<span class="pill sold">품절 ${soldCount}</span>`:''}${refundCount?`<span class="pill refund">환불완료 ${refundCount}</span>`:''}`}<span class="pill cust">이 고객 주문 총 ${list.length}건 (${nth}번째)</span><span class="spacer"></span>${cancelledOrder||!items.length?'':`<button type="button" class="secondary" onclick="setAllItemsReceived(${Number(o.id)},true)">전체 입고</button><button type="button" class="secondary" onclick="setAllItemsReceived(${Number(o.id)},false)">입고 해제</button>`}</div>`;
       const cls={'주문접수':'status-received','입금확인':'status-paid','상품준비중':'status-ready','배송준비':'status-prep','배송중':'status-shipping','배송완료':'status-done','취소':'status-cancel'}[o.status]||'status-received';
       const memo=o.memo||'';
       const customerEmail=o.email||(o.user_id?emailByUserId[String(o.user_id)]:'')||(o.user_id?'회원 이메일을 찾을 수 없어요':'로그인 계정 연결 없음');
       const safeCustomerEmail=escapeOrderText(customerEmail);
       const customerMessage=escapeOrderText(buildOrderConfirmationMessage(o,items,brandByProductId));
-      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div>${summaryBar}<div class="orderItems" style="margin-top:8px">${txt}</div>${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}<button type="button" class="orderDeleteBtn" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button><button type="button" class="secondary" style="padding:8px 10px;font-size:11px" onclick="openOrderPointHistory(${Number(o.id)})">적립내역</button></div></div>`;
+      return `<div class="orderRow"><div style="flex:1;min-width:0"><b>${escapeOrderText(o.customer_name||'')}</b><div class="smallText">로그인 이메일 · ${safeCustomerEmail}<br>연락처 · ${escapeOrderText(o.phone||'')}<br>배송지 · ${escapeOrderText(o.address||'')}<br>${new Date(o.created_at).toLocaleString('ko-KR')}</div><span class="statusBadge ${cls}">${escapeOrderText(o.status||'주문접수')}</span>${/\[합배요청\]/.test(memo)?'<span class="statusBadge status-combine">합배요청</span>':''}<div class="smallText" style="margin-top:7px;padding:7px 9px;background:#f7f3ed;border-radius:8px">적립금 ${Number(o.points_used||0)>0?`사용 · ${Number(o.points_used).toLocaleString('ko-KR')}원`:'미사용'} · 입금 예정 ${Math.max(0,Number(o.total_price||0)-Number(o.points_used||0)+3500).toLocaleString('ko-KR')}원 (배송비 포함)</div>${summaryBar}<div class="orderItems" style="margin-top:8px">${txt}</div>${cancelledOrder?'':preshipBoxHtml(o)}${(o.status||'')==='취소'&&o.cancel_reason?`<div style="margin-top:8px;padding:8px 10px;background:#fbe9e7;border-radius:8px;font-size:12px;color:#8f3a2c"><b>취소 사유</b><br>${escapeOrderText(o.cancel_reason)}</div>`:''}${memo?`<div style="margin-top:8px;padding:8px 10px;background:#f7f3ed;border-radius:8px;font-size:12px"><b>고객 요청 메모</b><br>${escapeOrderText(memo)}</div>`:''}<div style="margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:10px"><label for="orderMessage_${Number(o.id)}" style="margin:0 0 6px;display:block">고객에게 보낼 주문 확인 문구</label><textarea id="orderMessage_${Number(o.id)}" rows="8" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;line-height:1.6">${customerMessage}</textarea><button type="button" class="secondary" style="margin-top:7px;padding:8px 11px" onclick="copyOrderMessage(${Number(o.id)})">주문 확인 문구 복사</button></div><div style="margin-top:9px"><label style="margin:0 0 5px">관리자 메모</label><div style="display:flex;gap:6px"><input id="memo_${o.id}" value="${escapeOrderText(o.admin_memo||'')}" placeholder="관리자 메모를 입력해주세요" style="padding:9px"><button class="secondary" style="padding:8px 10px" onclick="saveOrderMemo(${Number(o.id)})">저장</button><button class="secondary" style="padding:8px 10px" onclick="deleteOrderMemo(${Number(o.id)})">삭제</button></div></div></div><div class="orderActions"><b>${Number(o.total_price).toLocaleString()}원</b><select data-prev="${escapeOrderText(o.status||'주문접수')}" onchange="onOrderStatusChange(${Number(o.id)},this)">${ORDER_STATUSES.map(s=>`<option ${(o.status||'주문접수')===s?'selected':''}>${s}</option>`).join('')}</select>${(o.status||'주문접수')==='취소'?'<button type="button" class="secondary" disabled style="padding:8px 10px;font-size:11px">취소된 주문</button>':`<button type="button" class="danger" style="padding:8px 10px;font-size:11px" onclick="openOrderCancelModal(${Number(o.id)})">주문취소</button>`}<button type="button" class="orderDeleteBtn" style="padding:8px 10px;font-size:11px" onclick="deleteOrder(${Number(o.id)})">주문삭제</button><button type="button" class="secondary" style="padding:8px 10px;font-size:11px" onclick="openOrderPointHistory(${Number(o.id)})">적립내역</button></div></div>`;
     }).join('');
     el.onclick=function(event){const button=event.target.closest('[data-order-product-link]');if(!button||!el.contains(button))return;openOrderedProduct(button.dataset.productId,button.dataset.productName)};
   }catch(e){el.innerHTML='<p class="note">'+escapeOrderText(e.message)+'</p>'}
@@ -2180,6 +2196,47 @@ async function saveItemsReceived(orderId,mutator){
   if(!Array.isArray(r)||!r.length)throw new Error('입고 상태를 저장할 권한이 없어요. 관리자 계정의 orders UPDATE 권한(RLS)을 확인해주세요.');
   const ctx=window.__orderCtx;const row=ctx&&(ctx.data||[]).find(x=>String(x.id)===String(orderId));if(row)row.items=r[0].items||items;
   renderOrders();
+}
+/* ===== 주문 상품 상태(선발송/품절/환불완료) + 선발송 운송장 1~3 ===== */
+const PRESHIP_CARRIERS=['CJ대한통운','롯데택배','우체국택배','한진택배','로젠택배','경동택배','GS25편의점택배','CU편의점택배','기타'];
+function itemStateBtn(oid,idx,flag,cls,label,onLabel,on,atIso){
+  const d=on&&atIso?new Date(atIso).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'}):'';
+  return `<button type="button" class="stBtn ${cls} ${on?'on':''}" onclick="toggleItemFlag(${Number(oid)},${idx},'${flag}',this)">${on?onLabel:label}${d?`<span class="recvAt">${d}</span>`:''}</button>`;
+}
+function preshipBoxHtml(o){
+  const list=Array.isArray(o.preship_tracking)?o.preship_tracking:[];
+  const id=Number(o.id);
+  const rows=[0,1,2].map(n=>{
+    const t=list[n]||{};const car=String(t.carrier||'CJ대한통운');
+    return `<div class="preshipRow"><b>${n+1}</b><select id="ptc_${id}_${n}">${PRESHIP_CARRIERS.map(c=>`<option ${c===car?'selected':''}>${c}</option>`).join('')}</select><input id="ptn_${id}_${n}" value="${escapeOrderText(t.number||'')}" placeholder="운송장번호 ${n+1}" inputmode="numeric"></div>`;
+  }).join('');
+  return `<div class="preshipBox"><b style="font-size:12px">선발송 운송장번호 (최대 3개)</b>${rows}<button type="button" class="secondary" style="margin-top:8px;padding:8px 11px" onclick="savePreshipTracking(${id})">운송장 저장</button><div class="smallText" style="margin-top:5px">저장하면 고객 MYPAGE 주문 내역에 바로 보여요. 번호를 지우고 저장하면 삭제돼요.</div></div>`;
+}
+async function savePreshipTracking(id){
+  const list=[];
+  for(let n=0;n<3;n++){
+    const num=(($('ptn_'+id+'_'+n)||{}).value||'').replace(/[^0-9A-Za-z-]/g,'').trim();
+    const car=($('ptc_'+id+'_'+n)||{}).value||'';
+    if(num)list.push({carrier:car,number:num});
+  }
+  try{
+    const r=await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',body:JSON.stringify({preship_tracking:list}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(r)||!r.length)throw new Error('운송장을 저장할 권한이 없어요. 관리자 계정의 orders UPDATE 권한(RLS)을 확인해주세요.');
+    const ctx=window.__orderCtx;const row=ctx&&(ctx.data||[]).find(x=>String(x.id)===String(id));if(row)row.preship_tracking=list;
+    alert(list.length?('선발송 운송장 '+list.length+'개가 저장됐어요.'):'운송장이 삭제됐어요.');
+  }catch(e){
+    const m=String(e.message||e);
+    alert('운송장 저장 실패\n\n'+(/preship_tracking/i.test(m)?'Supabase에 preship_tracking 칸이 아직 없어요. order_shipping_setup.sql 을 먼저 실행해주세요.\n\n':'')+m);
+  }
+}
+async function toggleItemFlag(orderId,idx,flag,btn){
+  const NAMES={pre_shipped:'선발송',sold_out:'품절',refunded:'환불완료'};
+  const cur=((((window.__orderCtx||{}).data||[]).find(x=>String(x.id)===String(orderId)))||{}).items;
+  const turningOn=!(Array.isArray(cur)&&cur[idx]&&cur[idx][flag]===true);
+  if(turningOn&&flag==='refunded'&&!confirm('이 상품을 환불완료로 표시할까요?\n(표시만 바뀌고, 결제금액·적립금은 자동으로 바뀌지 않아요.)'))return;
+  if(btn)btn.disabled=true;
+  try{await saveItemsReceived(orderId,items=>{const it=items[idx];if(!it)throw new Error('항목을 찾지 못했어요.');if(it[flag]===true){delete it[flag];delete it[flag+'_at']}else{it[flag]=true;it[flag+'_at']=new Date().toISOString()}})}
+  catch(e){if(btn)btn.disabled=false;alert((NAMES[flag]||'상태')+' 처리 실패\n\n'+(e.message||e))}
 }
 async function toggleItemReceived(orderId,idx,btn){
   if(btn)btn.disabled=true;
