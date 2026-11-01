@@ -495,7 +495,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <div id="bulkUploadStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
 <div class="box" id="stagedBox" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">등록 대기 상품</h2><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" class="secondary" onclick="toggleAllStaged()">선택 가능한 상품 전체 선택/해제</button><button type="button" id="stagedDraftSaveBtn" onclick="saveStagedDraft()">임시저장</button><button type="button" class="secondary" onclick="clearStaged()">대기 목록 비우기</button></div></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">등록 대기 상품</h2><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" class="secondary" onclick="toggleAllStaged()">선택 가능한 상품 전체 선택/해제</button><button type="button" class="secondary" onclick="autoSeparateStagedAcc()">ACC에도 추가</button><button type="button" id="stagedDraftSaveBtn" onclick="saveStagedDraft()">임시저장</button><button type="button" class="secondary" onclick="clearStaged()">대기 목록 비우기</button></div></div>
   <p class="note">카드를 누르면 미리보기, <b>수정</b>을 누르면 상품등록 탭의 입력 화면에서 수기로 등록할 때처럼 수정할 수 있어요. 아직 쇼핑몰에는 등록되지 않은 상태예요.</p>
   <div id="stagedSummary" class="filterCount"></div>
   <div class="actions" style="margin:10px 0 14px"><button type="button" id="stagedApplyBtn" onclick="applyStagedProducts()">상품 반영하기</button></div>
@@ -689,6 +689,8 @@ const PRODUCT_TYPE_RULES=[["사이즈표",new RegExp("\uc0ac\uc774\uc988\ud45c")
 const PRODUCT_TYPE_FALLBACK=[["원피스·세트",new RegExp("\uc288\ud2b8|\uc218\ud2b8|\uc138\ud2b8|\uc14b\uc5c5|\uc0c1\ud558|\uc62c\uc778\uc6d0|\uc6b0\uc8fc\ubcf5|\uc624\ubc84\ub864|\uc6d0\ud53c\uc2a4")],["하의",new RegExp("\ud32c\uce20|\ubc14\uc9c0|\ub808\uae45\uc2a4|\uc2a4\ucee4\ud2b8|\uc870\uac70|\uce58\ub9c8")],["아우터",new RegExp("\uc810\ud37c|\uc790\ucf13|\uc7ac\ud0b7|\ucf54\ud2b8|\ud328\ub529|\ubca0\uc2a4\ud2b8|\uc870\ub07c|\uac00\ub514\uac74|\uc9d1\uc5c5|\uc544\ub178\ub77d")],["상의",new RegExp("\ub9e8\ud22c\ub9e8|\ud2f0|\ub2c8\ud2b8|\uc154\uce20|\ud3f4\ub77c|\ud6c4\ub4dc|\ube14\ub77c\uc6b0\uc2a4|\ub098\uc2dc")],["악세사리/모자",new RegExp("\ubaa8\uc790|\ube44\ub2c8|\ud587|\ucea1|\ubcf4\ub137")],["악세사리/양말",new RegExp("\uc591\ub9d0|\uc0ad\uc2a4")],["악세사리/기타",new RegExp("\ud540|\uba38\ud50c\ub7ec|\ubaa9\ub3c4\ub9ac|\uc6cc\uba38|\uc7a5\uac11|\uac00\ubc29")]];
 function classifyProductType(name){
   let s=String(name||'').trim().toLowerCase();const isAcc=s.startsWith('acc');
+  if(/바라클라바/.test(s))return '악세사리/모자';                         // 바라클라바무지·바라클라바패턴 등
+  if(/(커브진|와이드진|스키니진|부츠컷진|일자진|데님|청바지)$/.test(s))return '하의'; // 기모커브진 등
   PRODUCT_TYPE_CLEAN.forEach(([re,rep])=>{s=s.replace(re,rep)});s=s.trim();
   for(const [l,re] of PRODUCT_TYPE_RULES)if(re.test(s))return l;
   for(const [l,re] of PRODUCT_TYPE_FALLBACK)if(re.test(s))return l;
@@ -767,6 +769,55 @@ function isAccCategoryId(id){
 }
 /* 회원가 자동 계산: 일반 25% 할인, ACC(악세사리) 카테고리는 20% 할인.
    도매가가 있으면 회원가가 도매가보다 최소 1,000원은 높도록 보정(상품가를 넘지는 않음) */
+function isAccProductType(t){return String(t||'').startsWith('악세사리')}
+function findAccCategoryFor(baseCatId,type){
+  /* 기본 카테고리와 같은 시즌(예: 26WINTER)의 ACC 카테고리를 찾아요. 모자/신발/양말… 하위 카테고리가 있으면 그쪽으로 */
+  const all=categories||[];
+  const accs=all.filter(c=>/acc|악세사리|액세서리/i.test(String(c.name||'')));
+  if(!accs.length)return null;
+  const byId=id=>all.find(x=>String(x.id)===String(id));
+  const depth=c=>{let d=0,cur=c,g=0;while(cur&&cur.parent_id!=null&&g++<20){cur=byId(cur.parent_id);d++}return d};
+  const rootName=id=>{const r=byId(parentRootOf(id));return String(r?.name||'')};
+  const base=byId(baseCatId);
+  const season=String(rootName(baseCatId)||base?.name||'').trim().split(/\s+/)[0].toUpperCase();   // 26WINTER
+  const score=c=>{
+    const nm=String(c.name||'').toUpperCase(),rn=rootName(c.id).toUpperCase();
+    return (season&&nm.startsWith(season)?20:0)+(season&&rn.startsWith(season)?10:0)+(/\bACC\b/.test(nm)?3:0)-depth(c);
+  };
+  const acc=accs.map(c=>({c,s:score(c)})).sort((x,y)=>y.s-x.s)[0].c;
+  const sub=String(type||'').split('/')[1]||'';
+  if(sub&&sub!=='기타'){
+    const kids=[...categoryDescendantIds(acc.id)].map(byId).filter(Boolean);
+    const hit=kids.find(k=>String(k.name||'').includes(sub));
+    if(hit)return hit;
+  }
+  return acc;
+}
+function routeAccCategory(name,baseCatId){
+  const type=classifyProductType(name);
+  if(!isAccProductType(type))return {ids:[String(baseCatId)],isAcc:false,moved:false};
+  if(isAccCategoryId(baseCatId))return {ids:[String(baseCatId)],isAcc:true,found:true,moved:false};
+  const t=findAccCategoryFor(baseCatId,type);
+  if(!t)return {ids:[String(baseCatId)],isAcc:true,found:false,moved:false};
+  return {ids:[String(baseCatId),String(t.id)],isAcc:true,found:true,moved:true,name:t.name};
+}
+function autoSeparateStagedAcc(){
+  let moved=0,missing=0;const names=new Set();
+  stagedProducts.forEach(p=>{
+    if(p.isSizeChart)return;
+    const base=(p.categoryIds||[])[0];if(base==null)return;
+    const type=p.productType||classifyProductType(p.name);
+    if(!isAccProductType(type)||(p.categoryIds||[]).some(isAccCategoryId))return;
+    const t=findAccCategoryFor(base,type);
+    if(!t){missing++;return}
+    const wasAuto=p.member==null||Number(p.member)===calcMemberPrice(p.normal,p.wholesale,p.categoryIds);
+    p.categoryIds=[...new Set([...(p.categoryIds||[]).map(String),String(t.id)])];   // 기존 카테고리는 그대로 두고 ACC를 추가
+    if(wasAuto)p.member=calcMemberPrice(p.normal,p.wholesale,p.categoryIds);
+    moved++;names.add(t.name);
+  });
+  renderStaged();
+  msg(moved?`ACC 상품 ${moved}개를 “${[...names].join(', ')}”에도 추가했어요 (기존 카테고리도 그대로 유지) 🤍`:(missing?'ACC 카테고리를 찾지 못했어요. 카테고리 이름에 ACC가 들어 있는지 확인해주세요.':'추가할 ACC 상품이 없어요. 이미 ACC 카테고리에도 들어 있거나 ACC 상품이 없어요.'));
+}
 function calcMemberPrice(normal,wholesale,categoryIds){
   normal=Number(normal);
   if(!Number.isFinite(normal)||normal<=0)return null;
@@ -1102,7 +1153,7 @@ async function analyzeBulkZip(){
     if(!products.length)throw new Error('엑셀에서 등록할 상품을 찾지 못했어요.');
     const added=[];
     const usedFolderKeys=new Set();
-    let filled=0,sameSkipped=0;
+    let filled=0,sameSkipped=0,accMoved=0,accMissing=0;const accNames=new Set();
     const stagedByKey=new Map(stagedProducts.map(p=>[bulkNorm(p.brand)+'|'+bulkNorm(p.name),p]));
     for(let i=0;i<products.length;i++){
       const p=products[i];
@@ -1119,9 +1170,11 @@ async function analyzeBulkZip(){
         continue;
       }
       const files=await readFiles(imgs);
+      const route=routeAccCategory(p.name,String(cat.id));
+      if(route.moved){accMoved++;accNames.add(route.name)}else if(route.isAcc&&!route.found)accMissing++;
       const normal=Number.isFinite(p.retail)?p.retail:0;
-      const member=(p.member!==null&&Number.isFinite(p.member))?p.member:calcMemberPrice(normal,p.wholesale,[String(cat.id)]);
-      const item={sid:++stagedSeq,row:p.row,photoFolder:p.folder,code:p.code,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,onePlusOne:!!p.onePlus,description:'',categoryIds:[String(cat.id)],files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null};
+      const member=(p.member!==null&&Number.isFinite(p.member))?p.member:calcMemberPrice(normal,p.wholesale,route.ids);
+      const item={sid:++stagedSeq,row:p.row,photoFolder:p.folder,code:p.code,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,onePlusOne:!!p.onePlus,description:'',categoryIds:route.ids,files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null};
       added.push(item);stagedByKey.set(key,item);
     }
     await refreshStagedExisting();
@@ -1132,7 +1185,7 @@ async function analyzeBulkZip(){
     const knownNames=new Set([...products.map(p=>bulkNorm(p.name)),...stagedProducts.map(p=>bulkNorm(p.name))]);
     const orphanFolders=folderKeys.filter(k=>!usedFolderKeys.has(k)&&!knownNames.has(k)&&!knownNames.has(aliasOfKey.get(k)||''));
     const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length;
-    say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
+    say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(accMoved?`\nACC 상품 ${accMoved}개는 기본 카테고리와 함께 “${[...accNames].join(', ')}” 카테고리에도 자동으로 추가했어요.`:'')+(accMissing?`\n⚠ ACC 상품 ${accMissing}개의 ACC 카테고리를 찾지 못해 기본 카테고리에만 넣었어요. 카테고리 이름에 ACC가 들어 있는지 확인해주세요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
     $('singleZipFile').value='';
     document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
