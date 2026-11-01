@@ -311,7 +311,7 @@ function setCategory(x,id=null){
 }
 function brandKey(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0\u200b-\u200d\ufeff]+/g,'').toLocaleLowerCase('ko-KR')}
 const PRODUCT_TYPE_TOP=['아우터','상의','하의','원피스·세트','악세사리'];
-const PRODUCT_TYPE_ACC_SUB=['모자','신발','양말','헤어','기타'];
+const PRODUCT_TYPE_ACC_SUB=['모자','신발','양말','헤어','머플러·장갑','가방','기타'];
 const __accChainCache=new Map();
 function isAccCategoryChain(id){
   if(id==null||id==='')return false;
@@ -330,6 +330,8 @@ function accSubFromCategoryName(n){
   if(/모자/.test(n))return'모자';
   if(/신발/.test(n))return'신발';
   if(/양말|타이즈/.test(n))return'양말';
+  if(/머플러|장갑|목도리|스카프/.test(n))return'머플러·장갑';
+  if(/가방|백팩/.test(n))return'가방';
   if(/헤어|핀/.test(n))return'헤어';
   if(n==='기타')return'기타';
   return null;
