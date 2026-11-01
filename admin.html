@@ -478,7 +478,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 <div id="stagedDraftBanner" class="stagedDraftBanner" hidden></div>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
-  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인) / 이미지 폴더 이름은 엑셀의 상품명과 같거나, “하이키키 상품명 색상 사이즈 가격”처럼 상품명이 단어로 들어 있어도 돼요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
+  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인 · 100원 단위 반올림 · 도매가 대비 최소 마진 1,500원 · 회원가는 정상가보다 최소 1,000원 낮게) / 이미지 폴더 이름은 엑셀의 상품명과 같거나, “하이키키 상품명 색상 사이즈 가격”처럼 상품명이 단어로 들어 있어도 돼요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
   <div class="row">
     <div>
       <label>통합 압축 파일 (.zip · 여러 개 한 번에 선택 가능)</label>
@@ -768,7 +768,7 @@ function isAccCategoryId(id){
   return false;
 }
 /* 회원가 자동 계산: 일반 25% 할인, ACC(악세사리) 카테고리는 20% 할인.
-   도매가가 있으면 회원가가 도매가보다 최소 1,000원은 높도록 보정(상품가를 넘지는 않음) */
+   계산된 회원가는 100원 단위로 반올림하고, 도매가가 있으면 회원가가 도매가보다 최소 1,500원은 높도록 보정하되, 회원가는 항상 정상가보다 최소 1,000원 낮게 유지 */
 function isAccProductType(t){return String(t||'').startsWith('악세사리')}
 function findAccCategoryFor(baseCatId,type){
   /* 기본 카테고리와 같은 시즌(예: 26WINTER)의 ACC 카테고리를 찾아요. 모자/신발/양말… 하위 카테고리가 있으면 그쪽으로 */
@@ -823,9 +823,12 @@ function calcMemberPrice(normal,wholesale,categoryIds){
   normal=Number(normal);
   if(!Number.isFinite(normal)||normal<=0)return null;
   const acc=(categoryIds||[]).some(isAccCategoryId);
-  let m=Math.round(normal*(acc?0.8:0.75));
+  let m=Math.round(normal*(acc?0.8:0.75)/100)*100;      // 10원 단위가 생기면 100원 단위로 반올림
   const w=(wholesale===null||wholesale===''||wholesale===undefined)?NaN:Number(wholesale);
-  if(Number.isFinite(w)&&w>0&&m-w<1000)m=Math.min(normal,w+1000);
+  if(Number.isFinite(w)&&w>0&&m-w<1500)m=Math.ceil((w+1500)/100)*100;   // 도매가 대비 최소 마진 1,500원
+  // 회원가는 정상가보다 최소 1,000원은 낮아야 해요 (마진보다 이 규칙이 우선)
+  const cap=Math.floor((normal-1000)/100)*100;
+  if(cap>0)m=Math.min(m,cap);
   return m;
 }
 function bulkNorm(v){return String(v??'').normalize('NFKC').replace(/[\s\u00a0]+/g,'').toLocaleLowerCase('ko-KR')}
