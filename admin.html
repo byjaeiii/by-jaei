@@ -478,11 +478,11 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 <div id="stagedDraftBanner" class="stagedDraftBanner" hidden></div>
 <div class="box" id="bulkUploadBox">
   <h2>엑셀 · 이미지 ZIP 올리기</h2>
-  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인 · 100원 단위 반올림 · 도매가 대비 최소 마진 1,500원 · 회원가는 정상가보다 최소 1,000원 낮게) / 이미지 폴더 이름은 엑셀의 상품명과 같거나, “하이키키 상품명 색상 사이즈 가격”처럼 상품명이 단어로 들어 있어도 돼요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
+  <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 없으면 상품가의 25% 할인 · ACC는 20% 할인 · 100원 단위 반올림 · 도매가 대비 최소 마진 1,500원 · 회원가는 정상가보다 최소 1,000원 낮게) / 이미지 폴더 이름은 엑셀의 상품명과 같거나, “하이키키 상품명 색상 사이즈 가격”처럼 상품명이 단어로 들어 있어도 돼요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀 파일(.xlsx)을 ZIP 없이 같이 선택해도 되고, 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
   <div class="row">
     <div>
-      <label>통합 압축 파일 (.zip · 여러 개 한 번에 선택 가능)</label>
-      <input type="file" id="singleZipFile" accept=".zip" multiple>
+      <label>통합 압축 파일 (.zip) · 엑셀 파일(.xlsx)도 함께 선택 가능</label>
+      <input type="file" id="singleZipFile" accept=".zip,.xlsx,.xls" multiple>
     </div>
     <div>
       <label>기본 카테고리 (수정에서 바꿀 수 있어요)</label>
@@ -889,6 +889,7 @@ async function readBulkZip(zipFiles){
   const list=Array.isArray(zipFiles)?zipFiles:[zipFiles];
   const entries=[];
   for(const zf of list){
+    if(zf&&zf.buf&&/\.xlsx?$/i.test(zf.name||'')){entries.push({name:zf.name,dir:false,async:async()=>zf.buf});continue}   // 엑셀 파일을 ZIP 없이 바로 선택한 경우
     let zip;
     try{zip=await JSZip.loadAsync(zf&&zf.buf?zf.buf:zf)}
     catch(err){throw new Error('"'+(zf&&zf.name||'ZIP')+'"을(를) ZIP으로 열 수 없어요. 압축 파일이 손상됐거나 ZIP 형식이 아닐 수 있어요. ('+(err.message||err)+')')}
@@ -915,6 +916,7 @@ async function readBulkZip(zipFiles){
     let s=raw.replace(/^\s*\d+\s*[.\-_)\]]\s*/,'');
     if(s===raw)s=raw.replace(/^\s*\d+\s+/,'');
     if(s===raw)s=raw.replace(/^\s*[A-Za-z]{1,6}\d+(?:[-_.]\d+)*\s*[_\-.)\]]\s*/,'');
+    if(s===raw)s=raw.replace(/^\s*\d{1,3}(?=[가-힣A-Za-z])/,'');   // 36윈터젤리곰맨투맨 처럼 번호가 바로 붙은 경우
     const ak=bulkNorm(s);
     if(ak&&ak!==k){aliasOfKey.set(k,ak);if(!folders.has(ak))folders.set(ak,folders.get(k))}
   });
