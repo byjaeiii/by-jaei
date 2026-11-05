@@ -452,6 +452,24 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 .catMoveBtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 </style>
 <style>.categoryManagerRow{gap:5px}.categoryManagerRow button.catMoveBtn{padding:7px 9px;min-width:0}.catMoveMode{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:13px;font-weight:700;cursor:pointer}.catMoveMode input{width:auto;margin:0}.catMoveMode small{font-weight:400;color:var(--muted);font-size:11px}</style>
+<style>
+.ppHead{display:flex;gap:8px;align-items:flex-start;margin:0 0 7px}
+.ppHead .parentCurrent{flex:1;margin:0}
+.ppEditToggle{padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ppEditToggle.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cePanel{margin:0 0 9px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fffdf9;display:grid;gap:8px}
+.ceTitle{font-size:11.5px;color:var(--muted);line-height:1.5}.ceTitle b{color:var(--ink)}
+.ceRow{display:flex;gap:6px}.ceRow input{flex:1;min-width:0;padding:9px 10px;font-size:13px}
+.ceRow button,.ceBtns button{padding:8px 11px;font-size:12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap}
+.ceRow button{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ceBtns{display:flex;flex-wrap:wrap;gap:6px}
+.ceBtns button.danger{color:#b3402f;border-color:#d9a79f;background:#fff}
+.parentPicker.editing .catChip.on{outline:2px solid #c9a98a;outline-offset:1px}
+</style>
+<style>
+.stagedBadge.update{background:#eaf1f8;color:#355f8c;border-color:#c5d8ea}
+.stagedCard.update{border-color:#c5d8ea}
+</style>
 </head><body><div class="wrap"><div class="logo"><a href="#" onclick="adminGoHome(event)" title="관리자 첫 화면으로" style="color:inherit;text-decoration:none;cursor:pointer">BY JAEI</a> · ADMIN <span style="font:11px Arial;letter-spacing:1px;color:#9b8f84">v18</span></div>
 <div id="authBox" class="box"><h2>관리자 로그인</h2><label>이메일</label><input id="email" type="email" autocomplete="username"><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:8px 0 0;cursor:pointer"><input id="saveEmail" type="checkbox" style="width:auto;margin:0"> 이메일/아이디 저장</label><label>비밀번호</label><input id="pw" type="password" autocomplete="current-password"><div class="actions"><button id="loginBtn" type="button">로그인</button></div><p class="note">관리자 권한이 승인된 계정만 상품을 등록할 수 있어요.</p><div id="loginStatus" class="msg">연결 준비 완료 · 로그인 버튼을 눌러주세요.</div></div>
 <div id="app" hidden>
@@ -474,6 +492,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <button type="button" id="untypedNavBtn" data-admin-section="untyped">분류안된상품</button>
   <button type="button" data-admin-section="orders">주문관리</button>
   <button type="button" data-admin-section="members">회원관리</button>
+  <button type="button" id="adminRefreshBtn" style="margin-left:auto;color:var(--ink);font-weight:700" onclick="refreshAdminData()">🔄 새로고침</button>
 </div>
 <div class="adminSection active" id="adminSection-products"><h2 class="adminSectionTitle">상품등록</h2><div class="box"><h2>카테고리 관리</h2><p class="note">여기서 카테고리를 직접 추가·수정·삭제할 수 있어요. 기존 카테고리 안에 하위 카테고리도 계속 만들 수 있습니다.</p><p class="note">숨긴 카테고리와 그 하위 카테고리·상품은 고객페이지에서 모두 보이지 않아요. 관리자페이지의 상품과 주문 데이터는 삭제되지 않고 그대로 유지됩니다.</p><div class="row"><div><label>카테고리 이름</label><input id="categoryNameInput" placeholder="예: 26WINTER BEBE OUTER"></div><div><label>상위 카테고리</label><select id="categoryParentInput"><option value="">상위 카테고리 없음</option></select><div id="categoryParentPicker" class="parentPicker"></div></div></div><div class="actions"><button id="categorySaveBtn" type="button" onclick="saveCategory()">카테고리 추가</button><button id="categoryCancelBtn" class="secondary" type="button" onclick="resetCategoryForm()" hidden>수정 취소</button></div><div class="categoryToolbar"><button type="button" class="secondary" onclick="expandAllCategories(true)">전체 펼치기</button><button type="button" class="secondary" onclick="expandAllCategories(false)">전체 접기</button></div><div id="categoryManagerList" style="margin-top:10px"></div></div>
 
@@ -504,7 +523,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">등록 대기 상품</h2><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" class="secondary" onclick="toggleAllStaged()">선택 가능한 상품 전체 선택/해제</button><button type="button" class="secondary" onclick="autoSeparateStagedAcc()">ACC에도 추가</button><button type="button" id="stagedDraftSaveBtn" onclick="saveStagedDraft()">임시저장</button><button type="button" class="secondary" onclick="clearStaged()">대기 목록 비우기</button></div></div>
   <p class="note">카드를 누르면 미리보기, <b>수정</b>을 누르면 상품등록 탭의 입력 화면에서 수기로 등록할 때처럼 수정할 수 있어요. 아직 쇼핑몰에는 등록되지 않은 상태예요.</p>
   <div id="stagedSummary" class="filterCount"></div>
-  <div class="actions" style="margin:10px 0 14px"><button type="button" id="stagedApplyBtn" onclick="applyStagedProducts()">상품 반영하기</button></div>
+  <label style="display:flex;align-items:center;gap:7px;margin:10px 0 0;font-size:12px;color:var(--muted);cursor:pointer"><input type="checkbox" id="stagedUpdateImages" style="width:auto" onchange="refreshStagedStatuses();renderStaged()"> 이미 등록된 상품을 수정할 때 이미지도 이번 ZIP의 사진으로 교체하기</label><div class="actions" style="margin:10px 0 14px"><button type="button" id="stagedApplyBtn" onclick="applyStagedProducts()">상품 반영하기</button></div>
   <div id="stagedGrid" class="productAdminGrid"></div>
   <div id="stagedApplyStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
@@ -986,29 +1005,60 @@ async function uploadBulkImage(blob,baseName){
 }
 let stagedProducts=[],stagedSeq=0,stagedEditingId=null,stagedExistingKeys=new Set(),stagedThumbUrls=[];
 function stagedKey(p,cid){return bulkNorm(p.brand)+'|'+bulkNorm(p.name)+'|'+String(cid)}
+let stagedExistingMap=new Map(),stagedWholesaleMap=new Map(),stagedHasUpdatedAt=false;
 async function refreshStagedExisting(){
-  const existing=await apiAll('/rest/v1/products?select=id,name,brand,category_id&order=id.asc');
-  stagedExistingKeys=new Set(existing.map(x=>bulkNorm(x.brand)+'|'+bulkNorm(x.name)+'|'+String(x.category_id)));
+  const existing=await apiAll('/rest/v1/products?select=*&order=id.asc');
+  stagedExistingMap=new Map();
+  existing.forEach(x=>{const k=bulkNorm(x.brand)+'|'+bulkNorm(x.name)+'|'+String(x.category_id);if(!stagedExistingMap.has(k))stagedExistingMap.set(k,[]);stagedExistingMap.get(k).push(x)});
+  stagedExistingKeys=new Set(stagedExistingMap.keys());
+  stagedHasUpdatedAt=existing.some(x=>Object.prototype.hasOwnProperty.call(x,'updated_at'));
+  stagedWholesaleMap=new Map();
+  try{(await apiAll('/rest/v1/product_private_costs?select=product_id,wholesale_price&order=product_id.asc')).forEach(r=>stagedWholesaleMap.set(String(r.product_id),Number(r.wholesale_price)))}catch(err){console.warn('도매가 비교 정보를 불러오지 못했어요',err)}
+}
+const stagedFmt=v=>v==null||v===''||!Number.isFinite(Number(v))?'없음':Number(v).toLocaleString('ko-KR');
+const stagedNormArr=a=>(Array.isArray(a)?a:[]).map(x=>String(x).trim()).filter(Boolean);
+function stagedDiff(p,row,withImages){
+  const labels=[],patch={};let wholesale=false;
+  const retailChanged=!p.isSizeChart&&Number.isFinite(p.normal)&&p.normal>0&&Number(row.normal_price)!==Number(p.normal);
+  if(retailChanged){labels.push(`소매가 ${stagedFmt(row.normal_price)}→${stagedFmt(p.normal)}`);patch.normal_price=p.normal}
+  const wholesaleChanged=p.wholesale!==null&&Number.isFinite(p.wholesale)&&stagedWholesaleMap.get(String(row.id))!==Number(p.wholesale);
+  if(!p.isSizeChart&&(retailChanged||p.memberExcel||wholesaleChanged)&&p.member!=null&&Number.isFinite(p.member)&&Number(row.member_price)!==Number(p.member)){labels.push(`회원가 ${stagedFmt(row.member_price)}→${stagedFmt(p.member)}`);patch.member_price=p.member}
+  const sc=stagedNormArr(p.colors),ss=stagedNormArr(p.sizes);
+  if(sc.length&&JSON.stringify(sc)!==JSON.stringify(stagedNormArr(row.colors))){labels.push('색상');patch.colors=p.colors}
+  if(ss.length&&JSON.stringify(ss)!==JSON.stringify(stagedNormArr(row.sizes))){labels.push('사이즈');patch.sizes=p.sizes}
+  if(p.onePlusOne&&Object.prototype.hasOwnProperty.call(row,'is_one_plus_one')&&!row.is_one_plus_one){labels.push('1+1 설정');patch.is_one_plus_one=true}
+  if(wholesaleChanged){labels.push(`도매가 ${stagedFmt(stagedWholesaleMap.get(String(row.id)))}→${stagedFmt(p.wholesale)}`);wholesale=true}
+  if(withImages&&p.files.length)labels.push('이미지 교체');
+  return {row,patch,wholesale,labels,changed:labels.length>0};
 }
 function refreshStagedStatuses(){
   const seen=new Set();
+  const withImages=!!($('stagedUpdateImages')&&$('stagedUpdateImages').checked);
   stagedProducts.forEach(p=>{
-    let status='ok',message='';
+    let status='ok',message='';p._upd=null;
     if(!p.name){status='error';message='상품명이 비어 있어요'}
     else if(!p.brand){status='error';message='브랜드명이 비어 있어요'}
     else if(!p.isSizeChart&&!(Number.isFinite(p.normal)&&p.normal>0)){status='error';message='소매가(상품가)가 비어 있거나 숫자가 아니에요 — 수정에서 입력해주세요'}
     else if(p.wholesale!==null&&!Number.isFinite(p.wholesale)){status='error';message='도매가가 숫자가 아니에요 — 수정에서 확인해주세요'}
-    else if(!p.files.length){status='error';message='이미지가 없어요 — 수정에서 사진을 추가해주세요'}
     else if(!p.categoryIds.length){status='error';message='카테고리가 선택되지 않았어요'}
     else{
       const keys=p.categoryIds.map(c=>stagedKey(p,c));
-      if(keys.some(k=>stagedExistingKeys.has(k))){status='dup';message='같은 브랜드·상품명이 해당 카테고리에 이미 등록돼 있어요'}
-      else if(keys.some(k=>seen.has(k))){status='dup';message='대기 목록에 같은 상품이 이미 있어요'}
+      const matched=keys.filter(k=>stagedExistingMap.has(k));
+      if(keys.some(k=>seen.has(k))){status='dup';message='대기 목록에 같은 상품이 이미 있어요'}
+      else if(matched.length){
+        keys.forEach(k=>seen.add(k));
+        const upd=[];matched.forEach(k=>stagedExistingMap.get(k).forEach(row=>upd.push(stagedDiff(p,row,withImages))));
+        p._upd=upd;
+        const first=upd.find(u=>u.changed);
+        if(first){status='update';message='기존 상품 수정: '+first.labels.join(' · ')+(upd.length>1?` (등록된 ${upd.length}곳에 모두 반영)`:'')}
+        else{status='dup';message='이미 등록돼 있고 바뀐 내용이 없어요'}
+      }
+      else if(!p.files.length){status='error';message='이미지가 없어요 — 수정에서 사진을 추가해주세요'}
       else keys.forEach(k=>seen.add(k));
     }
     if(status==='ok'&&p.lastError)message='지난 반영 시도 실패: '+p.lastError;
     p.status=status;p.message=message;
-    if(status!=='ok')p.selected=false;
+    if(status!=='ok'&&status!=='update')p.selected=false;
   });
 }
 function stagedPriceText(p){
@@ -1025,20 +1075,20 @@ function renderStaged(){
   stagedThumbUrls.forEach(u=>URL.revokeObjectURL(u));stagedThumbUrls=[];
   if(!stagedProducts.length){box.hidden=true;$('stagedGrid').innerHTML='';$('stagedSummary').textContent='';return}
   box.hidden=false;
-  const ok=stagedProducts.filter(p=>p.status==='ok').length,dup=stagedProducts.filter(p=>p.status==='dup').length,err=stagedProducts.filter(p=>p.status==='error').length;
-  const picked=stagedProducts.filter(p=>p.selected&&p.status==='ok').length;
-  $('stagedSummary').textContent=`전체 ${stagedProducts.length}개 · 등록 가능 ${ok}개 · 이미 등록됨/중복 ${dup}개 · 확인 필요 ${err}개 / 반영 선택 ${picked}개`;
+  const ok=stagedProducts.filter(p=>p.status==='ok').length,upd=stagedProducts.filter(p=>p.status==='update').length,dup=stagedProducts.filter(p=>p.status==='dup').length,err=stagedProducts.filter(p=>p.status==='error').length;
+  const picked=stagedProducts.filter(p=>p.selected&&(p.status==='ok'||p.status==='update')).length;
+  $('stagedSummary').textContent=`전체 ${stagedProducts.length}개 · 신규 등록 ${ok}개 · 기존 상품 수정 ${upd}개 · 변경 없음/중복 ${dup}개 · 확인 필요 ${err}개 / 반영 선택 ${picked}개`;
   $('stagedApplyBtn').textContent=`선택한 ${picked}개 상품 반영하기`;
-  const label={ok:'등록 가능',dup:'중복',error:'확인 필요'};
+  const label={ok:'신규 등록',update:'기존 상품 수정',dup:'변경 없음/중복',error:'확인 필요'};
   $('stagedGrid').innerHTML=stagedProducts.map(p=>{
     let thumb='';
     if(p.files[0]){thumb=URL.createObjectURL(p.files[0]);stagedThumbUrls.push(thumb)}
-    return `<div class="productCard stagedCard ${p.status}" onclick="previewStaged(${p.sid})"><div class="productCardImgWrap"><img class="productCardImg" src="${thumb}"></div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input type="checkbox" ${p.selected?'checked':''} ${p.status!=='ok'?'disabled':''} onchange="toggleStagedSelect(${p.sid},this.checked)"> 반영</label><div class="productCardName">${escapeOrderText(p.name||'(상품명 없음)')}</div><span class="stagedBadge ${p.status}">${label[p.status]}</span><div class="productCardMeta">${escapeOrderText(stagedPriceText(p))}<br>${escapeOrderText(p.brand||'')}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${stagedCategoryText(p)}</span></span><br><span style="font-size:10px">COLOR · ${escapeOrderText(p.colors.join(', ')||'-')}</span><br><span style="font-size:10px">SIZE · ${escapeOrderText(p.sizes.join(', ')||'-')}</span><br><span style="font-size:10px">이미지 ${p.files.length}장</span></div>${p.message?`<div class="stagedMsg">${escapeOrderText(p.message)}</div>`:''}<div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();previewStaged(${p.sid})">미리보기</button><button class="secondary" onclick="event.stopPropagation();editStaged(${p.sid})">수정</button><button class="danger" onclick="event.stopPropagation();removeStaged(${p.sid})">제외</button></div></div></div>`;
+    return `<div class="productCard stagedCard ${p.status}" onclick="previewStaged(${p.sid})"><div class="productCardImgWrap"><img class="productCardImg" src="${thumb}"></div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input type="checkbox" ${p.selected?'checked':''} ${p.status!=='ok'&&p.status!=='update'?'disabled':''} onchange="toggleStagedSelect(${p.sid},this.checked)"> 반영</label><div class="productCardName">${escapeOrderText(p.name||'(상품명 없음)')}</div><span class="stagedBadge ${p.status}">${label[p.status]}</span><div class="productCardMeta">${escapeOrderText(stagedPriceText(p))}<br>${escapeOrderText(p.brand||'')}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${stagedCategoryText(p)}</span></span><br><span style="font-size:10px">COLOR · ${escapeOrderText(p.colors.join(', ')||'-')}</span><br><span style="font-size:10px">SIZE · ${escapeOrderText(p.sizes.join(', ')||'-')}</span><br><span style="font-size:10px">이미지 ${p.files.length}장</span></div>${p.message?`<div class="stagedMsg">${escapeOrderText(p.message)}</div>`:''}<div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();previewStaged(${p.sid})">미리보기</button><button class="secondary" onclick="event.stopPropagation();editStaged(${p.sid})">수정</button><button class="danger" onclick="event.stopPropagation();removeStaged(${p.sid})">제외</button></div></div></div>`;
   }).join('');
 }
-function toggleStagedSelect(sid,checked){const p=stagedProducts.find(x=>x.sid===sid);if(!p||p.status!=='ok')return;p.selected=!!checked;renderStaged()}
+function toggleStagedSelect(sid,checked){const p=stagedProducts.find(x=>x.sid===sid);if(!p||(p.status!=='ok'&&p.status!=='update'))return;p.selected=!!checked;renderStaged()}
 function toggleAllStaged(){
-  const able=stagedProducts.filter(p=>p.status==='ok');if(!able.length)return;
+  const able=stagedProducts.filter(p=>p.status==='ok'||p.status==='update');if(!able.length)return;
   const allOn=able.every(p=>p.selected);able.forEach(p=>p.selected=!allOn);renderStaged();
 }
 function removeStaged(sid){
@@ -1192,7 +1242,7 @@ async function analyzeBulkZip(){
       if(route.moved){accMoved++;accNames.add(route.name)}else if(route.isAcc&&!route.found)accMissing++;
       const normal=Number.isFinite(p.retail)?p.retail:0;
       const member=(p.member!==null&&Number.isFinite(p.member))?p.member:calcMemberPrice(normal,p.wholesale,route.ids);
-      const item={retailAuto:!!p.retailAuto,sid:++stagedSeq,row:p.row,photoFolder:p.folder,code:p.code,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,onePlusOne:!!p.onePlus,description:'',categoryIds:route.ids,files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null};
+      const item={memberExcel:(p.member!==null&&Number.isFinite(p.member)),retailAuto:!!p.retailAuto,sid:++stagedSeq,row:p.row,photoFolder:p.folder,code:p.code,brand:p.brand,name:p.name,colors:p.colors,sizes:p.sizes,wholesale:p.wholesale,normal,member,isSizeChart:false,onePlusOne:!!p.onePlus,description:'',categoryIds:route.ids,files,selected:true,status:'ok',message:'',lastError:'',uploadedUrls:null};
       added.push(item);stagedByKey.set(key,item);
     }
     await refreshStagedExisting();
@@ -1202,8 +1252,8 @@ async function analyzeBulkZip(){
     const noImg=stagedProducts.filter(p=>!p.files.length).length;
     const knownNames=new Set([...products.map(p=>bulkNorm(p.name)),...stagedProducts.map(p=>bulkNorm(p.name))]);
     const orphanFolders=folderKeys.filter(k=>!usedFolderKeys.has(k)&&!knownNames.has(k)&&!knownNames.has(aliasOfKey.get(k)||''));
-    const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length;
-    say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n새 상품 ${added.length}개를 대기 목록에 올렸어요. (이미 등록됨 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(added.some(x=>x.retailAuto)?`\n소매가가 비어 있는 상품 ${added.filter(x=>x.retailAuto).length}개는 도매가 × 1.6 (100원 단위 반올림)으로 소매가를 자동 입력했어요.`:'')+(accMoved?`\nACC 상품 ${accMoved}개는 기본 카테고리와 함께 “${[...accNames].join(', ')}” 카테고리에도 자동으로 추가했어요.`:'')+(accMissing?`\n⚠ ACC 상품 ${accMissing}개의 ACC 카테고리를 찾지 못해 기본 카테고리에만 넣었어요. 카테고리 이름에 ACC가 들어 있는지 확인해주세요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
+    const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length,updN=added.filter(p=>p.status==='update').length;
+    say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n대기 목록에 ${added.length}개를 올렸어요. (신규 ${added.length-updN-dup-bad}개 · 기존 상품 수정 ${updN}개 · 변경 없음 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(added.some(x=>x.retailAuto)?`\n소매가가 비어 있는 상품 ${added.filter(x=>x.retailAuto).length}개는 도매가 × 1.6 (100원 단위 반올림)으로 소매가를 자동 입력했어요.`:'')+(accMoved?`\nACC 상품 ${accMoved}개는 기본 카테고리와 함께 “${[...accNames].join(', ')}” 카테고리에도 자동으로 추가했어요.`:'')+(accMissing?`\n⚠ ACC 상품 ${accMissing}개의 ACC 카테고리를 찾지 못해 기본 카테고리에만 넣었어요. 카테고리 이름에 ACC가 들어 있는지 확인해주세요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
     $('singleZipFile').value='';
     document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
@@ -1220,17 +1270,37 @@ async function applyStagedProducts(){
     await refreshStagedExisting();
     refreshStagedStatuses();
     renderStaged();
-    const targets=stagedProducts.filter(p=>p.selected&&p.status==='ok');
+    const targets=stagedProducts.filter(p=>p.selected&&(p.status==='ok'||p.status==='update'));
     if(!targets.length){say('반영할 상품이 없어요. 반영에 체크된 "등록 가능" 상품이 있는지 확인해주세요.');return}
-    const rowCount=targets.reduce((n,p)=>n+p.categoryIds.length,0);
-    if(!confirm(`${targets.length}개 상품을 쇼핑몰에 등록할까요?`+(rowCount!==targets.length?`\n(여러 카테고리 등록 포함 총 ${rowCount}건)`:''))){say('취소했어요.');return}
+    const newTargets=targets.filter(p=>p.status==='ok'),upTargets=targets.filter(p=>p.status==='update');
+    const rowCount=newTargets.reduce((n,p)=>n+p.categoryIds.length,0);
+    const withImages=!!($('stagedUpdateImages')&&$('stagedUpdateImages').checked);
+    const parts=[];if(newTargets.length)parts.push(`새 상품 ${newTargets.length}개 등록`+(rowCount!==newTargets.length?` (여러 카테고리 포함 총 ${rowCount}건)`:''));if(upTargets.length)parts.push(`이미 등록된 상품 ${upTargets.length}개 수정`);
+    if(!confirm(parts.join('\n')+'\n\n진행할까요?'+(upTargets.length?`\n\n※ 기존 상품 수정은 소매가·회원가·색상·사이즈·도매가만 바뀌어요.\n사진${withImages?'은 이번 ZIP의 사진으로 교체돼요.':'·카테고리·설명은 그대로예요.'}`:''))){say('취소했어요.');return}
     const current=await api('/rest/v1/products?select=sort_order&order=sort_order.desc&limit=1');
     let nextOrder=(Number(current?.[0]?.sort_order)||0)+1;
-    let okCount=0;const failed=[],warn=[];
+    let okCount=0,updCount=0;const failed=[],warn=[];
     for(let i=0;i<targets.length;i++){
       const p=targets[i];
       say(`상품 반영 중... ${i+1}/${targets.length}\n${p.name} (이미지 ${p.files.length}장)`);
       try{
+        if(p.status==='update'){
+          let imgUrls=null;
+          if(withImages&&p.files.length){
+            if(!p.uploadedUrls||p.uploadedUrls.length!==p.files.length){const urls=[];for(const f of p.files)urls.push(await uploadBulkImage(f,f.name));p.uploadedUrls=urls}
+            imgUrls=p.uploadedUrls;
+          }
+          for(const u of (p._upd||[])){
+            const body={...u.patch};
+            if(imgUrls)body.images=imgUrls;
+            if(Object.keys(body).length||u.wholesale){
+              if(stagedHasUpdatedAt)body.updated_at=new Date().toISOString();
+              await api('/rest/v1/products?id=eq.'+encodeURIComponent(String(u.row.id)),{method:'PATCH',body:JSON.stringify(body),headers:{'Prefer':'return=minimal'}});
+            }
+            if(u.wholesale){try{await savePrivateWholesalePrice(u.row.id,p.wholesale)}catch(pe){warn.push(`${p.name} — 도매가 저장 실패: ${pe.message||pe}`)}}
+          }
+          updCount++;stagedProducts=stagedProducts.filter(x=>x.sid!==p.sid);continue;
+        }
         if(!p.uploadedUrls||p.uploadedUrls.length!==p.files.length){
           const urls=[];
           for(const f of p.files)urls.push(await uploadBulkImage(f,f.name));
@@ -1259,11 +1329,11 @@ async function applyStagedProducts(){
     }
     refreshStagedStatuses();
     renderStaged();
-    say(`상품 반영 완료 🤍\n성공: ${okCount}개 · 실패: ${failed.length}개`+(failed.length?'\n\n[실패 — 대기 목록에 남겨뒀어요. 다시 반영을 눌러 재시도할 수 있어요]\n'+failed.map(x=>'· '+x).join('\n'):'')+(warn.length?'\n\n[확인 필요]\n'+warn.map(x=>'· '+x).join('\n'):''));
+    say(`상품 반영 완료 🤍\n신규 등록: ${okCount}개 · 기존 상품 수정: ${updCount}개 · 실패: ${failed.length}개`+(failed.length?'\n\n[실패 — 대기 목록에 남겨뒀어요. 다시 반영을 눌러 재시도할 수 있어요]\n'+failed.map(x=>'· '+x).join('\n'):'')+(warn.length?'\n\n[확인 필요]\n'+warn.map(x=>'· '+x).join('\n'):''));
     await loadProducts();
   }catch(e){
     say('상품 반영 실패: '+(e.message||e));
-  }finally{btn.disabled=false}
+  }finally{btn.disabled=false;try{renderBulkCategoryOptions();renderCategoryOptions()}catch(e){console.warn(e)}}
 }
 window.addEventListener('beforeunload',e=>{if(stagedProducts.length){e.preventDefault();e.returnValue=''}});
 
@@ -1627,29 +1697,110 @@ function parentRootOf(id){
   while(cur&&cur.parent_id!=null&&guard++<20){cur=categories.find(c=>String(c.id)===String(cur.parent_id))}
   return cur?String(cur.id):'';
 }
+let parentPickerEdit=false,parentPickerEditId=null;
 function refreshParentPicker(){
   const box=$('categoryParentPicker'),sel=$('categoryParentInput');if(!box||!sel)return;
   const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-  const blocked=editingCategoryId?new Set([String(editingCategoryId),...[...categoryDescendantIds(editingCategoryId)].map(String)]):new Set();
+  const editMode=parentPickerEdit;
+  const blocked=(!editMode&&editingCategoryId)?new Set([String(editingCategoryId),...[...categoryDescendantIds(editingCategoryId)].map(String)]):new Set();
   const groups=[];
   categoryTreeRows().forEach(r=>{if(blocked.has(String(r.c.id)))return;if(r.depth===0)groups.push({root:r.c,items:[r]});else if(groups.length&&String(groups[groups.length-1].root.id)===parentRootOf(r.c.id))groups[groups.length-1].items.push(r)});
   const cur=String(sel.value||'');
-  if(cur)parentPickerRoot=parentRootOf(cur);
-  else if(parentPickerRoot===null)parentPickerRoot='';
+  if(editMode&&parentPickerEditId!=null&&!categories.some(c=>String(c.id)===String(parentPickerEditId)))parentPickerEditId=null;
+  if(editMode){
+    if(parentPickerEditId!=null)parentPickerRoot=parentRootOf(parentPickerEditId);
+    else if(!parentPickerRoot&&groups.length)parentPickerRoot=String(groups[0].root.id);
+  }else{
+    if(cur)parentPickerRoot=parentRootOf(cur);
+    else if(parentPickerRoot===null)parentPickerRoot='';
+  }
   if(parentPickerRoot&&!groups.some(g=>String(g.root.id)===String(parentPickerRoot)))parentPickerRoot='';
-  const curCat=categories.find(c=>String(c.id)===cur);
-  const curText=cur&&curCat?(typeof categoryLockPath==='function'?categoryLockPath(cur):curCat.name):'';
-  box.innerHTML=`<div class="parentCurrent ${cur?'':'none'}">${cur?`상위 카테고리: <b>${esc(curText)}</b> 아래에 만들어져요`:'<b>최상위 카테고리</b>로 만들어져요 (상위 없음)'}</div>`+
-    `<div class="catRootTabs"><button type="button" class="catRootTab ${parentPickerRoot===''&&!cur?'active':''}" data-pp-root="">상위 없음</button>${groups.map(g=>`<button type="button" class="catRootTab ${String(parentPickerRoot)===String(g.root.id)?'active':''}" data-pp-root="${g.root.id}">${esc(g.root.name)}</button>`).join('')}</div>`+
-    (parentPickerRoot?`<div class="catGroup active">${(groups.find(g=>String(g.root.id)===String(parentPickerRoot))||{items:[]}).items.map(({c,depth})=>`<button type="button" class="catChip d${Math.min(depth,4)} ${String(c.id)===cur?'on':''}" data-pp-pick="${c.id}">${depth===0?'바로 아래 · ':depth>1?'↳ ':''}${esc(c.name)}</button>`).join('')}</div>`:'');
+  const pathOf=id=>{const c=categories.find(x=>String(x.id)===String(id));return c?(typeof categoryLockPath==='function'?categoryLockPath(id):c.name):''};
+  const curText=cur?pathOf(cur):'';
+  const ec=editMode&&parentPickerEditId!=null?categories.find(c=>String(c.id)===String(parentPickerEditId)):null;
+  const headText=editMode?(ec?'수정 모드: 아래 카테고리를 누르면 다른 카테고리로 바꿀 수 있어요':'수정 모드: 아래에서 수정할 카테고리를 눌러주세요'):(cur?`상위 카테고리: <b>${esc(curText)}</b> 아래에 만들어져요`:'<b>최상위 카테고리</b>로 만들어져요 (상위 없음)');
+  const head=`<div class="ppHead"><div class="parentCurrent ${editMode||!cur?'none':''}">${headText}</div><button type="button" class="ppEditToggle ${editMode?'on':''}" data-pp-edit-toggle="1">${editMode?'✓ 수정 모드 끝내기':'✏️ 카테고리 수정'}</button></div>`;
+  const panel=ec?`<div class="cePanel"><div class="ceTitle">선택한 카테고리: <b>${esc(pathOf(ec.id))}</b></div><div class="ceRow"><input id="ceName" value="${esc(ec.name)}" placeholder="카테고리 이름"><button type="button" data-ce="rename">이름 저장</button></div><div class="ceBtns"><button type="button" data-ce="up">↑ 위로</button><button type="button" data-ce="down">↓ 아래로</button><button type="button" data-ce="move">이동</button><button type="button" data-ce="hide">${ec.is_hidden===true?'다시 표시':'숨기기'}</button><button type="button" class="danger" data-ce="del">삭제</button></div></div>`:'';
+  const onId=editMode?(ec?String(ec.id):''):cur;
+  box.classList.toggle('editing',editMode);
+  box.innerHTML=head+panel+
+    `<div class="catRootTabs">${editMode?'':`<button type="button" class="catRootTab ${parentPickerRoot===''&&!cur?'active':''}" data-pp-root="">상위 없음</button>`}${groups.map(g=>`<button type="button" class="catRootTab ${String(parentPickerRoot)===String(g.root.id)?'active':''}" data-pp-root="${g.root.id}">${esc(g.root.name)}</button>`).join('')}</div>`+
+    (parentPickerRoot?`<div class="catGroup active">${(groups.find(g=>String(g.root.id)===String(parentPickerRoot))||{items:[]}).items.map(({c,depth})=>`<button type="button" class="catChip d${Math.min(depth,4)} ${String(c.id)===onId?'on':''}" data-pp-pick="${c.id}">${depth===0?'바로 아래 · ':depth>1?'↳ ':''}${esc(c.name)}</button>`).join('')}</div>`:'');
   if(!box.dataset.bound){
     box.dataset.bound='1';
     box.addEventListener('click',e=>{
+      const tg=e.target.closest('[data-pp-edit-toggle]');
+      if(tg&&box.contains(tg)){parentPickerEdit=!parentPickerEdit;parentPickerEditId=null;refreshParentPicker();return}
+      const ce=e.target.closest('[data-ce]');
+      if(ce&&box.contains(ce)){categoryQuickAction(ce.dataset.ce);return}
       const t=e.target.closest('[data-pp-root]'),p=e.target.closest('[data-pp-pick]');
-      if(p&&box.contains(p)){sel.value=String(p.dataset.ppPick);refreshParentPicker();return}
-      if(t&&box.contains(t)){const r=String(t.dataset.ppRoot);parentPickerRoot=r;if(r===''){sel.value=''}else if(parentRootOf(sel.value)!==r){sel.value=r}refreshParentPicker()}
+      if(p&&box.contains(p)){
+        if(parentPickerEdit){parentPickerEditId=String(p.dataset.ppPick);refreshParentPicker();return}
+        sel.value=String(p.dataset.ppPick);refreshParentPicker();return}
+      if(t&&box.contains(t)){
+        const r=String(t.dataset.ppRoot);parentPickerRoot=r;
+        if(parentPickerEdit){parentPickerEditId=null;refreshParentPicker();return}
+        if(r===''){sel.value=''}else if(parentRootOf(sel.value)!==r){sel.value=r}refreshParentPicker()}
     });
+    box.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='ceName'){e.preventDefault();categoryQuickAction('rename')}});
   }
+}
+async function renameCategoryQuick(old,name){
+  try{
+    const updated=await api('/rest/v1/categories?id=eq.'+encodeURIComponent(old.id),{method:'PATCH',body:JSON.stringify({name}),headers:{'Prefer':'return=representation'}});
+    if(!Array.isArray(updated)||updated.length===0)throw new Error('카테고리 수정 권한이 없거나 해당 카테고리를 찾지 못했어요.');
+    await api('/rest/v1/products?category_id=eq.'+encodeURIComponent(old.id),{method:'PATCH',body:JSON.stringify({category:name}),headers:{'Prefer':'return=minimal'}});
+    if(categories.filter(c=>String(c.name)===String(old.name)).length===1){
+      await api('/rest/v1/products?category=eq.'+encodeURIComponent(old.name)+'&category_id=is.null',{method:'PATCH',body:JSON.stringify({category:name,category_id:old.id}),headers:{'Prefer':'return=minimal'}});
+    }
+    await loadCategories();await loadProducts();
+    alert('카테고리 이름을 수정했어요.');
+  }catch(e){alert('카테고리 이름 수정에 실패했어요.\n\n'+(e.message||e))}
+}
+async function categoryQuickAction(act){
+  const id=parentPickerEditId;
+  if(id==null)return alert('수정할 카테고리를 먼저 눌러주세요.');
+  const c=categories.find(x=>String(x.id)===String(id));if(!c)return;
+  if(act==='rename'){
+    const name=(($('ceName')||{}).value||'').trim();
+    if(!name)return alert('카테고리 이름을 입력해주세요.');
+    if(name===String(c.name))return alert('이름이 그대로예요. 바꿀 이름을 입력해주세요.');
+    return renameCategoryQuick(c,name);
+  }
+  if(act==='up')return moveCategory(id,-1);
+  if(act==='down')return moveCategory(id,1);
+  if(act==='move')return openCategoryMoveDialog(id);
+  if(act==='hide')return toggleCategoryVisibility(id);
+  if(act==='del')return deleteCategory(id);
+}
+/* ===== 새로고침: 페이지를 다시 열지 않고 카테고리·상품·선택 화면을 다시 불러와요 ===== */
+let adminRefreshing=false;
+function rebindCategoryPickers(){
+  ['categoryOptions','categoryParentPicker','zipCategoryPicker'].forEach(id=>{
+    const b=$(id);if(!b)return;
+    const n=b.cloneNode(false);delete n.dataset.bound;delete n.dataset.pickerBound;b.replaceWith(n);
+  });
+}
+async function refreshAdminData(){
+  if(adminRefreshing)return;adminRefreshing=true;
+  const btn=$('adminRefreshBtn');if(btn){btn.disabled=true;btn.textContent='🔄 불러오는 중...'}
+  try{
+    let keep=null;try{if(typeof categoryLocked!=='undefined'&&!categoryLocked)keep=getSelectedCategories()}catch(e){}
+    const zipSel=$('zipCategory')?$('zipCategory').value:'';
+    rebindCategoryPickers();
+    await loadCategories();
+    if(keep&&keep.length)renderCategoryOptions(keep);
+    const z=$('zipCategory');
+    if(z&&zipSel&&categories.some(c=>String(c.id)===String(zipSel))){z.value=zipSel;refreshSelectPicker('zipCategory','zipCategoryPicker','기본 카테고리를 선택해주세요')}
+    ['stagedApplyBtn','categorySaveBtn'].forEach(id=>{const b=$(id);if(b)b.disabled=false});
+    await loadProducts();
+    try{if(typeof stagedProducts!=='undefined'&&typeof renderStaged==='function')renderStaged()}catch(e){console.warn(e)}
+    if(btn)btn.textContent='✓ 새로고침 완료';
+    setTimeout(()=>{const b=$('adminRefreshBtn');if(b&&!adminRefreshing)b.textContent='🔄 새로고침'},1400);
+  }catch(e){
+    if(btn)btn.textContent='🔄 새로고침';
+    alert('새로고침 중 문제가 생겼어요.\n\n'+(e.message||e)+'\n\n그래도 안 되면 브라우저 새로고침(F5)을 눌러주세요.');
+  }finally{adminRefreshing=false;if(btn)btn.disabled=false}
 }
 async function loadCategories(){
   const data=await api('/rest/v1/categories?select=id,name,parent_id,sort_order,created_at,is_hidden&order=sort_order.asc,created_at.asc');
@@ -2193,7 +2344,7 @@ function renderAdminProductList(){
     updateBulkUI(filtered);
     $('list').innerHTML=filtered.length?`<div class="productAdminGrid">${filtered.map(p=>{
       const pinned=Number(p.sort_order)<0;
-      return `<div class="productCard" onclick="previewProduct(${p.id})"><div class="productCardImgWrap"><img class="productCardImg" src="${p.images?.[0]||''}" style="${p.is_sold_out?'filter:blur(1.5px) brightness(.78)':''}">${p.is_sold_out?'<div class="soldOutOverlay"><span>SOLD OUT</span></div>':''}</div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.is_one_plus_one?'<span class="opTag">1+1</span>':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">COLOR · ${(p.colors||[]).join(', ')||'-'}</span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span></div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();toggleSoldOut(${p.id},${p.is_sold_out?'true':'false'})">${p.is_sold_out?'품절 해제':'SOLD OUT'}</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();deleteProduct(${p.id})">삭제</button></div></div></div>`;
+      return `<div class="productCard" onclick="previewProduct(${p.id})"><div class="productCardImgWrap"><img class="productCardImg" src="${p.images?.[0]||''}" style="${p.is_sold_out?'filter:blur(1.5px) brightness(.78)':''}">${p.is_sold_out?'<div class="soldOutOverlay"><span>SOLD OUT</span></div>':''}</div><div class="productCardBody"><label class="productSelectWrap" onclick="event.stopPropagation()"><input class="productSelect" type="checkbox" data-id="${p.id}" ${selectedProductIds.has(String(p.id))?'checked':''}> 선택</label><div class="productCardName">${pinned?'📌 ':''}${p.is_one_plus_one?'<span class="opTag">1+1</span>':''}${p.name}</div><div class="productCardMeta">${Number(p.normal_price).toLocaleString()}원${p.member_price!=null?' · 회원가 '+Number(p.member_price).toLocaleString()+'원':''}<br>${p.brand||''}<br><span class="productCardCategory"><span class="productCardCategoryLabel">카테고리</span><span class="productCardCategoryValue">${categoryPathText(p.category,p.category_id)}</span></span><br><span style="font-size:10px">COLOR · ${(p.colors||[]).join(', ')||'-'}</span><br><span style="font-size:10px">SIZE · ${(p.sizes||[]).join(', ')||'-'}</span>${p.created_at?`<br><span style="font-size:10px;color:var(--muted)">등록 ${dateKST(p.created_at)}${p.updated_at&&Date.parse(p.updated_at)-Date.parse(p.created_at)>60000?` · 수정 ${dateKST(p.updated_at)}`:''}</span>`:''}</div><div class="productCardActions"><button class="secondary" onclick="event.stopPropagation();pinProduct(${p.id})">${isSizeChartProduct(p)?(pinned?'카테고리 고정 해제':'카테고리 고정'):(pinned?'고정 해제':'상품고정')}</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},-1)">↑ 위로</button><button class="secondary" onclick="event.stopPropagation();moveProduct(${p.id},1)">↓ 아래</button><button class="secondary" onclick="event.stopPropagation();toggleSoldOut(${p.id},${p.is_sold_out?'true':'false'})">${p.is_sold_out?'품절 해제':'SOLD OUT'}</button><button class="secondary" onclick="event.stopPropagation();editProduct(${p.id})">수정</button><button class="danger" onclick="event.stopPropagation();deleteProduct(${p.id})">삭제</button></div></div></div>`;
     }).join('')}</div>`:'<p class="note">해당 카테고리에 등록된 상품이 없어요.</p>'
   }catch(e){$('list').innerHTML='<p class="note">'+e.message+'</p>'}
 }
