@@ -527,7 +527,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <div id="stagedGrid" class="productAdminGrid"></div>
   <div id="stagedApplyStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
-</div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="resetOrdersView()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderNoSearch" placeholder="주문번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderStatusTabs" class="orderStatusTabs"></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-untyped"><h2 class="adminSectionTitle">분류안된상품</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>분류안된상품</h2><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="secondary" onclick="fixTightsTypes()">타이즈 종류 바로잡기</button><button type="button" id="untypedSaveAll" class="secondary">선택한 것 모두 저장</button></span></div><p class="note">상품명으로 자동 분류가 안 된 상품이에요. (관리자에게만 보여요) 종류를 고르고 저장하면 같은 상품명의 모든 카테고리 상품에 한 번에 적용돼요. 분류 전에는 고객페이지 ALL에서 종류 버튼을 눌렀을 때 보이지 않아요.</p><div id="untypedCount" class="filterCount"></div><div id="untypedList"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="resetMembersView()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
+</div><div class="adminSection" id="adminSection-orders"><h2 class="adminSectionTitle">주문관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>주문 관리</h2><button class="secondary" onclick="resetOrdersView()">새로고침</button></div><div class="filterBar orderFilterBar"><input id="orderNameSearch" placeholder="고객 이름 검색"><input id="orderPhoneSearch" placeholder="폰번호 검색"><input id="orderNoSearch" placeholder="주문번호 검색"><input id="orderFrom" type="date" title="주문일 시작"><input id="orderTo" type="date" title="주문일 종료"><button type="button" onclick="loadOrders()">검색</button></div><div id="orderStatusTabs" class="orderStatusTabs"></div><div id="orderFilterCount" class="filterCount"></div><div id="orders"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-untyped"><h2 class="adminSectionTitle">분류안된상품</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>분류안된상품</h2><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="secondary" onclick="reclassifyAllProducts()">전체 자동분류 다시하기</button><button type="button" class="secondary" onclick="fixTightsTypes()">타이즈 종류 바로잡기</button><button type="button" id="untypedSaveAll" class="secondary">선택한 것 모두 저장</button></span></div><p class="note">상품명으로 자동 분류가 안 된 상품이에요. (관리자에게만 보여요) 종류를 고르고 저장하면 같은 상품명의 모든 카테고리 상품에 한 번에 적용돼요. 분류 전에는 고객페이지 ALL에서 종류 버튼을 눌렀을 때 보이지 않아요.</p><div id="untypedCount" class="filterCount"></div><div id="untypedList"><p class="note">불러오는 중...</p></div></div></div><div class="adminSection" id="adminSection-members"><h2 class="adminSectionTitle">회원관리</h2><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h2>회원 관리</h2><button class="secondary" onclick="resetMembersView()">새로고침</button></div><p class="note">가입한 회원은 승인 전까지 회원가가 적용되지 않아요.</p>
 <div class="box" id="adminPushBox" style="margin:14px 0;background:#f7f3ed">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:200px"><b style="font-size:14px">휴대폰 승인요청 · 주문 알림</b><div id="adminPushStatus" class="note" style="margin-top:6px">알림을 켜면 새 회원 승인요청과 새 주문이 들어올 때 휴대폰으로 알려드려요. 관리자 계정마다 기기에서 한 번씩 설정해주세요.</div></div>
@@ -2125,6 +2125,41 @@ async function fixTightsTypes(){
   }
   try{await loadProducts()}catch(_){}
   alert(ok+'개 상품의 종류를 타이즈로 바꿨어요 🤍'+(fail.length?'\n\n[실패]\n'+fail.join('\n'):''));
+}
+
+/* 등록된 모든 상품을 현재 자동분류 규칙으로 다시 분류해요 (악세사리/기타에 있던 타이즈 포함).
+   상품명으로 분류가 안 되는 상품은 그대로 두고, 카테고리는 건드리지 않고 종류(product_type)만 바꿔요. */
+async function reclassifyAllProducts(){
+  if(!(window.__allAdminProducts||[]).length)return alert('등록된 상품이 아직 없거나 불러오는 중이에요. 잠시 뒤 다시 눌러주세요.');
+  const groups=new Map();
+  (window.__allAdminProducts||[]).forEach(p=>{
+    if(p.is_size_chart===true||/사이즈\s*표/.test(String(p.name||'')))return;
+    const k=String(p.brand||'')+'||'+String(p.name||'');
+    if(!groups.has(k))groups.set(k,{brand:String(p.brand||''),name:String(p.name||''),rows:[]});
+    groups.get(k).rows.push(p);
+  });
+  const changes=[];
+  groups.forEach(g=>{
+    const to=classifyProductType(g.name);
+    if(!to)return;
+    const froms=[...new Set(g.rows.map(r=>r.product_type||'비어있음'))];
+    if(g.rows.every(r=>r.product_type===to))return;
+    changes.push({...g,to,froms});
+  });
+  if(!changes.length)return alert('다시 분류할 상품이 없어요 🤍\n\n모든 상품이 이미 자동분류 결과와 같아요.');
+  const label=t=>String(t).replace('/',' › ');
+  const tally=new Map();
+  changes.forEach(c=>{const k=c.froms.map(label).join('+')+' → '+label(c.to);tally.set(k,(tally.get(k)||0)+1)});
+  const sum=[...tally.entries()].sort((a,b)=>b[1]-a[1]).slice(0,20).map(([k,n])=>'· '+k+' : '+n+'개').join('\n');
+  const tights=changes.filter(c=>c.to===TIGHTS_TYPE).length;
+  if(!confirm('상품 '+changes.length+'개의 종류를 자동분류 결과로 바꿀까요?\n(타이즈로 바뀌는 상품 '+tights+'개 포함 · 카테고리는 그대로예요)\n\n'+sum+'\n\n※ 직접 골라둔 종류도 상품명 기준 결과로 바뀌어요.'))return;
+  let ok=0;const fail=[];
+  for(const c of changes){
+    try{await setProductTypeByName(c.brand,c.name,c.to);ok++}
+    catch(e){fail.push(c.name+' : '+(e.message||e))}
+  }
+  try{await loadProducts()}catch(_){}
+  alert(ok+'개 상품을 다시 분류했어요 🤍'+(fail.length?'\n\n[실패 '+fail.length+'개]\n'+fail.slice(0,15).join('\n'):''));
 }
 
 function updateAccBackfillBtn(){
