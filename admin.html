@@ -506,8 +506,13 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
   <p class="note">엑셀 1개와 상품명 폴더별 이미지가 들어 있는 <strong>ZIP 파일</strong>을 올리면 아래 <strong>등록 대기 목록</strong>이 만들어져요. 미리보기와 수정을 마친 뒤 <strong>상품 반영하기</strong>를 눌러야 쇼핑몰에 등록돼요.<br>엑셀 열: 브랜드명 · 상품명 · 색상 · 사이즈 · 도매가 · 소매가 (회원가 열이 있으면 사용, 소매가가 비어 있으면 도매가의 1.6배로 자동 계산, 없으면 상품가의 25% 할인 · ACC는 20% 할인 · 100원 단위 반올림 · 도매가 대비 최소 마진 1,500원 · 회원가는 정상가보다 최소 1,000원 낮게) / 이미지 폴더 이름은 엑셀의 상품명과 같거나, “하이키키 상품명 색상 사이즈 가격”처럼 상품명이 단어로 들어 있어도 돼요.<br>ZIP을 여러 개 한꺼번에 선택해도 돼요. 엑셀 파일(.xlsx)을 ZIP 없이 같이 선택해도 되고, 엑셀은 어느 ZIP에 들어 있어도 되고, 엑셀이 없는 ZIP의 이미지도 상품명 폴더 이름으로 자동으로 이어 붙여요.</p>
   <div class="row">
     <div>
-      <label>통합 압축 파일 (.zip) · 엑셀 파일(.xlsx)도 함께 선택 가능</label>
-      <input type="file" id="singleZipFile" accept=".zip,.xlsx,.xls" multiple>
+      <label>파일 선택 · 엑셀(.xlsx) · CSV · ZIP · 압축 푼 파일 모두 가능</label>
+      <input type="file" id="singleZipFile" multiple>
+      <div class="uploadHint">휴대폰에서 엑셀이 선택되지 않을 때도 이 칸에서 “파일”로 골라보세요. 엑셀·CSV·TXT·ZIP, 압축을 푼 엑셀 조각(sheet1.xml + sharedStrings.xml), 낱개 사진을 여러 개 한꺼번에 고를 수 있어요.</div>
+      <label style="margin-top:10px">압축 푼 폴더째 선택 (PC·일부 휴대폰 브라우저)</label>
+      <input type="file" id="singleFolderFiles" webkitdirectory multiple>
+      <label style="margin-top:10px">또는 엑셀에서 표를 복사해서 붙여넣기</label>
+      <textarea id="bulkPasteText" rows="4" placeholder="엑셀·구글시트에서 표를 복사해 여기에 붙여넣으세요. 첫 줄은 상품명·소매가 같은 열 이름이어야 해요."></textarea>
     </div>
     <div>
       <label>기본 카테고리 (수정에서 바꿀 수 있어요)</label>
@@ -515,7 +520,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
     </div>
   </div>
   <div class="actions">
-    <button type="button" id="zipBulkBtn" onclick="analyzeBulkZip()">ZIP 분석해서 대기 목록 만들기</button>
+    <button type="button" id="zipBulkBtn" onclick="analyzeBulkZip()">분석해서 대기 목록 만들기</button>
   </div>
   <div id="bulkUploadStatus" class="msg" style="display:none;white-space:pre-wrap"></div>
 </div>
@@ -536,7 +541,7 @@ body.dragSelecting{user-select:none;-webkit-user-select:none;cursor:crosshair}
 </div><details class="chatMatchBox" id="chatMatchBox"><summary>오픈채팅방 닉네임 ↔ 회원 대조</summary>
   <p class="note">오픈채팅방 참여자 닉네임을 <b>한 줄에 하나씩</b> 붙여넣고 <b>대조하기</b>를 누르세요. 닉네임에 <b>이름이나 전화번호(뒤 4자리 포함)</b>가 들어 있으면 가입한 회원과 자동으로 맞춰봐요. 이름·연락처가 적힌 텍스트/CSV/엑셀 파일, 카카오톡 <b>대화 내보내기(.txt)</b> 파일도 올릴 수 있어요.</p>
   <textarea id="chatMatchInput" rows="6" placeholder="예)&#10;길동맘 1234&#10;홍길동&#10;하나엄마 010-1111-2222"></textarea>
-  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile" accept=".txt,.csv,.xlsx,.xls"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div>
+  <div class="actions chatMatchActions"><input type="file" id="chatMatchFile"><button type="button" id="chatMatchRun" onclick="runChatMatch()">대조하기</button><button type="button" class="secondary" onclick="clearChatMatch()">비우기</button></div>
   <div id="chatMatchSummary" class="filterCount"></div>
   <div id="chatMatchTabs" class="orderStatusTabs"></div>
   <div id="chatMatchResult"></div>
@@ -861,7 +866,7 @@ function bulkNum(v){if(typeof v==='number')return v;const n=Number(String(v??'')
 function bulkNaturalCompare(a,b){return a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'})}
 function bulkMime(name){const e=String(name).split('.').pop().toLowerCase();return {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif'}[e]||'application/octet-stream'}
 function parseBulkExcel(buffer){
-  const wb=XLSX.read(buffer,{type:'array'});
+  const wb=(buffer&&buffer.SheetNames)?buffer:XLSX.read(buffer,{type:'array'});
   const isName=h=>h==='상품명'||h==='제품명'||h==='품명'||h==='상품이름'||h.includes('상품명')||h.includes('제품명');
   let rows=null;
   for(const sn of wb.SheetNames){
@@ -936,22 +941,131 @@ function parseBulkExcel(buffer){
     return {retailAuto,row:i+2,brand:String(ix.brand>=0?r[ix.brand]:'').trim(),name:String(r[ix.name]??'').trim(),colors:ix.color>=0?parseOptionList(r[ix.color]):[],sizes:buildSizes(r,retail),wholesale:whRaw,retail,member:ix.member>=0&&r[ix.member]!==''?bulkNum(r[ix.member]):null,folder:ix.folder>=0?String(r[ix.folder]??'').trim():'',code:ix.code>=0?String(r[ix.code]??'').trim():'',onePlus:(()=>{const raw=ix.onePlus>=0?String(r[ix.onePlus]??'').replace(/\s/g,''):'';if(raw)return /^(o|ㅇ|○|◯|y|yes|true|1|v|✓|✔|예|네|해당|1\+1|원플러스원|원플원)$/i.test(raw);return /1\s*\+\s*1/.test(String(r[ix.name]??''))})()}}).filter(p=>p.name);
   return products;
 }
+/* ===== 모바일 업로드 보강: 엑셀(.xlsx/.xls)·CSV·TXT·붙여넣기·압축 푼 엑셀 조각(sheet1.xml 등)·압축 푼 폴더 ===== */
+function bulkSniff(buf){
+  const u=new Uint8Array(buf.slice(0,8));
+  if(u[0]===0x50&&u[1]===0x4B&&(u[2]===0x03||u[2]===0x05)&&(u[3]===0x04||u[3]===0x06))return 'zip';
+  if(u[0]===0xD0&&u[1]===0xCF&&u[2]===0x11&&u[3]===0xE0)return 'ole';
+  return 'text';
+}
+function bulkDecodeText(buf){
+  let t;
+  try{t=new TextDecoder('utf-8',{fatal:true}).decode(buf)}
+  catch(_){try{t=new TextDecoder('euc-kr').decode(buf)}catch(__){t=new TextDecoder('utf-8').decode(buf)}}
+  return t.replace(/^\ufeff/,'');
+}
+function bulkParseDelimited(text){
+  const first=(text.split(/\r?\n/).find(l=>l.trim())||'');
+  const tabs=(first.match(/\t/g)||[]).length,commas=(first.match(/,/g)||[]).length,semis=(first.match(/;/g)||[]).length;
+  const d=tabs>0&&tabs>=commas?'\t':(commas>=semis?',':';');
+  const rows=[];let row=[],cell='',q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++}else q=false}else cell+=c}
+    else if(c==='"'&&cell==='')q=true;
+    else if(c===d){row.push(cell);cell=''}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);cell='';rows.push(row);row=[]}
+    else cell+=c;
+  }
+  if(cell!==''||row.length){row.push(cell);rows.push(row)}
+  return rows.filter(r=>r.some(c=>String(c).trim()!==''));
+}
+function bulkTextToWorkbook(text){
+  const aoa=bulkParseDelimited(text);
+  if(!aoa.length)throw new Error('내용이 비어 있어요.');
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),'붙여넣기');
+  return wb;
+}
+/* 압축을 푼 엑셀의 조각(sheet1.xml, sharedStrings.xml, styles.xml)을 다시 하나의 xlsx로 조립해요 */
+async function bulkXmlPartsToXlsx(parts){
+  const sheets=parts.filter(p=>/<(?:\w+:)?worksheet[\s>]/.test(p.text)).sort((a,b)=>bulkNaturalCompare(a.name,b.name));
+  const sst=parts.find(p=>/<(?:\w+:)?sst[\s>]/.test(p.text));
+  const sty=parts.find(p=>/<(?:\w+:)?styleSheet[\s>]/.test(p.text));
+  if(!sheets.length)throw new Error('압축을 푼 엑셀에서 시트 파일(sheet1.xml)을 찾지 못했어요.\n"xl/worksheets" 폴더의 sheet1.xml과 "xl" 폴더의 sharedStrings.xml을 함께 선택해주세요.');
+  if(!sst&&sheets.some(p=>/\bt="s"/.test(p.text)))throw new Error('글자 내용이 들어 있는 sharedStrings.xml 파일도 함께 선택해주세요.\n(압축을 푼 엑셀의 "xl" 폴더 안에 있어요)');
+  const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const RT='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const CT='application/vnd.openxmlformats-officedocument.spreadsheetml.';
+  const n=sheets.length,z=new JSZip();
+  z.file('[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="'+CT+'sheet.main+xml"/>'+sheets.map((_,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="'+CT+'worksheet+xml"/>').join('')+(sst?'<Override PartName="/xl/sharedStrings.xml" ContentType="'+CT+'sharedStrings+xml"/>':'')+(sty?'<Override PartName="/xl/styles.xml" ContentType="'+CT+'styles+xml"/>':'')+'</Types>');
+  z.file('_rels/.rels',H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+RT+'/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+  z.file('xl/workbook.xml',H+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="'+RT+'"><sheets>'+sheets.map((_,i)=>'<sheet name="Sheet'+(i+1)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('')+'</sheets></workbook>');
+  z.file('xl/_rels/workbook.xml.rels',H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((_,i)=>'<Relationship Id="rId'+(i+1)+'" Type="'+RT+'/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('')+(sst?'<Relationship Id="rId'+(n+1)+'" Type="'+RT+'/sharedStrings" Target="sharedStrings.xml"/>':'')+(sty?'<Relationship Id="rId'+(n+2)+'" Type="'+RT+'/styles" Target="styles.xml"/>':'')+'</Relationships>');
+  sheets.forEach((p,i)=>z.file('xl/worksheets/sheet'+(i+1)+'.xml',p.text));
+  if(sst)z.file('xl/sharedStrings.xml',sst.text);
+  if(sty)z.file('xl/styles.xml',sty.text);
+  return z.generateAsync({type:'arraybuffer'});
+}
+function bulkClearInputs(){
+  ['singleZipFile','singleFolderFiles'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  const t=document.getElementById('bulkPasteText');if(t)t.value='';
+}
 async function readBulkZip(zipFiles){
   const list=Array.isArray(zipFiles)?zipFiles:[zipFiles];
-  const entries=[];
+  const entries=[],looseXml=[];let looseSkipped=0;
+  const junk=n=>/(^|\/)(__MACOSX|\.DS_Store|~\$|Thumbs\.db)/.test(n)||/\/\._/.test('/'+n);
+  const mk=(name,buf,extra)=>Object.assign({name,dir:false,async:t=>Promise.resolve(t==='blob'?new Blob([buf]):buf)},extra||{});
+  const packRe=/^(xl\/|_rels\/|\[Content_Types\]\.xml|docProps\/)/;
   for(const zf of list){
-    if(zf&&zf.buf&&/\.xlsx?$/i.test(zf.name||'')){entries.push({name:zf.name,dir:false,async:async()=>zf.buf});continue}   // 엑셀 파일을 ZIP 없이 바로 선택한 경우
-    let zip;
-    try{zip=await JSZip.loadAsync(zf&&zf.buf?zf.buf:zf)}
-    catch(err){throw new Error('"'+(zf&&zf.name||'ZIP')+'"을(를) ZIP으로 열 수 없어요. 압축 파일이 손상됐거나 ZIP 형식이 아닐 수 있어요. ('+(err.message||err)+')')}
-    Object.values(zip.files).filter(f=>!f.dir&&!/(^|\/)(__MACOSX|\.DS_Store|~\$)/.test(f.name)&&!/\/\._/.test('/'+f.name)).forEach(f=>entries.push(f));
+    const nm=String(zf&&zf.name||'');
+    if(junk(nm))continue;
+    const buf=zf&&zf.buf?zf.buf:(zf&&zf.arrayBuffer?await zf.arrayBuffer():null);
+    if(!buf)continue;
+    const kind=bulkSniff(buf);
+    if(kind==='ole'){entries.push(mk(nm,buf,{__excel:true}));continue}   // 옛날 .xls
+    if(kind==='zip'){
+      let zip;
+      try{zip=await JSZip.loadAsync(buf)}
+      catch(err){throw new Error('"'+(nm||'ZIP')+'"을(를) ZIP으로 열 수 없어요. 압축 파일이 손상됐거나 ZIP 형식이 아닐 수 있어요. ('+(err.message||err)+')')}
+      const all=Object.values(zip.files).filter(f=>!f.dir&&!junk(f.name));
+      const wbEntry=all.find(f=>/(^|\/)xl\/workbook\.xml$/i.test(f.name));
+      if(wbEntry){
+        const prefix=wbEntry.name.slice(0,wbEntry.name.length-'xl/workbook.xml'.length);
+        if(prefix===''){entries.push(mk(nm,buf,{__excel:true}));continue}   // 확장자가 .zip 등으로 바뀐 엑셀 파일 (xlsx는 원래 ZIP 형식이에요)
+        // 압축을 푼 엑셀 폴더를 다시 ZIP으로 묶은 경우: 엑셀로 다시 조립
+        const inPack=f=>f.name.startsWith(prefix)&&packRe.test(f.name.slice(prefix.length));
+        const sub=new JSZip();
+        for(const f of all.filter(inPack))sub.file(f.name.slice(prefix.length),await f.async('arraybuffer'));
+        entries.push(mk((nm.replace(/\.[^.\/]*$/,'')||'엑셀')+'.xlsx',await sub.generateAsync({type:'arraybuffer'}),{__excel:true}));
+        all.filter(f=>!inPack(f)).forEach(f=>entries.push(f));
+        continue;
+      }
+      all.forEach(f=>entries.push(f));
+      continue;
+    }
+    // ZIP·엑셀이 아닌 낱개 파일 (휴대폰에서 압축을 풀어 하나씩 고른 경우)
+    if(/\.(jpe?g|png|webp|gif)$/i.test(nm)){
+      let path=nm;
+      if(!path.includes('/')){
+        // 폴더 정보 없이 사진만 고른 경우: 파일 이름에서 끝 번호를 뺀 이름을 폴더 이름처럼 써요 (예: "상품명 1.jpg" → "상품명")
+        const base=path.replace(/\.[^.]+$/,'').replace(/[\s_\-.]*[\(\[]?\d+[\)\]]?$/,'').trim();
+        if(!base){looseSkipped++;continue}
+        path=base+'/'+path;
+      }
+      entries.push(mk(path,buf));
+      continue;
+    }
+    const ext=(nm.match(/\.([^.\/]+)$/)||[])[1];
+    const text=bulkDecodeText(buf);
+    if(/^\s*(<\?xml|<(\w+:)?(worksheet|sst|styleSheet)[\s>])/.test(text)){
+      if(/<(?:\w+:)?(worksheet|sst|styleSheet)[\s>]/.test(text))looseXml.push({name:nm.split('/').pop(),text});
+      continue;
+    }
+    if(!ext||/^(csv|tsv|txt|xls|xlsx|xlsm)$/i.test(ext)){entries.push(mk(nm||'붙여넣기.txt',buf,{__excel:true,__text:true}));continue}
   }
-  const xlsxEntries=entries.filter(f=>/\.xlsx?$/i.test(f.name));
+  if(looseXml.length)entries.push(mk('엑셀(압축 푼 파일).xlsx',await bulkXmlPartsToXlsx(looseXml),{__excel:true}));
+  let xlsxEntries=entries.filter(f=>f.__excel||/\.xlsx?$/i.test(f.name));
+  if(!xlsxEntries.length)xlsxEntries=entries.filter(f=>/\.(csv|tsv)$/i.test(f.name)).map(f=>Object.assign(f,{__text:true}));
   let products=[];const excelNames=[];
   for(const xe of xlsxEntries){
     const fname=xe.name.split('/').pop();
-    try{products=products.concat(parseBulkExcel(await xe.async('arraybuffer')));excelNames.push(fname)}
-    catch(err){throw new Error((xlsxEntries.length>1?'['+fname+'] ':'')+(err.message||err))}
+    try{
+      const ab=await xe.async('arraybuffer');
+      const isText=xe.__text||bulkSniff(ab)==='text';
+      products=products.concat(parseBulkExcel(isText?bulkTextToWorkbook(bulkDecodeText(ab)):ab));
+      excelNames.push(fname);
+    }catch(err){throw new Error((xlsxEntries.length>1?'['+fname+'] ':'')+(err.message||err))}
   }
   const folders=new Map(),folderKeys=[],rawByKey=new Map(),aliasOfKey=new Map();
   entries.filter(f=>/\.(jpe?g|png|webp|gif)$/i.test(f.name)).forEach(f=>{
@@ -972,7 +1086,7 @@ async function readBulkZip(zipFiles){
     if(ak&&ak!==k){aliasOfKey.set(k,ak);if(!folders.has(ak))folders.set(ak,folders.get(k))}
   });
   folders.forEach(list=>list.sort((a,b)=>bulkNaturalCompare(a.base,b.base)));
-  return {products,folders,folderKeys,aliasOfKey,rawByKey,hasExcel:xlsxEntries.length>0,excelNames};
+  return {products,folders,folderKeys,aliasOfKey,rawByKey,hasExcel:xlsxEntries.length>0,excelNames,looseSkipped};
 }
 
 function bulkFindFolder(p,folders,folderKeys,rawByKey,usedKeys){
@@ -1210,28 +1324,30 @@ function saveStagedFromForm(){
   document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function analyzeBulkZip(){
-  const zipFiles=[...($('singleZipFile').files||[])];
+  const zipFiles=[...($('singleZipFile').files||[]),...(($('singleFolderFiles')&&$('singleFolderFiles').files)||[])];
+  const pasteText=String(($('bulkPasteText')&&$('bulkPasteText').value)||'').trim();
   const statusBox=$('bulkUploadStatus');
   const btn=$('zipBulkBtn');
   const cat=categories.find(c=>String(c.id)===String($('zipCategory').value));
-  if(!zipFiles.length)return alert('상품 정보와 이미지가 포함된 ZIP 파일을 첨부해 주세요.');
+  if(!zipFiles.length&&!pasteText)return alert('엑셀·ZIP 파일을 선택하거나, 엑셀에서 복사한 내용을 붙여넣어 주세요.');
   if(!cat)return alert('기본 카테고리를 선택해주세요.');
   const say=t=>{statusBox.style.display='block';statusBox.textContent=t};
   btn.disabled=true;
   try{
     say('라이브러리 준비 중...');
     await ensureZipLibs();
-    say(`ZIP ${zipFiles.length}개를 읽는 중...`);
+    say(`파일 ${zipFiles.length}개를 읽는 중...`);
     const snapshots=[];
     for(const f of zipFiles){
-      try{snapshots.push({name:f.name,buf:await f.arrayBuffer()})}
+      try{snapshots.push({name:f.webkitRelativePath||f.name,buf:await f.arrayBuffer()})}
       catch(err){
-        $('singleZipFile').value='';
+        bulkClearInputs();
         throw new Error('"'+f.name+'" 파일을 읽지 못했어요.\n파일을 선택한 뒤에 이동·삭제·수정됐거나, OneDrive·구글드라이브처럼 클라우드에만 있는 파일일 수 있어요.\n파일을 내 컴퓨터 폴더에 내려받아 두고, "파일 선택"을 눌러 다시 선택한 다음 분석해주세요.');
       }
     }
-    say(`ZIP ${zipFiles.length}개를 분석하는 중...`);
-    const {products,folders,folderKeys,aliasOfKey,rawByKey,hasExcel,excelNames}=await readBulkZip(snapshots);
+    if(pasteText)snapshots.push({name:'붙여넣기.txt',buf:new TextEncoder().encode(pasteText).buffer});
+    say(`파일 ${snapshots.length}개를 분석하는 중...`);
+    const {products,folders,folderKeys,aliasOfKey,rawByKey,hasExcel,excelNames,looseSkipped}=await readBulkZip(snapshots);
     const readFiles=async list=>{const files=[];for(const im of list){const blob=await im.entry.async('blob');files.push(new File([blob],im.base,{type:bulkMime(im.base)}))}return files};
     if(!hasExcel){
       // 엑셀이 없는 ZIP만 고른 경우: 이미 대기 목록에 있는 상품 중 이미지가 비어 있는 상품에 폴더 이름으로 이미지를 채워요
@@ -1250,7 +1366,7 @@ async function analyzeBulkZip(){
       renderStaged();
       const leftover=folderKeys.filter(k=>!used.has(k)&&!used.has(aliasOfKey.get(k)||'')).length;
       say(`이미지 채우기 완료 🤍 대기 목록의 상품 ${filledOnly}개에 이미지를 채웠어요.`+(leftover?`\n대기 목록에 없는 이미지 폴더 ${leftover}개는 건너뛰었어요.`:''));
-      $('singleZipFile').value='';
+      bulkClearInputs();
       document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
       return;
     }
@@ -1290,7 +1406,7 @@ async function analyzeBulkZip(){
     const orphanFolders=folderKeys.filter(k=>!usedFolderKeys.has(k)&&!knownNames.has(k)&&!knownNames.has(aliasOfKey.get(k)||''));
     const bad=added.filter(p=>p.status==='error').length,dup=added.filter(p=>p.status==='dup').length,updN=added.filter(p=>p.status==='update').length;
     say(`분석 완료 🤍 (ZIP ${zipFiles.length}개 · 엑셀 ${excelNames.join(', ')})\n대기 목록에 ${added.length}개를 올렸어요. (신규 ${added.length-updN-dup-bad}개 · 기존 상품 수정 ${updN}개 · 변경 없음 ${dup}개 · 확인 필요 ${bad}개)`+(filled?`\n이전에 이미지가 없던 상품 ${filled}개에 이번 ZIP의 이미지를 채웠어요.`:'')+(added.some(x=>x.retailAuto)?`\n소매가가 비어 있는 상품 ${added.filter(x=>x.retailAuto).length}개는 도매가 × 1.6 (100원 단위 반올림)으로 소매가를 자동 입력했어요.`:'')+(accMoved?`\nACC 상품 ${accMoved}개는 기본 카테고리와 함께 “${[...accNames].join(', ')}” 카테고리에도 자동으로 추가했어요.`:'')+(accMissing?`\n⚠ ACC 상품 ${accMissing}개의 ACC 카테고리를 찾지 못해 기본 카테고리에만 넣었어요. 카테고리 이름에 ACC가 들어 있는지 확인해주세요.`:'')+(sameSkipped?`\n이미 대기 목록에 있어서 건너뛴 상품 ${sameSkipped}개`:'')+(orphanFolders.length?`\n엑셀에 없는 이미지 폴더 ${orphanFolders.length}개: ${orphanFolders.slice(0,5).join(', ')}${orphanFolders.length>5?' 외':''} — 폴더 이름이 엑셀 상품명과 같은지 확인해주세요.`:'')+(noImg?`\n\n⚠ 이미지가 없는 상품이 ${noImg}개 있어요. 이미지가 다른 ZIP에 나뉘어 있다면 그 ZIP도 이어서 올려주세요. 엑셀의 상품명과 폴더 이름이 같은 상품은 자동으로 채워져요.`:'')+`\n\n미리보기와 수정을 마친 뒤 "상품 반영하기"를 눌러주세요.`);
-    $('singleZipFile').value='';
+    bulkClearInputs();
     document.getElementById('stagedBox')?.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
     say('ZIP 분석 실패: '+(e.message||e));
@@ -3260,13 +3376,17 @@ function downloadChatMatchCsv(){
 }
 async function readChatMatchFile(file){
   const name=String(file.name||'').toLowerCase();
-  if(/\.xlsx?$/.test(name)){
-    if(typeof XLSX==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
-    const arr=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
-    return arr.map(r=>r.map(c=>String(c??'').trim()).filter(Boolean).join(' ')).filter(Boolean).join('\n');
-  }
   const buf=await file.arrayBuffer();
+  const head=new Uint8Array(buf.slice(0,4));
+  const isExcelLike=/\.xlsx?$/.test(name)||(head[0]===0x50&&head[1]===0x4B)||(head[0]===0xD0&&head[1]===0xCF);
+  if(isExcelLike){
+    try{
+      if(typeof XLSX==='undefined')await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+      const wb=XLSX.read(buf,{type:'array'});
+      const arr=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+      return arr.map(r=>r.map(c=>String(c??'').trim()).filter(Boolean).join(' ')).filter(Boolean).join('\n');
+    }catch(err){if(/\.xlsx?$/.test(name))throw err}
+  }
   let text=new TextDecoder('utf-8').decode(buf);
   if(text.includes('\ufffd')){try{text=new TextDecoder('euc-kr').decode(buf)}catch(_){}}
   return text.replace(/^\ufeff/,'');
