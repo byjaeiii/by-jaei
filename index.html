@@ -125,6 +125,15 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .cartBrandGroup{margin:0 0 16px}.cartBrandHead{padding:9px 2px;margin-bottom:4px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700}.cartBrandHead label{display:flex;align-items:center;gap:8px;cursor:pointer}
 .cartBrandFee{padding:10px 2px 2px;text-align:right;font-size:13px;line-height:1.6}.cartBrandFee b{font-weight:700}.cartBrandFee .small{color:var(--muted);font-size:11px}
 .newTag{display:inline-block;margin-left:5px;padding:2px 5px;border-radius:999px;background:#f2893a;color:#fff;font-size:9px;font-weight:700;line-height:1;letter-spacing:.3px;vertical-align:middle}
+.sortBar{gap:8px}
+.brandFavBtn{flex:0 0 auto;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--muted);font-size:12px;padding:7px 12px;font-family:inherit;cursor:pointer;white-space:nowrap}
+.brandFavBtn.on{background:#fff3ea;border-color:#f0b98d;color:#d56f27;font-weight:600}.brandFavBtn[hidden]{display:none}
+.favBrandPanel{padding:0 16px 14px}.favBrandPanel[hidden]{display:none}
+.favBrandGroup{margin:0 0 12px}.favBrandGroupTitle{margin:0 0 6px;color:var(--muted);font-size:11px;letter-spacing:.2px}
+.favBrandChips{display:flex;flex-wrap:wrap;gap:6px}.favBrandTop{margin-bottom:12px}
+.favBrandChips button{border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font-size:12px;padding:7px 12px;font-family:inherit;cursor:pointer}
+.favBrandChips button.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.favBrandEmpty{padding:18px 0;text-align:center;color:var(--muted);font-size:13px;line-height:1.7}
 </style><style>
 .combineShipRow{display:flex;align-items:center;gap:10px;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fffdf9;cursor:pointer;font-size:14px;font-weight:700}
 .combineShipRow input{width:22px!important;height:22px!important;padding:0!important;margin:0!important;flex:0 0 22px;accent-color:#594537}
@@ -207,7 +216,7 @@ body.guestMode .sortBar{display:none!important}
 </style>
 </head>
 <body class="guestMode"><div class="app"><header><div class="head"><div class="logo" role="button" tabindex="0" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' ')goHome()">BY JAEI</div><div><button class="loginLink" onclick="openLogin()">LOGIN</button><button class="icon" onclick="openCart()">🛒</button></div></div></header>
-<section class="notice"><b>NOTICE</b><p><strong>주문 전, 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.</p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div id="typeCats" class="typeCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" enterkeyhint="search" autocomplete="off" oninput="onSearchInput()" onkeydown="onSearchKey(event)"><button type="button" id="searchClear" class="searchClear" aria-label="검색어 지우기" onclick="clearSearch()" hidden>✕</button></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="recent">최근 본 상품</button></nav><div class="sortBar" id="sortBar"><select id="sortSelect" aria-label="상품 정렬" onchange="setSort(this.value)"><option value="default">추천순(최신)</option><option value="low">낮은가격순</option><option value="high">높은가격순</option></select></div><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
+<section class="notice"><b>NOTICE</b><p><strong>주문 전, 공지사항을 필히 확인후<br>주문 부탁드려요!</strong><br><br>원하시는 상품을 장바구니에 담아 주문서를<br>제출해 주세요. 🤍<br>주문서 제출 후 <strong>1:1 채팅으로 성함과 연락처를<br>남겨주시면</strong> 확인 후 입금 안내를 도와드릴게요.</p></section><nav class="cats" id="cats"></nav><div id="brandCats" class="brandCats" hidden></div><div id="typeCats" class="typeCats" hidden></div><div class="search"><input id="search" placeholder="상품명을 검색해보세요" enterkeyhint="search" autocomplete="off" oninput="onSearchInput()" onkeydown="onSearchKey(event)"><button type="button" id="searchClear" class="searchClear" aria-label="검색어 지우기" onclick="clearSearch()" hidden>✕</button></div><nav id="quickLinks" class="quickLinks" aria-label="빠른 상품 보기"><button type="button" data-view="all">전체 상품</button><button type="button" data-view="new">신상품</button><button type="button" data-view="favorites">찜한 상품</button><button type="button" data-view="favbrands">찜한 브랜드</button><button type="button" data-view="recent">최근 본 상품</button></nav><div id="favBrandPanel" class="favBrandPanel" hidden></div><div class="sortBar" id="sortBar"><button type="button" id="brandFavBtn" class="brandFavBtn" hidden onclick="toggleCurrentBrandFav()">♡ 브랜드 찜하기</button><select id="sortSelect" aria-label="상품 정렬" onchange="setSort(this.value)"><option value="default">추천순(최신)</option><option value="low">낮은가격순</option><option value="high">높은가격순</option></select></div><main id="grid" class="grid"></main><nav id="pagination" class="pagination" aria-label="상품 페이지" hidden></nav></div><button id="backToTop" type="button" aria-label="맨 위로 이동" onclick="scrollPageToTop()">↑</button>
 <div id="detail" class="detail" hidden></div><div id="cart" class="cart" hidden></div><div id="login" class="login" hidden></div>
 <script>
 /* 화면 로딩 안전장치: config.js를 못 찾아도 같은 Supabase 프로젝트로 연결하고, 로딩 오류는 화면에 안내해요 */
@@ -265,6 +274,7 @@ function toggleFavorite(id){
 }
 async function syncFavorites(){
   if(!user)return;
+  syncFavBrands();
   try{
     /* 1) 이 기기에서 아직 서버에 못 올린 변경분을 먼저 올려요 */
     const pend=readPending();
@@ -303,7 +313,119 @@ async function syncSoldOut(ids){
   }catch(e){console.warn('품절 상태 확인 실패',e);return false}
 }
 function setSort(v){sortMode=(v==='low'||v==='high')?v:'default';currentProductPage=1;render()}
-function setQuickView(view){resetSearchBox();quickView=view||'all';category='ALL';categoryId=null;brandFilter='ALL';typeFilter='ALL';subTypeFilter='ALL';render();window.scrollTo({top:0,behavior:'smooth'})}
+/* ===== 브랜드 찜하기 =====
+   - 브랜드를 선택하면 정렬 버튼 왼쪽에 '브랜드 찜하기' 버튼이 나와요.
+   - '찜한 브랜드' 버튼을 누르면 찜한 브랜드가 카테고리별로 나오고, 브랜드를 고르면 그 브랜드 상품만 보여요.
+   - 저장: 이 기기 + (BYJAEI_favorite_brands.sql 적용 시) 서버에도 저장돼서 다른 기기에서도 보여요. */
+var favBrandSel='ALL';
+const FAV_BRAND_KEY='byjaei_fav_brands';
+function favBrandStoreKey(){return user?.id?`${FAV_BRAND_KEY}_${user.id}`:FAV_BRAND_KEY}
+function readFavBrands(key){try{const v=JSON.parse(localStorage.getItem(key||favBrandStoreKey())||'[]');return Array.isArray(v)?v.filter(x=>x&&x.k).map(x=>({k:String(x.k),l:String(x.l||x.k)})):[]}catch{return []}}
+function writeFavBrands(list){localStorage.setItem(favBrandStoreKey(),JSON.stringify(list))}
+function isFavBrand(k){return readFavBrands().some(x=>x.k===k)}
+function favBrandPendingKey(){return `byjaei_fav_brand_pending_${user?.id||'guest'}`}
+function readBrandPending(){try{const v=JSON.parse(localStorage.getItem(favBrandPendingKey())||'{}');return {add:(v.add&&typeof v.add==='object'&&!Array.isArray(v.add))?v.add:{},remove:Array.isArray(v.remove)?v.remove.map(String):[]}}catch{return {add:{},remove:[]}}}
+function writeBrandPending(p){localStorage.setItem(favBrandPendingKey(),JSON.stringify(p))}
+function markBrandPending(k,adding,label){const p=readBrandPending();delete p.add[k];p.remove=p.remove.filter(x=>x!==k);if(adding)p.add[k]=label;else p.remove.push(k);writeBrandPending(p)}
+function clearBrandPending(k){const p=readBrandPending();delete p.add[k];p.remove=p.remove.filter(x=>x!==k);writeBrandPending(p)}
+function toggleFavBrand(k,label){
+  let list=readFavBrands();const has=list.some(x=>x.k===k);
+  list=has?list.filter(x=>x.k!==k):[{k,l:label},...list];
+  writeFavBrands(list);
+  if(user){
+    markBrandPending(k,!has,label);
+    const op=has?sb.from('user_favorite_brands').delete().eq('user_id',user.id).eq('brand_key',k):sb.from('user_favorite_brands').upsert({user_id:user.id,brand_key:k,brand_label:label},{onConflict:'user_id,brand_key'});
+    Promise.resolve(op).then(({error})=>{if(error)console.warn('찜한 브랜드 서버 저장 실패(BYJAEI_favorite_brands.sql 필요):',error.message);else clearBrandPending(k)}).catch(e=>console.warn(e));
+  }
+  if(has&&quickView==='favbrands'&&favBrandSel!=='ALL'&&favBrandSel.split('|')[1]===k)favBrandSel='ALL';
+  render();
+}
+async function syncFavBrands(){
+  if(!user)return;
+  try{
+    const pend=readBrandPending();
+    const addMap=new Map(readFavBrands(FAV_BRAND_KEY).map(x=>[x.k,x.l]));   /* 로그인 전에 찜해둔 브랜드 */
+    Object.entries(pend.add).forEach(([k,l])=>addMap.set(k,String(l||k)));
+    if(addMap.size){const {error:e1}=await sb.from('user_favorite_brands').upsert([...addMap.entries()].map(([k,l])=>({user_id:user.id,brand_key:k,brand_label:l})),{onConflict:'user_id,brand_key'});if(e1)throw e1}
+    if(pend.remove.length){const {error:e2}=await sb.from('user_favorite_brands').delete().eq('user_id',user.id).in('brand_key',pend.remove);if(e2)throw e2}
+    writeBrandPending({add:{},remove:[]});
+    localStorage.removeItem(FAV_BRAND_KEY);
+    const {data,error}=await sb.from('user_favorite_brands').select('brand_key,brand_label,created_at').eq('user_id',user.id).order('created_at',{ascending:false});
+    if(error)throw error;
+    writeFavBrands((data||[]).map(r=>({k:String(r.brand_key),l:String(r.brand_label||r.brand_key)})));
+    render();
+  }catch(e){console.warn('찜한 브랜드 서버 연동 불가 — 이 기기에만 저장돼요 (BYJAEI_favorite_brands.sql 필요):',e&&e.message||e)}
+}
+function rootCategoryOf(id){
+  let cur=siteCategories.find(c=>String(c.id)===String(id));const seen=new Set();
+  while(cur&&cur.parent_id!=null&&!seen.has(String(cur.id))){seen.add(String(cur.id));const up=siteCategories.find(c=>String(c.id)===String(cur.parent_id));if(!up)break;cur=up}
+  return cur||null;
+}
+function productRootId(p){
+  const id=p.category_id!=null?p.category_id:uniqueCategoryIdForName(String(p.category||'').trim());
+  const r=id!=null?rootCategoryOf(id):null;
+  return r?String(r.id):'__none';
+}
+function dominantBrandOf(list){
+  const m=new Map();
+  list.forEach(p=>{const label=String(p.brand||'').normalize('NFC').replace(/\s+/g,' ').trim();const k=brandKey(label);if(!k)return;const g=m.get(k)||{k,labels:new Map(),n:0};g.n++;g.labels.set(label,(g.labels.get(label)||0)+1);m.set(k,g)});
+  const best=[...m.values()].sort((a,b)=>b.n-a.n)[0];
+  return best?{k:best.k,l:[...best.labels.entries()].sort((a,b)=>b[1]-a[1])[0][0]}:null;
+}
+/* 지금 화면에서 선택된 브랜드 (브랜드 카테고리 또는 BRAND 탭의 브랜드). 브랜드가 선택되지 않았으면 null */
+function currentBrandInfo(){
+  if(quickView!=='all'||category==='ALL')return null;
+  const vis=customerVisibleProducts();
+  if(category==='BRAND')return brandFilter==='ALL'?null:dominantBrandOf(vis.filter(p=>brandKey(p.brand)===brandFilter));
+  const sel=categoryId?siteCategories.find(c=>String(c.id)===String(categoryId)):siteCategories.find(c=>String(c.name)===String(category));
+  if(!sel||sel.parent_id==null)return null;
+  const parent=siteCategories.find(c=>String(c.id)===String(sel.parent_id));
+  if(!parent||!/^26WINTER(BEBE|KIDS|JUNIOR)$/.test(String(parent.name||'').replace(/\s+/g,'').toUpperCase()))return null;
+  return dominantBrandOf(vis.filter(p=>p.category_id!=null&&String(p.category_id)===String(sel.id)));
+}
+function updateBrandFavBtn(){
+  const b=document.getElementById('brandFavBtn');if(!b)return;
+  const info=currentBrandInfo();
+  if(!info){b.hidden=true;return}
+  const on=isFavBrand(info.k);
+  b.hidden=false;b.dataset.k=info.k;b.dataset.l=info.l;
+  b.classList.toggle('on',on);
+  b.textContent=on?'♥ 찜한 브랜드':'♡ 브랜드 찜하기';
+}
+function toggleCurrentBrandFav(){const b=document.getElementById('brandFavBtn');if(!b||b.hidden)return;toggleFavBrand(b.dataset.k,b.dataset.l)}
+function favBrandMatch(p){
+  if(favBrandSel==='ALL')return true;
+  const [rid,bk]=favBrandSel.split('|');
+  return brandKey(p.brand)===bk&&productRootId(p)===rid;
+}
+function setFavBrandSel(t){favBrandSel=t||'ALL';currentProductPage=1;render()}
+function renderFavBrandPanel(){
+  const el=document.getElementById('favBrandPanel');if(!el)return;
+  if(quickView!=='favbrands'){el.hidden=true;el.innerHTML='';return}
+  const favs=readFavBrands();
+  el.hidden=false;
+  if(!favs.length){el.innerHTML='<div class="favBrandEmpty">찜한 브랜드가 없어요.<br>브랜드를 선택한 뒤 “♡ 브랜드 찜하기”를 눌러보세요 🤍</div>';return}
+  const label=new Map(favs.map(x=>[x.k,x.l]));
+  const groups=new Map(),found=new Set();
+  customerVisibleProducts().forEach(p=>{
+    const k=brandKey(p.brand);if(!label.has(k))return;
+    const rid=productRootId(p);if(!groups.has(rid))groups.set(rid,new Set());
+    groups.get(rid).add(k);found.add(k);
+  });
+  const collator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
+  const rootRows=categoryTreeRows().filter(({c})=>c.parent_id==null).map(({c})=>c);
+  const attr=v=>String(v).replaceAll('"','&quot;');
+  const chip=(rid,k)=>`<button type="button" class="${favBrandSel===rid+'|'+k?'active':''}" data-fb="${attr(rid+'|'+k)}">${safeText(label.get(k))}</button>`;
+  const groupHtml=(title,rid,keys)=>`<div class="favBrandGroup"><div class="favBrandGroupTitle">${safeText(title)}</div><div class="favBrandChips">${[...keys].sort((a,b)=>collator.compare(label.get(a),label.get(b))).map(k=>chip(rid,k)).join('')}</div></div>`;
+  let html=`<div class="favBrandChips favBrandTop"><button type="button" class="${favBrandSel==='ALL'?'active':''}" data-fb="ALL">전체</button></div>`;
+  rootRows.forEach(c=>{const g=groups.get(String(c.id));if(g&&g.size)html+=groupHtml(c.name,String(c.id),g)});
+  const other=groups.get('__none');if(other&&other.size)html+=groupHtml('기타','__none',other);
+  const missing=favs.map(x=>x.k).filter(k=>!found.has(k));
+  if(missing.length)html+=groupHtml('지금은 등록된 상품이 없어요','__empty',missing);
+  el.innerHTML=html;
+}
+document.getElementById('favBrandPanel').addEventListener('click',e=>{const b=e.target.closest('button[data-fb]');if(b)setFavBrandSel(b.dataset.fb)});
+function setQuickView(view){resetSearchBox();quickView=view||'all';favBrandSel='ALL';category='ALL';categoryId=null;brandFilter='ALL';typeFilter='ALL';subTypeFilter='ALL';render();window.scrollTo({top:0,behavior:'smooth'})}
 function renderQuickLinks(){const el=document.getElementById('quickLinks');if(!el)return;el.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===quickView))}
 function rememberRecent(id){const ids=recentIds().filter(x=>x!==String(id));ids.unshift(String(id));writeIdList(recentKey,ids.slice(0,30))}
 function cartKey(){return user?.id?`byjaei_cart_${user.id}`:guestCartKey}
@@ -605,15 +727,16 @@ function render(){
   if(accountLink)accountLink.textContent=user?'MYPAGE':'LOGIN';
   document.body.classList.toggle('guestMode',!user);
   if(!user){renderGuestGate();return}
-  cats();renderQuickLinks();
+  cats();renderQuickLinks();renderFavBrandPanel();updateBrandFavBtn();
   const q=(document.getElementById('search').value||'').toLowerCase();
-  const filterKey=JSON.stringify([category,categoryId,brandFilter,typeFilter,subTypeFilter,quickView,q,sortMode]);
+  const filterKey=JSON.stringify([category,categoryId,brandFilter,typeFilter,subTypeFilter,quickView,favBrandSel,q,sortMode]);
   if(filterKey!==lastProductFilterKey){currentProductPage=1;lastProductFilterKey=filterKey;}
   const favIds=favoriteIds(),recentProductIds=recentIds(),newCutoff=Date.now()-30*24*60*60*1000;
+  const favBrandSet=new Set(readFavBrands().map(x=>x.k));
   const visibleProducts=customerVisibleProducts();
   let a=visibleProducts.filter(p=>{
     const created=Date.parse(p.created_at||'')||0;
-    const viewOk=quickView==='new'?created>=newCutoff:quickView==='favorites'?favIds.includes(String(p.id)):quickView==='recent'?recentProductIds.includes(String(p.id)):true;
+    const viewOk=quickView==='new'?created>=newCutoff:quickView==='favorites'?favIds.includes(String(p.id)):quickView==='favbrands'?(favBrandSet.has(brandKey(p.brand))&&favBrandMatch(p)):quickView==='recent'?recentProductIds.includes(String(p.id)):true;
     const productCategory=String(p.category||'').trim();
     let categoryOk=category==='ALL'||category==='BRAND';
     if(!categoryOk){
