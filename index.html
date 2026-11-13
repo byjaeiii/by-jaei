@@ -124,6 +124,7 @@ header{position:sticky;top:0;z-index:10;background:#f7f3edf5;border-bottom:1px s
 .shipSepNote{margin:6px 0 2px;padding:9px 11px;border-radius:10px;background:#f6efe7;color:#8a6a52;font-size:12px;line-height:1.7}.shipSepNote span{color:#8a7c70}
 .cartBrandGroup{margin:0 0 16px}.cartBrandHead{padding:9px 2px;margin-bottom:4px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700}.cartBrandHead label{display:flex;align-items:center;gap:8px;cursor:pointer}
 .cartBrandFee{padding:10px 2px 2px;text-align:right;font-size:13px;line-height:1.6}.cartBrandFee b{font-weight:700}.cartBrandFee .small{color:var(--muted);font-size:11px}
+.newTag{display:inline-block;margin-left:5px;padding:2px 5px;border-radius:999px;background:#f2893a;color:#fff;font-size:9px;font-weight:700;line-height:1;letter-spacing:.3px;vertical-align:middle}
 </style><style>
 .combineShipRow{display:flex;align-items:center;gap:10px;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fffdf9;cursor:pointer;font-size:14px;font-weight:700}
 .combineShipRow input{width:22px!important;height:22px!important;padding:0!important;margin:0!important;flex:0 0 22px;accent-color:#594537}
@@ -526,8 +527,26 @@ function cats(){
   const prevCatScroll=catEl.querySelector('.catScroll')?.scrollLeft||0;
   const roots=rows.filter(({c})=>c.parent_id==null).map(({c})=>c);
   const escape=v=>String(v).replaceAll('"','&quot;');
-  const childrenOf=c=>siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(x.id))
-    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
+  const isBrandRoot=c=>/^26WINTER(BEBE|KIDS|JUNIOR)$/.test(clean(c&&c.name));   // 브랜드 카테고리가 들어 있는 상위 카테고리
+  const nameCollator=new Intl.Collator('ko-KR',{numeric:true,sensitivity:'base'});
+  const brandSortName=n=>String(n||'').replace(/\s*[\(\[].*$/,'').replace(/^[^\p{L}\p{N}]+/u,'').trim();   // '(6M-7Y)' 같은 사이즈 표기·앞쪽 기호는 정렬에서 제외
+  const childrenOf=c=>{
+    const list=siteCategories.filter(x=>String(x.parent_id??'')===String(c.id) && clean(x.name)!=='26WINTER(전체보기)'&&!isCustomerCategoryHidden(x.id));
+    return isBrandRoot(c)
+      ?list.sort((a,b)=>{const ka=brandSortName(a.name),kb=brandSortName(b.name),ga=/^[\u3131-\uD79D]/.test(ka)?0:1,gb=/^[\u3131-\uD79D]/.test(kb)?0:1;return ga-gb||nameCollator.compare(ka,kb)||nameCollator.compare(String(a.name),String(b.name))})   // 한글(가나다) → 영문·숫자 순
+      :list.sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0)||String(a.name).localeCompare(String(b.name),'ko-KR',{numeric:true}));
+  };
+  /* 새로 들어온 브랜드 표시: 상품이 등록된 지 3일이 안 된 브랜드에 NEW (3일이 지나면 저절로 사라져요) */
+  const newCutoffMs=Date.now()-3*24*60*60*1000;
+  const newCategoryIds=new Set(),newBrandKeys=new Set();
+  customerVisibleProducts().forEach(p=>{
+    const t=Date.parse(p.created_at||'');
+    if(!Number.isFinite(t)||t<newCutoffMs)return;
+    const id=p.category_id!=null?String(p.category_id):uniqueCategoryIdForName(String(p.category||'').trim());
+    if(id)newCategoryIds.add(String(id));
+    const bk=brandKey(p.brand);if(bk)newBrandKeys.add(bk);
+  });
+  const newTag='<span class="newTag">NEW</span>';
   const selectedCategory=category==='ALL'||category==='BRAND'?null:(categoryId?siteCategories.find(x=>String(x.id)===String(categoryId)):siteCategories.find(x=>String(x.name)===String(category)));
   const rootOf=c=>{
     let current=c;
@@ -545,7 +564,7 @@ function cats(){
     const isActive=displayRoot?String(displayRoot.id)===String(c.id):category===c.name;
     return `<button type="button" class="${isActive?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`;
   }).join('');
-  catEl.innerHTML=`<div class="catScroll"><div class="catTopRow">${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catSubScroll"><div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${selectedCategory&&String(selectedCategory.id)===String(c.id)?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}</button>`).join('')}</div></div>`:''}`;
+  catEl.innerHTML=`<div class="catScroll"><div class="catTopRow">${normalHtml}<button type="button" class="${category==='BRAND'?'active':''}" data-category="BRAND">BRAND</button></div></div>${title?`<div class="catTitle">${escape(title)}</div>`:''}${selectedChildren.length?`<div class="catSubScroll"><div class="catSubRow">${selectedChildren.map(c=>`<button type="button" class="${selectedCategory&&String(selectedCategory.id)===String(c.id)?'active':''}" data-category="${escape(c.name)}" data-category-id="${c.id}">${c.name}${displayRoot&&isBrandRoot(displayRoot)&&newCategoryIds.has(String(c.id))?newTag:''}</button>`).join('')}</div></div>`:''}`;
   const newCatScroll=catEl.querySelector('.catScroll');if(newCatScroll&&prevCatScroll)newCatScroll.scrollLeft=prevCatScroll;
   renderTypeFilters();
   const brandEl=document.getElementById('brandCats');
@@ -564,7 +583,7 @@ function cats(){
   });
   const brands=[...brandGroups.entries()].map(([key,g])=>({key,label:[...g.labels.entries()].sort((a,b)=>b[1]-a[1])[0][0]})).sort((a,b)=>collator.compare(a.label,b.label));
   brandEl.hidden=false;
-  brandEl.innerHTML=[{key:'ALL',label:'ALL'},...brands].map(x=>`<button type="button" class="${brandFilter===x.key?'active':''}" data-brand="${x.key.replaceAll('"','&quot;')}">${x.label}</button>`).join('');
+  brandEl.innerHTML=[{key:'ALL',label:'ALL'},...brands].map(x=>`<button type="button" class="${brandFilter===x.key?'active':''}" data-brand="${x.key.replaceAll('"','&quot;')}">${x.label}${x.key!=='ALL'&&newBrandKeys.has(x.key)?newTag:''}</button>`).join('');
 }
 document.getElementById('cats').addEventListener('click',e=>{
   const b=e.target.closest('button[data-category]');
